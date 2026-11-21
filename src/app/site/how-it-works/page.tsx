@@ -24,8 +24,8 @@ export default function HowItWorks() {
       <h1 className="font-display text-[clamp(40px,5vw,64px)] leading-[1.05] text-brand">How a sale with Vikkaa works</h1>
       <ol className="mt-12 grid gap-8">
         {STEPS.map(([h, p], i) => (
-          <li key={h} className="grid grid-cols-[3rem_1fr] gap-4 border-t border-accent/50 pt-6">
-            <span className="font-display text-4xl leading-none text-accent">{i + 1}</span>
+          <li key={h} className="grid grid-cols-[3rem_1fr] gap-4 border-t border-brand-green/40 pt-6">
+            <span className="font-display text-4xl leading-none text-brand-green">{i + 1}</span>
             <div>
               <h2 className="text-xl font-semibold">{h}</h2>
               <p className="mt-1 max-w-[62ch] text-sage">{p}</p>

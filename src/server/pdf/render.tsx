@@ -1,4 +1,5 @@
-import { renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { join } from 'node:path';
+import { Image, renderToBuffer, StyleSheet, Text, View } from '@react-pdf/renderer';
 import type { ReactElement } from 'react';
 import type { DocumentProps } from '@react-pdf/renderer';
 
@@ -8,7 +9,6 @@ export async function renderPdf(element: ReactElement<DocumentProps>): Promise<B
 
 export const pdf = StyleSheet.create({
   page: { padding: 48, fontSize: 10, fontFamily: 'Helvetica', color: '#1a1a1a', lineHeight: 1.45 },
-  brand: { fontSize: 18, fontFamily: 'Helvetica-Bold', lineHeight: 1.3, marginBottom: 2 },
   muted: { color: '#666666' },
   h1: { fontSize: 16, fontFamily: 'Helvetica-Bold', marginTop: 20, marginBottom: 8 },
   h2: { fontSize: 12, fontFamily: 'Helvetica-Bold', marginTop: 16, marginBottom: 6 },
@@ -19,10 +19,13 @@ export const pdf = StyleSheet.create({
   banner: { backgroundColor: '#fff3cd', padding: 8, marginBottom: 12, fontFamily: 'Helvetica-Bold' },
 });
 
+const LOGO = join(process.cwd(), 'public/brand/logo.png');
+
 export function Letterhead({ title, number, date }: { title: string; number?: string | null; date: Date }) {
   return (
     <View>
-      <Text style={pdf.brand}>Vikkaa.lk</Text>
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt */}
+      <Image src={LOGO} style={{ width: 110, marginBottom: 4 }} />
       <Text style={pdf.muted}>Property and vehicle marketing</Text>
       <Text style={pdf.h1}>{title}</Text>
       {number ? <Text>No. {number}</Text> : null}

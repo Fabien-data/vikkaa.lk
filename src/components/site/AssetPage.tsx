@@ -114,7 +114,7 @@ export async function AssetPage({ category, slug }: { category: AssetCategory; s
           <p className="mt-3.5 max-w-[64ch]">Every detail here was checked on our visit. Ask us anything — we were there.</p>
         </div>
 
-        <aside aria-label="Price and enquiry" className="self-start border border-t-[3px] border-[#d9e1db] border-t-accent bg-white p-7 md:sticky md:top-6">
+        <aside aria-label="Price and enquiry" className="self-start border border-t-[3px] border-[#d9e1db] border-t-brand-green bg-white p-7 md:sticky md:top-6">
           <p className="font-display text-[38px] leading-tight text-brand">{a.status === 'sold' ? 'Sold' : formatLkr(a.askingPriceCents)}</p>
           {a.status === 'under_offer' && <p className="text-sm text-sage">Under offer. You can still enquire.</p>}
           {a.status !== 'sold' && (

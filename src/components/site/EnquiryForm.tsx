@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { submitEnquiry } from '@/app/site/enquire-action';
 import type { ActionResult } from '@/lib/form';
 
-const input = 'w-full rounded-sm border border-[#c9d3cc] bg-white px-3 py-2.5 text-base focus-visible:outline-2 focus-visible:outline-accent';
+const input = 'w-full rounded-sm border border-[#c9d3cc] bg-white px-3 py-2.5 text-base focus-visible:outline-2 focus-visible:outline-brand-green';
 
 export function EnquiryForm({ slug }: { slug: string }) {
   const [state, action, pending] = useActionState<ActionResult, FormData>(submitEnquiry.bind(null, slug), undefined);

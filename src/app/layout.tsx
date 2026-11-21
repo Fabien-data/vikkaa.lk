@@ -14,7 +14,12 @@ export const metadata: Metadata = {
   title: { default: 'Vikkaa.lk: property and vehicle marketing in Sri Lanka', template: '%s | Vikkaa.lk' },
   description:
     'Vikkaa prices your property or vehicle with real market data, films it with our own crew, runs it on every platform at once and handles every buyer until it sells.',
-  openGraph: { siteName: 'Vikkaa.lk', locale: 'en_LK', type: 'website' },
+  openGraph: {
+    siteName: 'Vikkaa.lk',
+    locale: 'en_LK',
+    type: 'website',
+    images: [{ url: '/brand/og.jpg', width: 1200, height: 630, alt: 'Vikkaa' }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

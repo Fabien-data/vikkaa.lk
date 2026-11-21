@@ -19,5 +19,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/|favicon.ico|media/).*)'],
+  // Static files (brand, media, icons) are served as-is on both hosts.
+  matcher: ['/((?!_next/|favicon.ico|icon.png|apple-icon.png|media/|brand/).*)'],
 };

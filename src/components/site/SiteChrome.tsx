@@ -15,8 +15,9 @@ export function SiteHeader() {
   return (
     <header className="bg-brand text-white">
       <div className="mx-auto flex w-[min(1160px,100%-40px)] items-center justify-between py-5">
-        <Link href="/" className="font-display text-[28px] leading-none">
-          Vikkaa<span className="text-accent">.lk</span>
+        <Link href="/" aria-label="Vikkaa.lk home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo-white.png" alt="Vikkaa" width={136} height={68} className="h-10 w-auto" />
         </Link>
         <nav aria-label="Main" className="hidden gap-7 text-[15px] md:flex">
           {NAV.map(([href, label]) => (
@@ -25,7 +26,7 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <Link href="/sell" className="rounded-sm bg-accent px-4 py-2 text-sm font-semibold text-brand-ink md:hidden">
+        <Link href="/sell" className="rounded-sm bg-white px-4 py-2 text-sm font-semibold text-brand md:hidden">
           Sell with us
         </Link>
       </div>
@@ -35,7 +36,7 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-accent/40 bg-brand-ink text-[15px] text-white/75">
+    <footer className="mt-auto border-t border-white/15 bg-brand-ink text-[15px] text-white/75">
       <div className="mx-auto flex w-[min(1160px,100%-40px)] flex-wrap justify-between gap-4 py-8">
         <span>
           Call or WhatsApp Vikkaa on <a href={`tel:${config.vikkaaPhone}`} className="underline">{prettyPhone(config.vikkaaPhone)}</a>

@@ -1,32 +1,23 @@
 # Vikkaa visual direction
 
-**Decision:** pending the partner's pick. Deadline: Monday 23 November 2026. If there's no answer by then, ship A.
+## Brand (from the founders' brand board, 21 November 2026)
+- **Logo:** "Vikkaa" wordmark whose V is a tick (verified). Source files are in `Vikkaa Assests/Vikka/`.
+  - Web-ready versions are in `public/brand/`: `logo.png` (green), `logo-white.png`, `mark.png` (tick only), app icons, and `og.jpg` (link previews).
+  - Rebuild them with `pnpm exec tsx scripts/build-brand-assets.ts`.
+- **Colours:**
+  - deep green `#0b281e`: header, hero, dark sections, text
+  - green `#1d6649`: buttons, links and highlights on light backgrounds
+  - supporting: mist `#EDF1EE`, sage `#6E8579`
+  - On dark backgrounds, buttons are white with deep-green text, like the logo.
+  - There is no gold. Direction A's brass accent was a guess and has been dropped.
+- **Tokens:** set in `src/app/globals.css` under `@theme`: `brand`, `brand-ink`, `brand-green`, `mist`, `sage`.
 
-Open the mockups in a browser. The buttons in the bottom-right corner switch between the home page and an asset page.
-- `design/mockups/direction-a.html`: **A, "Estate"**
-- `design/mockups/direction-b.html`: **B, "Every screen"**
-
-## A, "Estate"
-- **Palette:**
-  - tea green `#17392E`
-  - ink `#13241F`
-  - brass `#B08A3E` (fine lines and small accents only)
-  - mist `#EDF1EE`
-  - sage `#6E8579`
-  - white `#FFFFFF`
-- **Type:** Gloock for headlines, Hanken Grotesk for body text.
-- **Feel:** heritage and trust. A full-bleed property photo inside a thin brass frame, like a title deed.
-
-## B, "Every screen"
-- **Palette:**
-  - cool white `#F3F5F7`
-  - navy ink `#16202E`
-  - marigold `#E2A52B`
-  - lagoon slate `#3D5A73`
-  - line `#D5DCE3`
-- **Type:** Archivo throughout. Headlines use its extra-wide setting (width 125), body text the normal width.
-- **Feel:** modern marketing studio. The hero shows one property cut into a TikTok reel, an Instagram post and a YouTube frame.
-
-## For both
-- Stock photos are placeholders. Real listings use the founders' own shoots.
-- The partner records his choice and any comments here: palette, fonts, tone of voice, photo style.
+## Layout and type (partner's pick still open)
+- The site is built on **Direction A, "Estate"** (`design/mockups/direction-a.html`):
+  - Gloock headlines, Hanken Grotesk body text;
+  - a hero photo inside a thin frame;
+  - numbered steps;
+  - a split call-to-action at the end.
+- **Direction B, "Every screen"** (`design/mockups/direction-b.html`) is the alternative layout. It uses Archivo throughout, and its hero shows one property cut for TikTok, Instagram and YouTube.
+- The colours now come from the brand in both cases, so the partner's choice is only about layout and typography.
+- **Open question for the partner:** the logo's wordmark is a bold sans-serif. Are serif headlines (A) the contrast we want, or should headlines match the logo (B's Archivo)?

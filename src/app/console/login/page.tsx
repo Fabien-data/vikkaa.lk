@@ -38,8 +38,10 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Vikkaa Studio</CardTitle>
+        <CardHeader className="grid justify-items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.png" alt="Vikkaa" width={136} height={68} className="h-12 w-auto" />
+          <CardTitle>Studio sign-in</CardTitle>
         </CardHeader>
         <CardContent>
           {step === 'password' ? (

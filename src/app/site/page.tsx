@@ -20,8 +20,8 @@ export default async function Home() {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={latest[0].photos[0].src} srcSet={latest[0].photos[0].srcSet} sizes="100vw" alt="" className="absolute inset-0 h-full w-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,38,32,0.95)_0%,rgba(15,38,32,0.6)_60%,rgba(15,38,32,0.35)_100%)]" />
-        <div className="pointer-events-none absolute inset-[18px] border border-accent/70" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(11,40,30,0.95)_0%,rgba(11,40,30,0.6)_60%,rgba(11,40,30,0.35)_100%)]" />
+        <div className="pointer-events-none absolute inset-[18px] border border-white/25" aria-hidden="true" />
         <div className="relative mx-auto w-[min(1160px,100%-40px)] pb-20 pt-24">
           <h1 className="max-w-[13ch] font-display text-[clamp(44px,7vw,92px)] leading-[1.02]">
             Your property, shown the way it deserves to be seen.
@@ -31,7 +31,7 @@ export default async function Home() {
             until the deed is signed.
           </p>
           <div className="mt-9 flex flex-wrap gap-3.5">
-            <Link href="/sell" className="rounded-sm bg-accent px-6 py-3.5 font-semibold text-brand-ink hover:bg-[#c49a46]">
+            <Link href="/sell" className="rounded-sm bg-white px-6 py-3.5 font-semibold text-brand hover:bg-mist">
               Get a marketing plan
             </Link>
             <Link href="/buy" className="rounded-sm border border-white/60 px-6 py-3.5 font-semibold hover:bg-white/10">
@@ -64,7 +64,7 @@ export default async function Home() {
               ['Film, campaigns and digital marketing'],
             ].map(([role]) => (
               <div key={role}>
-                <div className="grid aspect-[4/5] place-items-center border-b-[3px] border-accent bg-mist text-sm text-sage">Founder photo</div>
+                <div className="grid aspect-[4/5] place-items-center border-b-[3px] border-brand-green bg-mist text-sm text-sage">Founder photo</div>
                 <h3 className="mt-3.5 text-lg font-semibold">Founder name</h3>
                 <p className="text-[15px] text-sage">{role}</p>
               </div>
@@ -92,8 +92,8 @@ export default async function Home() {
           </h2>
           <ol className="mt-14 grid gap-6 md:grid-cols-5 md:gap-0">
             {STEPS.map(([h, p], i) => (
-              <li key={h} className="border-t border-accent/60 pr-5 pt-6">
-                <span className="block font-display text-[40px] leading-none text-accent">{i + 1}</span>
+              <li key={h} className="border-t border-white/25 pr-5 pt-6">
+                <span className="block font-display text-[40px] leading-none text-white/60">{i + 1}</span>
                 <h3 className="mt-4 text-[17px] font-semibold">{h}</h3>
                 <p className="mt-1.5 text-[15px] text-white/70">{p}</p>
               </li>
@@ -135,7 +135,7 @@ export default async function Home() {
         <div className="bg-brand-ink px-5 py-16 text-white md:px-14">
           <h2 className="font-display text-4xl">Looking to buy?</h2>
           <p className="mt-3 max-w-[42ch] text-white/80">Tell us what you want. Vikkaa Circle members see new listings two days before everyone else.</p>
-          <Link href="/buy" className="mt-6 inline-block rounded-sm bg-accent px-6 py-3.5 font-semibold text-brand-ink">
+          <Link href="/buy" className="mt-6 inline-block rounded-sm bg-white px-6 py-3.5 font-semibold text-brand hover:bg-mist">
             Tell us what you want
           </Link>
         </div>

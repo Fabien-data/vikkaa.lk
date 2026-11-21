@@ -131,11 +131,11 @@
     @apply font-sans;
   }
 }
-/* Vikkaa brand tokens: Direction A "Estate" (design/DIRECTION.md). Swap these values if the partner picks B. */
+/* Vikkaa brand tokens from the founders' brand board (design/DIRECTION.md). Not named "accent": shadcn owns that token. */
 @theme {
-  --color-brand: #17392E;
-  --color-brand-ink: #13241F;
-  --color-accent: #B08A3E;
+  --color-brand: #0b281e;
+  --color-brand-ink: #0b281e;
+  --color-brand-green: #1d6649;
   --color-mist: #EDF1EE;
   --color-sage: #6E8579;
   --font-display: var(--font-display-face), Georgia, serif;
