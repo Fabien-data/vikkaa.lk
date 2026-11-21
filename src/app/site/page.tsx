@@ -9,10 +9,11 @@ import { Reveal } from '@/components/site/motion/Reveal';
 import { SplitReveal } from '@/components/site/motion/SplitReveal';
 import { CountUp } from '@/components/site/motion/CountUp';
 import { TickLine } from '@/components/site/motion/TickLine';
-import { ScrubWords } from '@/components/site/home/ScrubWords';
 import { ShootGallery } from '@/components/site/home/ShootGallery';
 import { Steps } from '@/components/site/home/Steps';
 import { Parallax } from '@/components/site/home/Parallax';
+import { FilmType } from '@/components/site/film/FilmType';
+import { FilmAperture } from '@/components/site/film/FilmAperture';
 
 const wrap = 'mx-auto w-[min(1320px,100%-40px)]';
 const h2 = 'font-display text-[clamp(40px,5vw,76px)] leading-[1]';
@@ -61,49 +62,53 @@ export default async function Home() {
     <main>
       <Hero />
 
-      {/* Where every campaign goes live */}
-      <section aria-labelledby="platforms-h" className="overflow-hidden border-b border-brand/10 pb-14 pt-16 md:pb-20 md:pt-24">
-        <div className={`${wrap} flex flex-wrap items-baseline justify-between gap-3`}>
-          <h2 id="platforms-h" className="eyebrow text-brand-green">
-            One campaign, every platform
-          </h2>
-          <p className="text-[15px] text-ink-soft">Same story, cut for each screen, live at the same time.</p>
-        </div>
-        <div className="mt-8 flex w-max motion-safe:animate-marquee hover:[animation-play-state:paused] md:mt-12">
-          {[0, 1].map((copy) => (
-            <ul key={copy} aria-hidden={copy === 1 || undefined} className="flex shrink-0 items-center">
-              {PLATFORMS.map((p, i) => (
-                <li key={p} className="flex items-center">
-                  <span
-                    className={`whitespace-nowrap px-6 font-display text-[clamp(56px,8.5vw,136px)] leading-[1.1] md:px-10 ${
-                      i % 2 ? 'text-outline [--outline:rgb(11_40_30/0.45)]' : 'text-brand-ink'
-                    }`}
-                  >
-                    {p}
-                  </span>
-                  <Tick className="w-[clamp(22px,2.6vw,40px)] text-brand-green" />
-                </li>
+      {/* Where every campaign goes live: the brand film plays inside the platform names */}
+      <section aria-labelledby="platforms-h" className="px-3 pt-3 md:px-6 md:pt-6">
+        <div className="grain relative overflow-hidden rounded-[2.5rem] bg-night pb-10 pt-12 text-white md:pb-16 md:pt-16">
+          <div className={`${wrap} flex flex-wrap items-baseline justify-between gap-3 md:w-[min(1320px,100%-96px)]`}>
+            <h2 id="platforms-h" className="eyebrow flex items-center gap-3 text-mint">
+              <span className="h-px w-8 bg-mint/60" aria-hidden="true" />
+              One campaign, every platform
+            </h2>
+            <p className="text-[15px] text-white/70">Same story, cut for each screen, live at the same time.</p>
+          </div>
+          <FilmType className="mt-6 md:mt-10">
+            <div className="flex w-max py-2 motion-safe:animate-marquee hover:[animation-play-state:paused] md:py-4">
+              {[0, 1].map((copy) => (
+                <ul key={copy} aria-hidden={copy === 1 || undefined} className="flex shrink-0 items-center">
+                  {PLATFORMS.map((p, i) => (
+                    <li key={p} className="flex items-center">
+                      <span
+                        className={`whitespace-nowrap px-6 font-display text-[clamp(84px,13vw,224px)] leading-[1.05] md:px-12 ${
+                          i % 2 ? 'text-transparent [-webkit-text-stroke:1.5px_#fff]' : ''
+                        }`}
+                      >
+                        {p}
+                      </span>
+                      <Tick className="w-[clamp(26px,3vw,48px)]" />
+                    </li>
+                  ))}
+                </ul>
               ))}
-            </ul>
-          ))}
+            </div>
+          </FilmType>
         </div>
       </section>
 
-      {/* Manifesto and the three promises */}
-      <section aria-labelledby="why-h" className="relative overflow-hidden pb-24 pt-28 md:pb-32 md:pt-44">
-        <p aria-hidden="true" className="text-outline pointer-events-none absolute -left-[3vw] top-6 select-none font-display text-[clamp(150px,30vw,480px)] leading-none [--outline:rgb(11_40_30/0.2)] md:top-12">
-          Craft
-        </p>
-        <TickLine className="pointer-events-none absolute -right-24 top-28 hidden w-[min(640px,70vw)] text-brand-green/30 md:block" />
-        <div className={`relative ${wrap}`}>
-          <h2 id="why-h" className="eyebrow text-brand-green">
-            Why Vikkaa
-          </h2>
-          <ScrubWords className="mt-8 max-w-[24ch] font-display text-[clamp(36px,5.4vw,84px)] leading-[1.04] text-brand-ink md:mt-12">
-            Most property in Sri Lanka is sold with a phone photo and a classified ad. We bring the <em className="text-brand-green">craft</em> of a
-            brand campaign to the biggest sale of your life.
-          </ScrubWords>
-          <Reveal as="ul" stagger={0.12} className="mt-24 grid gap-12 md:mt-28 md:grid-cols-3 md:gap-8">
+      {/* Manifesto: the tick is a window onto the brand film, which opens to fill the screen; then the three promises */}
+      <section aria-labelledby="why-h" className="relative">
+        <FilmAperture
+          eyebrow={
+            <h2 id="why-h" className="eyebrow text-brand-green">
+              Why Vikkaa
+            </h2>
+          }
+        >
+          Most property in Sri Lanka is sold with a phone photo and a classified ad. We bring the <em className="text-brand-green">craft</em> of a
+          brand campaign to the biggest sale of your life.
+        </FilmAperture>
+        <div className={`${wrap} pb-24 pt-20 md:pb-32 md:pt-28`}>
+          <Reveal as="ul" stagger={0.12} className="grid gap-12 md:grid-cols-3 md:gap-8">
             {PROMISES.map(({ icon: Icon, title, line, live }, i) => (
               <li key={title} className="border-t border-brand/15 pt-7">
                 <div className="flex items-center justify-between">

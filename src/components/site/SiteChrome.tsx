@@ -87,6 +87,7 @@ export function SiteFooter() {
         <div className="mt-8 flex flex-wrap justify-between gap-3 text-[13px] text-white/50">
           <span>© {new Date().getFullYear()} Vikkaa.lk</span>
           <span>Some photography from Unsplash until our own shoots replace it.</span>
+          <span>Film music: Sascha Ende, ende.app (CC BY 4.0)</span>
         </div>
       </div>
     </footer>

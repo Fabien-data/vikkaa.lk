@@ -14,8 +14,9 @@ export function TickLine({ className, stroke = 'currentColor', width = 1.2 }: { 
       whenMotionOk(() => {
         gsap.fromTo(
           ref.current,
-          { strokeDashoffset: 1 },
-          { strokeDashoffset: 0, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top 95%', end: 'bottom 35%', scrub: 1 } },
+          // attr, not CSS: GSAP rounds CSS px values, which would snap this 0-1 offset instead of drawing it.
+          { attr: { 'stroke-dashoffset': 1 } },
+          { attr: { 'stroke-dashoffset': 0 }, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top 95%', end: 'bottom 35%', scrub: 1 } },
         );
       }),
     [],

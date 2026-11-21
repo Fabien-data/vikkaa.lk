@@ -1,0 +1,371 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Vikkaa film</title>
+<style>
+@font-face { font-family: 'Instrument Serif'; src: url(assets/fonts/instrument.woff2) format('woff2'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'Instrument Serif'; src: url(assets/fonts/instrument-italic.woff2) format('woff2'); font-weight: 400; font-style: italic; }
+@font-face { font-family: 'Hanken'; src: url(assets/fonts/hanken.woff2) format('woff2'); font-weight: 100 900; }
+
+:root {
+  --W: 1920px; --H: 1080px;
+  --night: #03150f; --brand: #0b281e; --green: #1d6649; --glow: #3aa876; --mint: #b5e8cd;
+  --paper: #f6f5f1; --ink-soft: #4b6156; --signal: #ee1c25;
+  --expo: cubic-bezier(.16, 1, .3, 1);
+}
+body.v { --W: 1080px; --H: 1920px; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; }
+body { width: var(--W); height: var(--H); overflow: hidden; }
+#stage { position: relative; width: var(--W); height: var(--H); overflow: hidden; background: var(--night); color: #fff;
+  font-family: Hanken, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.scene { position: absolute; inset: 0; display: none; overflow: hidden; }
+.serif { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+.serif em { font-style: italic; color: var(--mint); }
+.eyebrow { font-size: 15px; font-weight: 650; letter-spacing: .24em; text-transform: uppercase; }
+.line { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
+.line > span { display: block; will-change: transform; }
+img { display: block; }
+
+/* ---------- global layers ---------- */
+#bg { position: absolute; inset: 0; background:
+  radial-gradient(110% 80% at 88% 8%, rgba(29,102,73,.62), transparent 58%),
+  radial-gradient(80% 70% at 0% 100%, rgba(29,102,73,.46), transparent 55%),
+  linear-gradient(135deg, #021b15 0%, #0b281e 50%, #0e3627 100%); }
+#bg .sheen { position: absolute; width: 140%; height: 140%; left: -20%; top: -20%;
+  background: radial-gradient(40% 35% at 50% 50%, rgba(58,168,118,.22), transparent 70%); }
+#leak { position: absolute; inset: -20%; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  background: radial-gradient(30% 45% at 50% 50%, rgba(255,176,92,.85), rgba(255,120,60,.35) 45%, transparent 70%); filter: blur(30px); }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+#shutter { position: absolute; inset: 0; pointer-events: none; }
+#shutter i { position: absolute; left: 0; right: 0; height: 50%; background: #000; transform: scaleY(0); }
+#shutter i:first-child { top: 0; transform-origin: top; }
+#shutter i:last-child { bottom: 0; transform-origin: bottom; }
+#vignette { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.42) 100%); }
+#fade { position: absolute; inset: 0; background: var(--night); opacity: 0; pointer-events: none; }
+
+/* step rail */
+#rail { position: absolute; left: 150px; bottom: 92px; display: flex; gap: 34px; opacity: 0; align-items: center; }
+#rail .st { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 650; letter-spacing: .18em; color: rgba(255,255,255,.4); }
+#rail .st i { width: 30px; height: 2px; background: rgba(255,255,255,.22); position: relative; overflow: hidden; }
+#rail .st i b { position: absolute; inset: 0; background: var(--mint); transform-origin: left; transform: scaleX(0); }
+#rail .st.on { color: #fff; }
+body.v #rail { left: 50%; transform: translateX(-50%); bottom: 300px; gap: 22px; }
+body.v #rail .st i { width: 22px; }
+
+/* ---------- S1 hook ---------- */
+#s1 { background: radial-gradient(90% 80% at 60% 55%, #1a1d1b, #050706 75%); }
+#s1 .wrap { position: absolute; inset: 0; transform-origin: 66% 58%; }
+#s1 .hook { position: absolute; left: 150px; top: 130px; font-size: 92px; line-height: 1.02; color: #f2f2ee; }
+#s1 .hook em { color: #f2f2ee; }
+#s1 .ad { position: absolute; left: 640px; top: 360px; width: 1120px; height: 560px; background: #fff; border: 1px solid #cfcfcf;
+  display: flex; gap: 28px; padding: 22px; transform: rotate(-2deg); box-shadow: 0 30px 80px rgba(0,0,0,.6); font-family: Arial, Helvetica, sans-serif; color: #222; }
+#s1 .pic { position: relative; width: 560px; height: 100%; overflow: hidden; background: #888; flex: none; }
+#s1 .pic img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%;
+  filter: saturate(.22) contrast(1.45) brightness(1.28) sepia(.18) hue-rotate(-10deg) blur(1.5px); transform: rotate(4deg) scale(1.16); }
+#s1 .pic .hot { position: absolute; inset: 0; background: radial-gradient(28% 32% at 38% 46%, rgba(255,255,255,.75), transparent 70%); mix-blend-mode: screen; }
+#s1 .pic .stamp { position: absolute; right: 10px; bottom: 8px; font: 700 18px 'Courier New', monospace; color: #ffb000; text-shadow: 0 0 2px #000; }
+#s1 .feed { position: absolute; inset: 0; }
+#s1 .feed .ad { box-shadow: none; filter: blur(7px) saturate(.4) brightness(.55); }
+#s1 .body { display: flex; flex-direction: column; gap: 14px; padding-top: 6px; min-width: 0; }
+#s1 .tag { align-self: flex-start; background: #e00; color: #ff0; font: 900 40px Arial Black, Arial, sans-serif; padding: 2px 12px; transform: rotate(-1deg); }
+#s1 .title { font: 700 34px Arial, sans-serif; color: #1a0dab; text-decoration: underline; line-height: 1.15; }
+#s1 .meta { font-size: 22px; color: #777; }
+#s1 .price { font: 700 40px Arial, sans-serif; color: #090; }
+#s1 .price small { font-size: 22px; color: #777; font-weight: 400; }
+#s1 .call { margin-top: auto; background: #ffef00; border: 2px dashed #e00; font: 900 30px Arial, sans-serif; padding: 12px; text-align: center; }
+body.v #s1 .hook { left: 140px; top: 270px; font-size: 88px; }
+body.v #s1 .ad { left: 140px; top: 720px; width: 800px; height: 860px; flex-direction: column; gap: 18px; }
+body.v #s1 .pic { width: 100%; height: 470px; }
+body.v #s1 .wrap { transform-origin: 50% 55%; }
+
+/* ---------- S2 transformation ---------- */
+#s2 .img { position: absolute; inset: -6%; }
+#s2 .img img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 50%; filter: saturate(1.12) contrast(1.06); }
+#s2 .grade { position: absolute; inset: 0; background: linear-gradient(115deg, rgba(255,170,90,.22), transparent 45%, rgba(3,21,15,.25)); mix-blend-mode: soft-light; }
+#s2 .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(3,21,15,.88) 0%, rgba(3,21,15,.35) 38%, transparent 62%); }
+#s2 .flare { position: absolute; left: -10%; top: 30%; width: 120%; height: 4px; opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,214,170,.0) 20%, rgba(255,220,180,.9) 50%, rgba(255,214,170,.0) 80%, transparent); filter: blur(2px); mix-blend-mode: screen; }
+#s2 .flare::after { content: ''; position: absolute; left: 47%; top: -60px; width: 120px; height: 120px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,230,200,.85), rgba(255,180,120,.25) 40%, transparent 70%); }
+.brackets { position: absolute; inset: 9% 7%; pointer-events: none; }
+.brackets i { position: absolute; width: 70px; height: 70px; border: 3px solid rgba(255,255,255,.9); }
+.brackets i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.brackets i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.brackets i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.brackets i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+#s2 .copy { position: absolute; left: 150px; bottom: 150px; font-size: 128px; line-height: .98; }
+body.v #s2 .copy { left: 140px; bottom: 380px; font-size: 112px; }
+
+/* ---------- S3 reveal ---------- */
+#s3 .mark { position: absolute; left: 50%; top: 47%; width: 760px; height: 381px; transform: translate(-50%, -50%); }
+#s3 .mark svg { position: absolute; left: 0; top: 0; width: 57.4%; height: 100%; overflow: visible; filter: drop-shadow(0 0 6px rgba(181,232,205,.85)) drop-shadow(0 0 22px rgba(58,168,118,.7)); }
+#s3 .mark img { position: absolute; inset: 0; width: 100%; height: 100%; }
+#s3 .tagline { position: absolute; left: 0; right: 0; top: calc(47% + 250px); text-align: center; font-size: 34px; color: rgba(255,255,255,.78); letter-spacing: .01em; }
+body.v #s3 .mark { width: 740px; height: 371px; top: 44%; }
+body.v #s3 .tagline { top: calc(44% + 250px); font-size: 40px; padding: 0 150px; line-height: 1.3; text-wrap: balance; }
+
+/* ---------- step scenes ---------- */
+.step .col { position: absolute; left: 150px; top: 50%; width: 600px; transform: translateY(-58%); }
+.step .num { font-size: 150px; line-height: 1; color: transparent; -webkit-text-stroke: 1.5px rgba(181,232,205,.55); }
+.step .title { margin-top: 18px; font-size: 104px; line-height: .98; }
+.step .sub { margin-top: 26px; font-size: 32px; color: rgba(255,255,255,.72); }
+.card { position: absolute; left: 860px; top: 50%; width: 900px; transform: translateY(-55%); background: var(--paper); color: var(--brand);
+  border-radius: 34px; padding: 44px 48px; box-shadow: 0 50px 120px -30px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.06); }
+.card .head { display: flex; align-items: center; justify-content: space-between; padding-bottom: 26px; border-bottom: 1px solid rgba(11,40,30,.1); }
+.card .head .eyebrow { color: var(--green); font-size: 16px; }
+.card .muted { color: var(--ink-soft); font-size: 21px; }
+body.v .step .col { left: 140px; top: 290px; width: 800px; transform: none; }
+body.v .step .num { font-size: 130px; }
+body.v .step .title { font-size: 104px; }
+body.v .card { left: 140px; width: 800px; top: auto; bottom: 430px; transform: none; padding: 38px 40px; }
+
+/* form */
+.form .field { margin-top: 26px; }
+.form label { display: block; font-size: 19px; font-weight: 650; color: var(--ink-soft); margin-bottom: 12px; }
+.form .chips { display: flex; gap: 12px; }
+.form .chip { padding: 14px 26px; border-radius: 999px; border: 1.5px solid rgba(11,40,30,.2); font-size: 22px; font-weight: 600; }
+.form .chip.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+.form .input { height: 70px; border-radius: 18px; border: 1.5px solid rgba(11,40,30,.18); background: #fff; display: flex; align-items: center; padding: 0 22px; font-size: 27px; font-weight: 550; }
+.form .input.focus { border-color: var(--green); box-shadow: 0 0 0 4px rgba(29,102,73,.15); }
+.form .caret { display: inline-block; width: 2px; height: 32px; background: var(--green); margin-left: 3px; }
+.form .row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; }
+.form .send { margin-top: 32px; width: 100%; height: 76px; border-radius: 999px; background: var(--brand); color: #fff; font-size: 25px; font-weight: 650;
+  display: flex; align-items: center; justify-content: center; gap: 12px; }
+.form .toast { position: absolute; left: 50%; bottom: -46px; transform: translate(-50%, 0); white-space: nowrap; background: var(--green); color: #fff;
+  padding: 18px 30px; border-radius: 999px; font-size: 22px; font-weight: 600; box-shadow: 0 20px 50px -10px rgba(0,0,0,.5); opacity: 0; }
+#cursor { position: absolute; width: 34px; height: 34px; left: 0; top: 0; opacity: 0; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+
+/* report */
+.report .chart { position: relative; height: 330px; margin-top: 34px; display: flex; align-items: flex-end; gap: 22px; padding: 0 6px; }
+.report .bar { flex: 1; border-radius: 14px 14px 6px 6px; background: linear-gradient(to top, #cfe0d6, #e6efe9); transform-origin: bottom; position: relative; }
+.report .bar.hit { background: linear-gradient(to top, var(--green), #2f8a62); }
+.report .band { position: absolute; left: 0; right: 0; height: 74px; bottom: 196px; border-top: 2px dashed rgba(29,102,73,.55); border-bottom: 2px dashed rgba(29,102,73,.55); background: rgba(58,168,118,.1); transform-origin: left; }
+.report .band span { position: absolute; right: 12px; top: -34px; font-size: 17px; font-weight: 650; color: var(--green); letter-spacing: .08em; text-transform: uppercase; }
+.report .axis { display: flex; gap: 22px; padding: 12px 6px 0; border-top: 1px solid rgba(11,40,30,.12); }
+.report .axis span { flex: 1; text-align: center; font-size: 16px; color: var(--ink-soft); }
+.report .rec { margin-top: 30px; display: flex; align-items: center; justify-content: space-between; }
+.report .rec .label { font-size: 20px; font-weight: 650; color: var(--ink-soft); }
+.report .rec .val { font-size: 72px; line-height: 1; color: var(--brand); }
+.report .rec svg { width: 74px; height: 64px; }
+
+/* portal */
+.portal .live { display: inline-flex; align-items: center; gap: 12px; }
+.portal .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 6px rgba(238,28,37,.15); }
+.portal ul { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 14px; }
+.portal li { display: flex; align-items: center; gap: 20px; padding: 20px 22px; border-radius: 20px; background: #fff; border: 1px solid rgba(11,40,30,.08); }
+.portal li i { width: 50px; height: 50px; border-radius: 14px; background: #e8efea; display: grid; place-items: center; flex: none; }
+.portal li i svg { width: 26px; height: 26px; }
+.portal li b { display: block; font-size: 25px; font-weight: 650; }
+.portal li span { display: block; font-size: 19px; color: var(--ink-soft); margin-top: 3px; }
+.portal li em { margin-left: auto; font-style: normal; font-size: 17px; color: var(--ink-soft); }
+.portal .sold { margin-top: 26px; height: 112px; border-radius: 26px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; gap: 22px;
+  font-family: 'Instrument Serif', serif; font-size: 70px; box-shadow: 0 0 0 0 rgba(58,168,118,.0); }
+.portal .sold svg { width: 70px; height: 60px; overflow: visible; }
+
+/* ---------- S6 shoot ---------- */
+.shot { position: absolute; inset: 0; overflow: hidden; }
+#shotA { filter: url(#hbA); } #shotB { filter: url(#hbB); } #shotC { filter: url(#hbC); }
+.shot .px { position: absolute; inset: -8%; }
+.shot img { width: 100%; height: 100%; object-fit: cover; }
+.hud { position: absolute; inset: 0; pointer-events: none; font-family: 'Courier New', ui-monospace, monospace; font-weight: 700; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.hud .tl, .hud .tr, .hud .bl, .hud .br { position: absolute; font-size: 26px; letter-spacing: .06em; }
+.hud .tl { left: 7%; top: 9%; } .hud .tr { right: 7%; top: 9%; text-align: right; } .hud .bl { left: 7%; bottom: 9%; } .hud .br { right: 7%; bottom: 9%; text-align: right; }
+.hud .rec i { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: var(--signal); margin-right: 12px; vertical-align: -1px; }
+.fbox { position: absolute; left: 50%; top: 50%; width: 240px; height: 160px; transform: translate(-50%, -50%); }
+.fbox i { position: absolute; width: 34px; height: 34px; border: 3px solid #fff; }
+.fbox i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; } .fbox i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.fbox i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; } .fbox i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.fbox.lock i { border-color: #6dff9e; }
+.cross { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%); }
+.cross::before, .cross::after { content: ''; position: absolute; background: rgba(255,255,255,.85); }
+.cross::before { left: 0; right: 0; top: 50%; height: 2px; } .cross::after { top: 0; bottom: 0; left: 50%; width: 2px; }
+.compass { position: absolute; left: 50%; top: 5%; width: 640px; height: 40px; transform: translateX(-50%); overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+.compass .ticks { position: absolute; top: 0; height: 100%; width: 3000px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.85) 0 2px, transparent 2px 40px); }
+#s6 .label { position: absolute; left: 150px; bottom: 250px; }
+#s6 .label .eyebrow { color: var(--mint); }
+#s6 .label .t { font-size: 120px; line-height: 1; margin-top: 10px; text-shadow: 0 10px 40px rgba(0,0,0,.45); }
+#s6 .chips { position: absolute; left: 150px; bottom: 160px; display: flex; gap: 14px; }
+#s6 .chips span { padding: 14px 24px; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(10px); font-size: 22px; font-weight: 600; }
+#s6 .darken { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(3,21,15,.55), transparent 35%, transparent 65%, rgba(3,21,15,.6)); }
+body.v #s6 .label { left: 140px; bottom: 560px; }
+body.v #s6 .chips { left: 140px; right: 140px; bottom: 420px; flex-wrap: wrap; }
+body.v .hud .tl, body.v .hud .tr { top: 22%; } body.v .hud .bl, body.v .hud .br { bottom: 26%; } body.v .hud .tl, body.v .hud .bl { left: 14%; } body.v .hud .tr, body.v .hud .br { right: 14%; }
+
+/* ---------- S7 phones ---------- */
+#s7 canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#s7 .col { position: absolute; left: 150px; top: 50%; width: 560px; transform: translateY(-58%); }
+#s7 .labels span { position: absolute; transform: translate(-50%, 0); font-size: 15px; font-weight: 650; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.82); white-space: nowrap; }
+#s7 .badges b { position: absolute; transform: translate(-50%, -50%) scale(0); display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px;
+  background: var(--signal); color: #fff; font-size: 17px; font-weight: 800; letter-spacing: .18em; box-shadow: 0 8px 24px rgba(238,28,37,.45); }
+#s7 .badges b::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #fff; }
+body.v #s7 .col { left: 140px; top: 290px; width: 800px; transform: none; }
+
+/* ---------- S9 outro ---------- */
+#s9 .logo { position: absolute; left: 50%; top: 42%; width: 700px; transform: translate(-50%, -50%); }
+#s9 .cta { position: absolute; left: 50%; top: calc(42% + 250px); transform: translateX(-50%); display: flex; align-items: center; gap: 14px;
+  padding: 26px 46px; border-radius: 999px; background: #fff; color: var(--brand); font-size: 30px; font-weight: 650; white-space: nowrap; box-shadow: 0 24px 60px -16px rgba(0,0,0,.6); }
+#s9 .url { position: absolute; left: 0; right: 0; top: calc(42% + 380px); text-align: center; font-size: 22px; font-weight: 650; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,255,255,.62); }
+body.v #s9 .logo { width: 700px; top: 40%; }
+body.v #s9 .cta { top: calc(40% + 280px); font-size: 34px; }
+body.v #s9 .url { top: calc(40% + 430px); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"><div class="sheen"></div></div>
+
+  <!-- S1: the cliché -->
+  <section class="scene" id="s1">
+    <div class="wrap">
+      <div class="feed"></div>
+      <div class="ad main">
+        <div class="pic"><img src="assets/img/villaAhangama.jpg" alt="" /><div class="hot"></div><div class="stamp">IMG_4821.JPG</div></div>
+        <div class="body">
+          <div class="tag">FOR SALE!!!</div>
+          <div class="title">4 BR house with pool – urgent sale!! Call now</div>
+          <div class="meta">Galle · posted 3 weeks ago · 23 views</div>
+          <div class="price">Rs. 68,500,000 <small>(negotiable)</small></div>
+          <div class="call">CALL NOW 07X XXX XXXX</div>
+        </div>
+      </div>
+      <h1 class="hook serif"><span class="line"><span>Most property in Sri Lanka</span></span><span class="line"><span>is sold <em>like this.</em></span></span></h1>
+    </div>
+  </section>
+
+  <!-- S2: the same villa, as cinema -->
+  <section class="scene" id="s2">
+    <div class="img"><img src="assets/img/villaAhangama.jpg" alt="" /></div>
+    <div class="grade"></div>
+    <div class="flare"></div>
+    <div class="shade"></div>
+    <div class="brackets"><i></i><i></i><i></i><i></i></div>
+    <div class="copy serif"><span class="line"><span>Yours deserves</span></span><span class="line"><span>a <em>campaign.</em></span></span></div>
+  </section>
+
+  <!-- S3: reveal -->
+  <section class="scene" id="s3">
+    <div class="mark">
+      <svg viewBox="0 0 400 345" preserveAspectRatio="none">
+        <path class="stroke" fill="none" stroke="#d8f5e6" stroke-width="5" pathLength="1" stroke-dasharray="1" />
+        <path class="fill" fill="#fff" opacity="0" />
+      </svg>
+      <img src="assets/brand/logo-white.png" alt="" />
+    </div>
+    <div class="tagline">Property &amp; vehicle marketing, done for you.</div>
+  </section>
+
+  <!-- S4: 01 tell us -->
+  <section class="scene step" id="s4">
+    <div class="col">
+      <div class="num serif">01</div>
+      <div class="title serif"><span class="line"><span>Tell us</span></span><span class="line"><span>about <em>it.</em></span></span></div>
+      <div class="sub">A three-minute form.</div>
+    </div>
+    <div class="card form">
+      <div class="head"><span class="eyebrow">Sell with Vikkaa</span><span class="muted">About 3 minutes</span></div>
+      <div class="field"><label>What are you selling?</label><div class="chips"><span class="chip on">Property</span><span class="chip">Vehicle</span></div></div>
+      <div class="field"><label>Where is it?</label><div class="input" data-i="0"><span class="typed" data-text="Villa · Ahangama, Galle" data-start="11.12" data-cps="30"></span><i class="caret"></i></div></div>
+      <div class="row">
+        <div class="field"><label>Bedrooms</label><div class="input" data-i="1"><span class="typed" data-text="4" data-start="11.98" data-cps="20"></span><i class="caret"></i></div></div>
+        <div class="field"><label>Asking price</label><div class="input" data-i="2">Rs&nbsp;<span class="typed" data-text="68,500,000" data-start="12.08" data-cps="34"></span><i class="caret"></i></div></div>
+      </div>
+      <div class="send">Get my marketing plan <span>→</span></div>
+      <div class="toast">✓ We’ll call you within one working day</div>
+    </div>
+  </section>
+
+  <!-- S5: 02 price -->
+  <section class="scene step" id="s5">
+    <div class="col">
+      <div class="num serif">02</div>
+      <div class="title serif"><span class="line"><span>We price it</span></span><span class="line"><span>with <em>real data.</em></span></span></div>
+      <div class="sub">Real comparable sales.</div>
+    </div>
+    <div class="card report">
+      <div class="head"><span class="eyebrow">Market report</span><span class="muted">Comparable villas · Galle district</span></div>
+      <div class="chart">
+        <div class="band"><span>Recommended range</span></div>
+        <div class="bar" style="height:58%"></div><div class="bar" style="height:71%"></div><div class="bar" style="height:63%"></div>
+        <div class="bar hit" style="height:79%"></div><div class="bar" style="height:68%"></div><div class="bar" style="height:75%"></div>
+      </div>
+      <div class="axis"><span>Comp 1</span><span>Comp 2</span><span>Comp 3</span><span>Comp 4</span><span>Comp 5</span><span>Comp 6</span></div>
+      <div class="rec"><div><div class="label">Recommended asking price</div><div class="val serif">Rs 66–70M</div></div>
+        <svg viewBox="0 0 400 345"><path class="t" fill="none" stroke="#1d6649" stroke-width="22" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" /></svg></div>
+    </div>
+  </section>
+
+  <!-- S6: 03 we film it -->
+  <section class="scene" id="s6">
+    <div class="shot" id="shotA"><div class="px"><img src="assets/img/villaAhangama.jpg" alt="" style="object-position:62% 55%" /></div>
+      <div class="hud"><div class="tl rec"><i></i>REC <span class="tc">00:00:14:12</span></div><div class="tr">4K · 25P<br />ISO 400 · f/2.8</div>
+        <div class="br">A7 IV · 35mm&nbsp;&nbsp;<span class="bat">▮▮▮▯</span></div><div class="fbox"><i></i><i></i><i></i><i></i></div></div></div>
+    <div class="shot" id="shotB"><div class="px"><img src="assets/img/villaAerial.jpg" alt="" /></div>
+      <div class="hud"><div class="compass"><div class="ticks"></div></div><div class="cross"></div>
+        <div class="tl">ALT <span class="alt">32.0</span> m<br />H.S 2.1 m/s</div><div class="tr">GIMBAL −90°<br />4K · 30P</div><div class="br">REC <span class="tc2">00:01:02</span></div></div></div>
+    <div class="shot" id="shotC"><div class="px"><img src="assets/img/openAirLiving.jpg" alt="" /></div></div>
+    <div class="darken"></div>
+    <div class="label"><div class="eyebrow">03</div><div class="t serif">We film <em>it.</em></div></div>
+    <div class="chips"><span>Photos</span><span>Drone</span><span>Walkthrough film</span><span>Reels</span></div>
+  </section>
+
+  <!-- S7: 04 every screen (three.js) -->
+  <section class="scene" id="s7">
+    <canvas id="gl"></canvas>
+    <div class="col">
+      <div class="num serif" style="font-size:150px;line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(181,232,205,.55)">04</div>
+      <div class="title serif" style="margin-top:18px;font-size:104px;line-height:.98"><span class="line"><span>Live</span></span><span class="line"><span><em>everywhere.</em></span></span></div>
+      <div class="sub" style="margin-top:26px;font-size:32px;color:rgba(255,255,255,.72)">Every platform, the same day.</div>
+    </div>
+    <div class="labels"></div>
+    <div class="badges"></div>
+  </section>
+
+  <!-- S8: 05 every buyer -->
+  <section class="scene step" id="s8">
+    <div class="col">
+      <div class="num serif">05</div>
+      <div class="title serif"><span class="line"><span>We handle</span></span><span class="line"><span>every <em>buyer.</em></span></span></div>
+      <div class="sub">Until the deed is signed.</div>
+    </div>
+    <div class="card portal">
+      <div class="head"><span class="live"><span class="dot"></span><span class="eyebrow">Your campaign · live</span></span><span class="muted">Villa · Ahangama</span></div>
+      <ul>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="#1d6649" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></i><div><b>New enquiry</b><span>via WhatsApp</span></div><em>just now</em></li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="#1d6649" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></i><div><b>Viewing booked</b><span>Saturday, 10:00</span></div><em>today</em></li>
+        <li><i><svg viewBox="0 0 24 24" fill="none" stroke="#1d6649" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></i><div><b>Offer received</b><span>Reviewed with you</span></div><em>today</em></li>
+      </ul>
+      <div class="sold"><svg viewBox="0 0 400 345"><path class="t" fill="none" stroke="#b5e8cd" stroke-width="26" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" /></svg><span>Sold</span></div>
+    </div>
+  </section>
+
+  <!-- S9: outro -->
+  <section class="scene" id="s9">
+    <img class="logo" src="assets/brand/logo-white.png" alt="" />
+    <div class="cta">Get a marketing plan <span>→</span></div>
+    <div class="url">vikkaa.lk · Western Province</div>
+  </section>
+
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="hbA" x="-20%" y="0" width="140%" height="100%"><feGaussianBlur stdDeviation="0 0" /></filter>
+    <filter id="hbB" x="-20%" y="0" width="140%" height="100%"><feGaussianBlur stdDeviation="0 0" /></filter>
+    <filter id="hbC" x="-20%" y="0" width="140%" height="100%"><feGaussianBlur stdDeviation="0 0" /></filter>
+  </svg>
+
+  <div id="rail"></div>
+  <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#0b281e" stroke-width="1.5" stroke-linejoin="round" /></svg>
+  <div id="leak"></div>
+  <div id="vignette"></div>
+  <div id="shutter"><i></i><i></i></div>
+  <div id="flash"></div>
+  <div id="fade"></div>
+</div>
+
+<script src="assets/lib/gsap.min.js"></script>
+<script type="importmap">{ "imports": { "three": "./assets/lib/three.module.js" } }</script>
+<script type="module" src="film.js"></script>
+</body>
+</html>
