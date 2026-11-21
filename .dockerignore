@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.superpowers
+storage
+storage-test
+Vikkaa Assests
+docs
+design
+.env
+.env.*
+!.env.example

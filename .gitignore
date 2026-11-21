@@ -50,3 +50,4 @@ next-env.d.ts
 .superpowers/
 !.env.example
 /storage-test/
+!deploy/.env.production.example
