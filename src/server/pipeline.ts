@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '@/db';
 import { assets, engagements, type Asset } from '@/db/schema';
 import type { AssetStatus, EngagementStage } from '@/lib/enums';
@@ -42,12 +42,15 @@ export async function advanceEngagement(
   throw new InvalidTransitionError(`Cannot move an engagement from ${from} to ${to}`);
 }
 
+/** Signs a proposal once. The conditional update means a second call can never move the exclusive-period dates. */
 export async function markSigned(engagementId: string, at: Date): Promise<void> {
   const e = await loadEngagement(engagementId);
-  await db
+  const updated = await db
     .update(engagements)
     .set({ stage: 'signed', signedAt: at, endsAt: new Date(at.getTime() + e.exclusiveDays * DAY_MS) })
-    .where(eq(engagements.id, engagementId));
+    .where(and(eq(engagements.id, engagementId), eq(engagements.stage, 'proposal'), isNull(engagements.signedAt)))
+    .returning({ id: engagements.id });
+  if (!updated.length) throw new InvalidTransitionError(`Only an unsigned proposal can be signed (this one is ${e.stage})`);
   await syncProduction(engagementId);
 }
 

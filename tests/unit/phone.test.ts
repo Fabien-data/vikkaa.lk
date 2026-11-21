@@ -16,4 +16,8 @@ it.each([
   [undefined, null],
   ['abc', null],
   ['+12', null],
+  ['+94 077 123 4567', '+94771234567'],
+  ['0094771234567', '+94771234567'],
+  ['+94 77 123 456', null],
+  ['+9477123456789', null],
 ])('normalisePhone(%s) → %s', (raw, out) => expect(normalisePhone(raw)).toBe(out));

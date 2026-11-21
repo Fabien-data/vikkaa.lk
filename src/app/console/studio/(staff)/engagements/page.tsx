@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -6,6 +7,7 @@ import { FitBadge } from '@/components/studio/FitBadge';
 import { ENGAGEMENT_STAGES, stageLabel, type EngagementStage } from '@/lib/enums';
 
 export default async function EngagementsPage({ searchParams }: { searchParams: Promise<{ stage?: string }> }) {
+  await requireStaff();
   const { stage } = await searchParams;
   const filter = ENGAGEMENT_STAGES.includes(stage as EngagementStage) ? (stage as EngagementStage) : undefined;
   const rows = await db.query.engagements.findMany({

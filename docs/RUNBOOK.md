@@ -33,7 +33,9 @@ Server: OVH VPS `139.99.90.67`. App: `/srv/vikkaa/app`. Files: `/srv/vikkaa/stor
 
 ## Roll back
 
-`git checkout <previous commit> && bash deploy/deploy.sh`.
+`git reset --hard <previous commit> && SKIP_PULL=1 bash deploy/deploy.sh`.
+
+This stays on the branch, so later deploys still work. When the fix is pushed, run `git reset --hard origin/main && bash deploy/deploy.sh`.
 
 Migrations only ever add. If a migration must be undone, restore the database (below).
 

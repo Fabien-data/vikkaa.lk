@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eq } from 'drizzle-orm';
@@ -8,6 +9,7 @@ import { AssetFields } from '../asset-fields';
 import { saveAsset } from '../actions';
 
 export default async function NewAssetPage({ searchParams }: { searchParams: Promise<{ engagement?: string }> }) {
+  await requireStaff();
   const { engagement: engagementId } = await searchParams;
   if (!engagementId) notFound();
   const [e] = await db.select({ id: engagements.id }).from(engagements).where(eq(engagements.id, engagementId));

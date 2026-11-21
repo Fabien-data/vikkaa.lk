@@ -4,7 +4,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 COMPOSE="docker compose -f deploy/docker-compose.prod.yml"
 
-git pull --ff-only
+# SKIP_PULL=1 deploys whatever is checked out (used for rollbacks).
+[ "${SKIP_PULL:-}" = 1 ] || git pull --ff-only
 $COMPOSE build
 $COMPOSE up -d db
 $COMPOSE --profile tools run --rm tools pnpm db:migrate

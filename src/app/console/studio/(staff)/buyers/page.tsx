@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { count, desc, eq, ilike, or } from 'drizzle-orm';
 import { db } from '@/db';
@@ -6,6 +7,7 @@ import { inputClass } from '@/components/studio/Field';
 import { formatLkr } from '@/lib/money';
 
 export default async function BuyersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  await requireStaff();
   const { q } = await searchParams;
   const rows = await db
     .select({

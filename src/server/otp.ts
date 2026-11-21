@@ -1,5 +1,5 @@
 import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { and, eq, gt, isNotNull, lt, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { signatories } from '@/db/schema';
 import { config } from '@/lib/config';
@@ -42,14 +42,29 @@ export async function sendSigningCode(signatoryId: string): Promise<'sms' | 'ema
   return 'email';
 }
 
-/** True once for a correct, unexpired code with attempts left; a correct code is consumed. */
+/**
+ * True once for a correct, unexpired code with attempts left. Both steps are single conditional UPDATEs, so parallel
+ * guesses each use up an attempt and a correct code can only be consumed once.
+ */
 export async function verifySigningCode(signatoryId: string, code: string): Promise<boolean> {
-  const [s] = await db.select().from(signatories).where(eq(signatories.id, signatoryId));
-  if (!s?.otpHash || !s.otpExpiresAt || s.otpExpiresAt.getTime() < Date.now() || s.otpAttempts >= MAX_ATTEMPTS) return false;
-  const ok = /^\d{6}$/.test(code) && timingSafeEqual(Buffer.from(hashCode(s.id, code), 'hex'), Buffer.from(s.otpHash, 'hex'));
-  await db
+  const [attempt] = await db
     .update(signatories)
-    .set(ok ? { otpHash: null, otpExpiresAt: null } : { otpAttempts: s.otpAttempts + 1 })
-    .where(eq(signatories.id, s.id));
-  return ok;
+    .set({ otpAttempts: sql`${signatories.otpAttempts} + 1` })
+    .where(
+      and(
+        eq(signatories.id, signatoryId),
+        isNotNull(signatories.otpHash),
+        lt(signatories.otpAttempts, MAX_ATTEMPTS),
+        gt(signatories.otpExpiresAt, new Date()),
+      ),
+    )
+    .returning({ otpHash: signatories.otpHash });
+  if (!attempt?.otpHash || !/^\d{6}$/.test(code)) return false;
+  if (!timingSafeEqual(Buffer.from(hashCode(signatoryId, code), 'hex'), Buffer.from(attempt.otpHash, 'hex'))) return false;
+  const consumed = await db
+    .update(signatories)
+    .set({ otpHash: null, otpExpiresAt: null })
+    .where(and(eq(signatories.id, signatoryId), eq(signatories.otpHash, attempt.otpHash)))
+    .returning({ id: signatories.id });
+  return consumed.length === 1;
 }

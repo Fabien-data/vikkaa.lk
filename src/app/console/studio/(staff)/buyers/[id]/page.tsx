@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { desc, eq, inArray } from 'drizzle-orm';
@@ -12,6 +13,7 @@ import { saveBuyer } from '../actions';
 const rupees = (c: number | null) => (c ? String(c / 100) : '');
 
 export default async function BuyerPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireStaff();
   const { id } = await params;
   const [b] = await db.select().from(buyers).where(eq(buyers.id, id));
   if (!b) notFound();

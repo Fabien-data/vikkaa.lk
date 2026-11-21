@@ -20,6 +20,7 @@ async function seed(assetOver: Partial<typeof assets.$inferInsert> = {}) {
     .returning();
   return { e, a };
 }
+const toProposal = (id: string) => db.update(engagements).set({ stage: 'proposal' }).where(eq(engagements.id, id));
 const stageOf = async (id: string) => (await db.select().from(engagements).where(eq(engagements.id, id)))[0];
 const assetOf = async (id: string) => (await db.select().from(assets).where(eq(assets.id, id)))[0];
 const photo = { src: '/media/x-1600.webp', srcSet: 'x' };
@@ -54,6 +55,7 @@ describe('pipeline', () => {
 
   it('signed + paid moves draft assets to production; either alone does not', async () => {
     const one = await seed();
+    await toProposal(one.e.id);
     await markSigned(one.e.id, new Date('2026-12-01T00:00:00Z'));
     expect((await assetOf(one.a.id)).status).toBe('draft');
     await markPaid(one.e.id, new Date('2026-12-02T00:00:00Z'));
@@ -66,10 +68,20 @@ describe('pipeline', () => {
 
   it('markSigned sets endsAt from exclusiveDays', async () => {
     const { e } = await seed();
+    await toProposal(e.id);
     await markSigned(e.id, new Date('2026-12-01T00:00:00Z'));
     const s = await stageOf(e.id);
     expect(s.stage).toBe('signed');
     expect(s.endsAt!.toISOString()).toBe('2027-03-01T00:00:00.000Z');
+  });
+
+  it('markSigned only signs a proposal, and never twice', async () => {
+    const { e } = await seed();
+    await expect(markSigned(e.id, new Date())).rejects.toBeInstanceOf(InvalidTransitionError);
+    await toProposal(e.id);
+    await markSigned(e.id, new Date('2026-12-01T00:00:00Z'));
+    await expect(markSigned(e.id, new Date('2026-12-09T00:00:00Z'))).rejects.toBeInstanceOf(InvalidTransitionError);
+    expect((await stageOf(e.id)).signedAt!.toISOString()).toBe('2026-12-01T00:00:00.000Z');
   });
 
   it('asset cannot go live without a photo, title, description and price', async () => {

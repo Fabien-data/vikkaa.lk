@@ -7,6 +7,7 @@ import { signatories, SIGNATORY_ROLES, type SignatoryRole } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
 import { putPrivate } from '@/server/storage';
 import { signWithPaperScan } from '@/server/agreement-signer';
+import { InvalidTransitionError } from '@/server/pipeline';
 import { normalisePhone } from '@/lib/phone';
 import { signPath } from '@/lib/signed-url';
 import { whatsappLink } from '@/lib/whatsapp';
@@ -69,7 +70,12 @@ export async function uploadPaperScan(_prev: ActionResult, form: FormData): Prom
   const scan = uploadedFile(form, 'scan');
   if (!scan) return { error: 'Choose the scanned agreement.' };
   if (scan.size > MAX_UPLOAD_BYTES) return { error: 'The scan is larger than 20 MB.' };
-  await signWithPaperScan(engagementId, Buffer.from(await scan.arrayBuffer()), scan.name);
+  try {
+    await signWithPaperScan(engagementId, Buffer.from(await scan.arrayBuffer()), scan.name);
+  } catch (err) {
+    if (err instanceof InvalidTransitionError) return { error: err.message };
+    throw err;
+  }
   revalidatePath(`/studio/engagements/${engagementId}`);
   return { ok: true };
 }

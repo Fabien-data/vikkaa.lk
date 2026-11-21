@@ -97,7 +97,7 @@ describe('documents', () => {
   });
 
   it('paid invoice + full deposit + signed moves assets to production', async () => {
-    const { e, a } = await seed();
+    const { e, a } = await seed({ stage: 'proposal' });
     await markSigned(e.id, new Date());
     const inv = await issueInvoice(e.id);
     await recordPayment(inv.id, 10_000_000, 'bank_transfer', 'TX1', new Date());

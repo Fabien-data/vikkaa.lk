@@ -22,8 +22,9 @@ export async function submitCheckin(_prev: ActionResult, form: FormData): Promis
   if (!phone) return { error: 'Enter a valid phone number.' };
   if (!nic || !isValidIdNumber(nic)) return { error: 'Enter a valid NIC or passport number.' };
   if (form.get('confirmIntroduced') !== 'on') return { error: 'Please confirm that Vikkaa introduced you.' };
+  if (form.get('privacy') !== 'on') return { error: 'Please agree to the privacy notice.' };
 
-  const buyer = await upsertBuyerByPhone(phone, { name, nic: nic.toUpperCase(), source: 'viewing' });
+  const buyer = await upsertBuyerByPhone(phone, { name, nic: nic.toUpperCase(), source: 'viewing', privacyAcceptedAt: new Date() });
   await appendEvidence({
     assetId: asset.id,
     buyerId: buyer.id,

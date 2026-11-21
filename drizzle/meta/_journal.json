@@ -50,6 +50,13 @@
       "when": 1795262806045,
       "tag": "0006_gigantic_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795265923365,
+      "tag": "0007_jittery_thunderbolt",
+      "breakpoints": true
     }
   ]
 }

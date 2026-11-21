@@ -23,6 +23,7 @@ import { sendSigningCode, verifySigningCode, OtpTooSoonError } from '@/server/ot
 import { signAgreement, signWithPaperScan } from '@/server/agreement-signer';
 import { generateAgreementDraft } from '@/server/documents';
 import { saveSignatory } from '@/app/console/studio/(staff)/engagements/[id]/signatory-actions';
+import { saveEngagement } from '@/app/console/studio/(staff)/engagements/actions';
 
 const lastCode = () => (sms.at(-1)?.message ?? emails.at(-1)?.text ?? '').match(/\b(\d{6})\b/)![1];
 const wrongCode = (code: string) => (code === '000000' ? '111111' : '000000');
@@ -158,6 +159,75 @@ describe('signing', () => {
     await sendSigningCode(s[0].id);
     await sign(s[0].id, lastCode());
     await expect(sign(s[0].id, '123456')).rejects.toThrow(/already signed/);
+  });
+
+  it('parallel wrong guesses cannot beat the 5-attempt limit', async () => {
+    const { s } = await seed();
+    await sendSigningCode(s[0].id);
+    const code = lastCode();
+    await Promise.all(Array.from({ length: 10 }, () => verifySigningCode(s[0].id, wrongCode(code))));
+    expect(await verifySigningCode(s[0].id, code)).toBe(false);
+  });
+
+  it('a correct code signs only once even when submitted twice at the same time', async () => {
+    const { s } = await seed();
+    await sendSigningCode(s[0].id);
+    const code = lastCode();
+    const results = await Promise.allSettled([sign(s[0].id, code), sign(s[0].id, code)]);
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+    expect(await db.$count(documents, eq(documents.type, 'agreement_signed'))).toBe(1);
+  });
+
+  it('records which draft each signatory signed, and builds the signed copy from that draft', async () => {
+    const { e, s } = await seed([{ phone: '+94771234567' }, { phone: '+94772223334' }]);
+    const [draft] = await db.select().from(documents).where(eq(documents.type, 'agreement'));
+    await sendSigningCode(s[0].id);
+    await sign(s[0].id, lastCode());
+    const [first] = await db.select().from(signatories).where(eq(signatories.id, s[0].id));
+    expect([first.signedDocumentId, first.signedDocumentSha256]).toEqual([draft.id, draft.sha256]);
+
+    await db.update(assets).set({ title: 'Edited after signing' }).where(eq(assets.engagementId, e.id));
+    await sendSigningCode(s[1].id);
+    await sign(s[1].id, lastCode(), '200012345678');
+    const [signed] = await db.select().from(documents).where(eq(documents.type, 'agreement_signed'));
+    expect(signed.meta).toMatchObject({ draftId: draft.id, draftSha256: draft.sha256, assetTitles: ['House'] });
+  });
+
+  it('no new draft can be generated once anyone has signed', async () => {
+    const { e, s } = await seed([{ phone: '+94771234567' }, { phone: '+94772223334' }]);
+    await sendSigningCode(s[0].id);
+    await sign(s[0].id, lastCode());
+    await expect(generateAgreementDraft(e.id)).rejects.toThrow(/already signed/);
+  });
+
+  it('refuses to sign a different draft from the one a co-owner signed', async () => {
+    const { e, s } = await seed([{ phone: '+94771234567' }, { phone: '+94772223334' }]);
+    await sendSigningCode(s[0].id);
+    await sign(s[0].id, lastCode());
+    const [draft] = await db.select().from(documents).where(eq(documents.type, 'agreement'));
+    await db.insert(documents).values({ engagementId: e.id, type: 'agreement', storageKey: draft.storageKey, sha256: 'f'.repeat(64), issuedAt: new Date(Date.now() + 1000) });
+    await sendSigningCode(s[1].id);
+    await expect(sign(s[1].id, lastCode(), '200012345678')).rejects.toThrow(/changed/);
+  });
+
+  it('engagement terms are locked once anyone has signed', async () => {
+    const { e, s } = await seed([{ phone: '+94771234567' }, { phone: '+94772223334' }]);
+    await sendSigningCode(s[0].id);
+    await sign(s[0].id, lastCode());
+    const r = await saveEngagement(
+      undefined,
+      form({ id: e.id, upfrontFeeRupees: '1', adBudgetRupees: '0', commissionPercent: '1', exclusiveDays: '30', followOnMonths: '1' }),
+    );
+    expect(r?.error).toMatch(/locked/);
+  });
+
+  it('a second paper scan does not move the signing dates', async () => {
+    const { e } = await seed();
+    await signWithPaperScan(e.id, Buffer.from('%PDF-scan'), 'signed.pdf');
+    const [first] = await db.select().from(engagements).where(eq(engagements.id, e.id));
+    await expect(signWithPaperScan(e.id, Buffer.from('%PDF-scan2'), 'again.pdf')).rejects.toThrow();
+    const [after] = await db.select().from(engagements).where(eq(engagements.id, e.id));
+    expect(after.signedAt!.getTime()).toBe(first.signedAt!.getTime());
   });
 
   it('paper scan marks the engagement signed', async () => {

@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { desc, eq } from 'drizzle-orm';
@@ -12,6 +13,7 @@ import { Field, inputClass } from '@/components/studio/Field';
 import { changeAssetStatus, movePhoto, removePhoto, saveAsset, uploadAssetPhotos } from '../actions';
 
 export default async function AssetPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireStaff();
   const { id } = await params;
   const [asset] = await db.select().from(assets).where(eq(assets.id, id));
   if (!asset) notFound();

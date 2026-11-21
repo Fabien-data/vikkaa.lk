@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { asc, eq } from 'drizzle-orm';
@@ -26,6 +27,7 @@ const ANSWER_TEXT: Record<string, string> = {
 const rupees = (cents: number | null) => (cents ? String(cents / 100) : '');
 
 export default async function EngagementPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireStaff();
   const { id } = await params;
   const e = await db.query.engagements.findFirst({
     where: eq(engagements.id, id),

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { asc, desc, eq, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { evidenceEntries, type Channel, type EvidenceEntry, type EvidenceType } from '@/db/schema';
 import { canonicalJson } from '@/lib/canonical-json';
@@ -58,12 +58,22 @@ export async function appendEvidence(input: {
       .where(eq(evidenceEntries.organizationId, organizationId))
       .orderBy(desc(evidenceEntries.seq))
       .limit(1);
+    // A buyer's first contact about an asset is recorded as such, whichever channel it came through.
+    let type = input.type;
+    if (type === 'contact') {
+      const [prior] = await tx
+        .select({ id: evidenceEntries.id })
+        .from(evidenceEntries)
+        .where(and(eq(evidenceEntries.assetId, input.assetId), eq(evidenceEntries.buyerId, input.buyerId)))
+        .limit(1);
+      if (!prior) type = 'first_contact';
+    }
     const fields: HashFields = {
       prevHash: last?.hash ?? GENESIS,
       organizationId,
       assetId: input.assetId,
       buyerId: input.buyerId,
-      type: input.type,
+      type,
       channel: input.channel,
       happenedAt: new Date(input.happenedAt.getTime()),
       recordedAt: new Date(),

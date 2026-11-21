@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { desc, eq } from 'drizzle-orm';
@@ -14,6 +15,7 @@ import { ShareLinkButton } from '@/components/studio/ShareLinkButton';
 import { createEngagement } from '../../engagements/actions';
 
 export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireStaff();
   const { id } = await params;
   const client = await db.query.clients.findFirst({
     where: eq(clients.id, id),

@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import { asc } from 'drizzle-orm';
 import { db } from '@/db';
 import { areaPrices } from '@/db/schema';
@@ -10,6 +11,7 @@ import { deleteAreaPrice, saveAreaPrice } from './actions';
 const KIND_TEXT = { land_perch: 'Land, per perch', house: 'House', apartment: 'Apartment', vehicle: 'Vehicle' } as const;
 
 export default async function AreaPricesPage() {
+  await requireStaff();
   const rows = await db.select().from(areaPrices).orderBy(asc(areaPrices.kind), asc(areaPrices.district), asc(areaPrices.area));
 
   return (

@@ -100,7 +100,17 @@ export function ProposalPdf({ e, date }: { e: EngagementForPdf; date: Date }) {
 
 export type SignatureLine = { name: string; idNumber: string; phone: string; signedAt: Date; ip: string; role: string };
 
-export function AgreementPdf({ e, date, signatures }: { e: EngagementForPdf; date: Date; signatures?: SignatureLine[] }) {
+export function AgreementPdf({
+  e,
+  date,
+  signatures,
+  draftSha256,
+}: {
+  e: EngagementForPdf;
+  date: Date;
+  signatures?: SignatureLine[];
+  draftSha256?: string;
+}) {
   return (
     <PdfDocument title="Vikkaa exclusive marketing and sale agreement">
       <Page size="A4" style={pdf.page}>
@@ -128,6 +138,9 @@ export function AgreementPdf({ e, date, signatures }: { e: EngagementForPdf; dat
           <Text style={[pdf.muted, { marginBottom: 10 }]}>
             Each signatory confirmed a one-time code sent to the phone or email below and entered their name and ID number.
           </Text>
+          {draftSha256 ? (
+            <Text style={[pdf.muted, { marginBottom: 10 }]}>Fingerprint (SHA-256) of the draft every signatory read: {draftSha256}</Text>
+          ) : null}
           {signatures.map((s, i) => (
             <View key={i} style={{ marginBottom: 12 }}>
               <Text style={{ fontFamily: 'Helvetica-Bold' }}>

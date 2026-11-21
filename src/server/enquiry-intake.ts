@@ -1,6 +1,6 @@
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { assets, enquiries, evidenceEntries, type Channel } from '@/db/schema';
+import { assets, enquiries, type Channel } from '@/db/schema';
 import { config } from '@/lib/config';
 import { upsertBuyerByPhone } from '@/server/buyers';
 import { appendEvidence } from '@/server/evidence-log';
@@ -22,13 +22,9 @@ export async function recordEnquiry(
   });
   const [enquiry] = await db.insert(enquiries).values({ assetId, buyerId: buyer.id, channel, message: input.message || null }).returning();
 
-  const [seen] = await db
-    .select({ id: evidenceEntries.id })
-    .from(evidenceEntries)
-    .where(and(eq(evidenceEntries.assetId, assetId), eq(evidenceEntries.buyerId, buyer.id)))
-    .limit(1);
-  const type = seen ? 'contact' : 'first_contact';
-  await appendEvidence({ assetId, buyerId: buyer.id, type, channel, happenedAt: now, data: { enquiryId: enquiry.id } });
+  // appendEvidence decides first contact vs later contact inside its locked transaction.
+  const entry = await appendEvidence({ assetId, buyerId: buyer.id, type: 'contact', channel, happenedAt: now, data: { enquiryId: enquiry.id } });
+  const type = entry.type as 'first_contact' | 'contact';
 
   if (config.staffNotifyEmails.length) {
     const [asset] = await db.select({ title: assets.title }).from(assets).where(eq(assets.id, assetId));

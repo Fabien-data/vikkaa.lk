@@ -1,9 +1,9 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, isNotNull } from 'drizzle-orm';
 import { db } from '@/db';
-import { clients, comparables, engagements, assets } from '@/db/schema';
+import { clients, comparables, engagements, assets, signatories } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
 import { scoreFit, type IntakeAnswers } from '@/server/fit-scorer';
 import { rangeFor } from '@/server/area-prices';
@@ -34,6 +34,12 @@ export async function createEngagement(form: FormData): Promise<void> {
 export async function saveEngagement(_prev: ActionResult, form: FormData): Promise<ActionResult> {
   await requireStaff();
   const id = String(form.get('id'));
+  const signed = await db
+    .select({ id: signatories.id })
+    .from(signatories)
+    .where(and(eq(signatories.engagementId, id), isNotNull(signatories.signedAt)))
+    .limit(1);
+  if (signed.length) return { error: 'Terms are locked because someone has signed the agreement.' };
   try {
     const percent = Number(String(form.get('commissionPercent') ?? '').trim());
     if (!Number.isFinite(percent) || percent < 0 || percent > 20) throw new FormError('Commission: enter a percentage between 0 and 20');

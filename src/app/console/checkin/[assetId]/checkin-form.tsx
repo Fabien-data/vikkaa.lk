@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 const input =
   'w-full rounded-md border border-input bg-background px-3 py-2.5 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
-export function CheckinForm({ assetId, kind }: { assetId: string; kind: 'property' | 'vehicle' }) {
+export function CheckinForm({ assetId, kind, privacyUrl }: { assetId: string; kind: 'property' | 'vehicle'; privacyUrl: string }) {
   const [state, action, pending] = useActionState<ActionResult, FormData>(submitCheckin, undefined);
 
   if (state?.ok) {
@@ -41,6 +41,16 @@ export function CheckinForm({ assetId, kind }: { assetId: string; kind: 'propert
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" name="confirmIntroduced" required className="mt-1" />I confirm Vikkaa introduced me to this{' '}
         {kind === 'vehicle' ? 'vehicle' : 'property'}.
+      </label>
+      <label className="flex items-start gap-3 text-sm">
+        <input type="checkbox" name="privacy" required className="mt-1" />
+        <span>
+          I agree to the{' '}
+          <a href={privacyUrl} target="_blank" rel="noreferrer" className="underline">
+            privacy notice
+          </a>
+          .
+        </span>
       </label>
       {state?.error && (
         <p role="alert" className="text-sm text-destructive">

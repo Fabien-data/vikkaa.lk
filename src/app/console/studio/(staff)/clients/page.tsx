@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { desc, ilike, or, count, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -8,6 +9,7 @@ import { saveClient } from './actions';
 import { inputClass } from '@/components/studio/Field';
 
 export default async function ClientsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  await requireStaff();
   const { q } = await searchParams;
   const rows = await db
     .select({ id: clients.id, name: clients.name, type: clients.type, phone: clients.phone, engagements: count(engagements.id) })

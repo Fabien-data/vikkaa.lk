@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
@@ -6,6 +7,7 @@ import { ASSET_STATUSES, statusLabel, type AssetStatus } from '@/lib/enums';
 import { formatLkr } from '@/lib/money';
 
 export default async function AssetsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  await requireStaff();
   const { status } = await searchParams;
   const filter = ASSET_STATUSES.includes(status as AssetStatus) ? (status as AssetStatus) : undefined;
   const rows = await db.select().from(assets).where(filter ? eq(assets.status, filter) : undefined).orderBy(desc(assets.createdAt)).limit(200);

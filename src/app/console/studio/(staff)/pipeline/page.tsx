@@ -1,3 +1,4 @@
+import { requireStaff } from '@/server/auth-guard';
 import Link from 'next/link';
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { db } from '@/db';
@@ -24,6 +25,7 @@ function Column({ title, count, children }: { title: string; count: number; chil
 }
 
 export default async function PipelinePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  await requireStaff();
   const { error } = await searchParams;
   const early = await db.query.engagements.findMany({
     where: inArray(engagements.stage, ENGAGEMENT_COLUMNS),

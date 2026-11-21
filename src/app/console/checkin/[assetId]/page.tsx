@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { assets } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
+import { config } from '@/lib/config';
 import { CheckinForm } from './checkin-form';
 
 export default async function CheckinPage({ params }: { params: Promise<{ assetId: string }> }) {
@@ -16,7 +17,7 @@ export default async function CheckinPage({ params }: { params: Promise<{ assetI
       <p className="text-sm font-semibold">Vikkaa.lk</p>
       <h1 className="mt-2 text-2xl font-semibold">Welcome to the {asset.category === 'vehicle' ? 'test drive' : 'viewing'}</h1>
       <p className="mt-2 text-muted-foreground">{asset.title}</p>
-      <CheckinForm assetId={asset.id} kind={asset.category} />
+      <CheckinForm assetId={asset.id} kind={asset.category} privacyUrl={`${config.publicUrl}/privacy`} />
     </main>
   );
 }

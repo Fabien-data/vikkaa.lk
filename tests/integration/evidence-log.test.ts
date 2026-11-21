@@ -49,7 +49,7 @@ describe('evidence log', () => {
     await entry(a.id, b.id);
     await entry(a.id, b.id, { type: 'offer', data: { offerCents: 100 } });
     await db.execute(sql`alter table evidence_entries disable trigger evidence_entries_append_only`);
-    await db.execute(sql`update evidence_entries set channel = 'email' where type = 'contact'`);
+    await db.execute(sql`update evidence_entries set channel = 'email' where type = 'offer'`);
     await db.execute(sql`alter table evidence_entries enable trigger evidence_entries_append_only`);
     expect(await verifyEvidenceChain('org_vikkaa')).toBe(false);
   });
@@ -93,6 +93,21 @@ describe('evidence log', () => {
     expect(await db.$count(buyers)).toBe(1);
   });
 
+  it('a first contact logged as contact is recorded as first_contact', async () => {
+    const { a, b } = await seed();
+    expect((await entry(a.id, b.id, { type: 'contact', channel: 'whatsapp' })).type).toBe('first_contact');
+    expect((await entry(a.id, b.id, { type: 'contact', channel: 'phone' })).type).toBe('contact');
+  });
+
+  it('check-in requires the privacy notice and records consent', async () => {
+    const { a } = await seed();
+    const base = { assetId: a.id, name: 'Sunil', phone: '0712223334', nic: '123456789V', confirmIntroduced: 'on' };
+    expect((await submitCheckin(undefined, form(base)))?.error).toMatch(/privacy/i);
+    expect(await submitCheckin(undefined, form({ ...base, privacy: 'on' }))).toEqual({ ok: true });
+    const [sunil] = await db.select().from(buyers).where(eq(buyers.phone, '+94712223334'));
+    expect(sunil.privacyAcceptedAt).toBeInstanceOf(Date);
+  });
+
   it('check-in requires confirmation', async () => {
     const { a } = await seed();
     const r = await submitCheckin(undefined, form({ assetId: a.id, name: 'Sunil', phone: '0712223334', nic: '123456789V' }));
@@ -102,7 +117,7 @@ describe('evidence log', () => {
   it('check-in logs viewing for property and test_drive for vehicle', async () => {
     const house = await seed('property');
     const car = await seed('vehicle');
-    const ok = { name: 'Sunil', phone: '0712223334', nic: '123456789V', confirmIntroduced: 'on' };
+    const ok = { name: 'Sunil', phone: '0712223334', nic: '123456789V', confirmIntroduced: 'on', privacy: 'on' };
     expect(await submitCheckin(undefined, form({ assetId: house.a.id, ...ok }))).toEqual({ ok: true });
     expect(await submitCheckin(undefined, form({ assetId: car.a.id, ...ok }))).toEqual({ ok: true });
     const types = (await db.select().from(evidenceEntries)).map((e) => [e.assetId, e.type, e.channel]);
@@ -114,7 +129,7 @@ describe('evidence log', () => {
 
   it('check-in entry data holds no personal fields', async () => {
     const { a } = await seed();
-    await submitCheckin(undefined, form({ assetId: a.id, name: 'Sunil', phone: '0712223334', nic: '123456789V', confirmIntroduced: 'on' }));
+    await submitCheckin(undefined, form({ assetId: a.id, name: 'Sunil', phone: '0712223334', nic: '123456789V', confirmIntroduced: 'on', privacy: 'on' }));
     const [e] = await db.select().from(evidenceEntries);
     expect(e.data).toEqual({ checkin: true, confirmedIntroduced: true });
   });

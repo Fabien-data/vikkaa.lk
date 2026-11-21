@@ -28,6 +28,9 @@ export const signatories = pgTable('signatories', {
   signedPhone: text(),
   signedIp: text(),
   signedUserAgent: text(),
+  /** The exact agreement draft this person signed (spec §3.3: any later change must show). */
+  signedDocumentId: text(),
+  signedDocumentSha256: text(),
   createdAt: timestamp().defaultNow().notNull(),
 });
 

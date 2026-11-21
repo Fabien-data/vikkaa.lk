@@ -1,4 +1,4 @@
-import { and, asc, eq, sum } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, sum } from 'drizzle-orm';
 import { db } from '@/db';
 import {
   assets,
@@ -6,6 +6,7 @@ import {
   documents,
   engagements,
   payments,
+  signatories,
   type Document,
   type DocumentType,
   type PaymentMethod,
@@ -55,15 +56,30 @@ export async function generateProposal(engagementId: string): Promise<Document> 
   return store(e, 'proposal', await renderPdf(<ProposalPdf e={e} date={new Date()} />));
 }
 
+/** Each draft freezes the data it was rendered from, so the signed copy shows exactly what the signers read. */
 export async function generateAgreementDraft(engagementId: string): Promise<Document> {
   const e = await loadEngagement(engagementId);
   if (!e.assets.length) throw new DocumentError('Add at least one asset before generating the agreement');
-  return store(e, 'agreement', await renderPdf(<AgreementPdf e={e} date={new Date()} />));
+  const signed = await db
+    .select({ id: signatories.id })
+    .from(signatories)
+    .where(and(eq(signatories.engagementId, engagementId), isNotNull(signatories.signedAt)))
+    .limit(1);
+  if (signed.length) throw new DocumentError('Someone has already signed this agreement, so it can no longer be changed.');
+  const date = new Date();
+  return store(e, 'agreement', await renderPdf(<AgreementPdf e={e} date={date} />), {
+    issuedAt: date,
+    meta: { snapshot: JSON.parse(JSON.stringify(e)) },
+  });
 }
 
-export async function generateSignedAgreement(engagementId: string, signatures: SignatureLine[]): Promise<Document> {
-  const e = await loadEngagement(engagementId);
-  return store(e, 'agreement_signed', await renderPdf(<AgreementPdf e={e} date={new Date()} signatures={signatures} />));
+export async function generateSignedAgreement(draft: Document, signatures: SignatureLine[]): Promise<Document> {
+  const e = draft.meta.snapshot as EngagementForPdf | undefined;
+  if (!e) throw new DocumentError('This draft predates signing snapshots. Generate a new agreement draft.');
+  const bytes = await renderPdf(<AgreementPdf e={e} date={draft.issuedAt} signatures={signatures} draftSha256={draft.sha256} />);
+  return store(e, 'agreement_signed', bytes, {
+    meta: { draftId: draft.id, draftSha256: draft.sha256, assetTitles: e.assets.map((a) => a.title) },
+  });
 }
 
 export async function storeAgreementScan(engagementId: string, bytes: Buffer, filename: string): Promise<Document> {
