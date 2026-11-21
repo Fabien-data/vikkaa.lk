@@ -14,7 +14,10 @@ if (!email || !name) {
 // Public sign-up is disabled, so the account is created through Better Auth's server context.
 const ctx = await auth.$context;
 const password = randomBytes(12).toString('base64url');
-const created = await ctx.internalAdapter.createUser({ email: email.toLowerCase(), name, emailVerified: true });
+const created = await ctx.internalAdapter.createUser(
+  { email: email.toLowerCase(), name, emailVerified: true },
+  { method: 'admin' },
+);
 await ctx.internalAdapter.linkAccount({
   userId: created.id,
   providerId: 'credential',

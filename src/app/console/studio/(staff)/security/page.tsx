@@ -11,7 +11,7 @@ export default function SecurityPage() {
 
   async function enable(form: FormData) {
     const { data, error } = await authClient.twoFactor.enable({ password: String(form.get('password')) });
-    if (error || !data) return setMessage(error?.message ?? 'Could not start setup');
+    if (error || !data || !('totpURI' in data)) return setMessage(error?.message ?? 'Could not start setup');
     setSecret(new URL(data.totpURI).searchParams.get('secret'));
   }
 
