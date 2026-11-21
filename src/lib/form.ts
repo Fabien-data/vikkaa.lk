@@ -1,0 +1,31 @@
+import { rupeesToCents } from '@/lib/money';
+
+export type ActionResult = { ok?: true; error?: string } | undefined;
+
+/** A user-facing validation problem in a Studio form. */
+export class FormError extends Error {}
+
+export function formText(form: FormData, name: string): string | null {
+  const v = String(form.get(name) ?? '').trim();
+  return v || null;
+}
+
+export function formCents(form: FormData, name: string, label: string): number {
+  const raw = String(form.get(name) ?? '').trim();
+  if (raw === '') return 0;
+  try {
+    return rupeesToCents(raw);
+  } catch {
+    throw new FormError(`${label}: enter an amount in rupees`);
+  }
+}
+
+export function formOptionalCents(form: FormData, name: string, label: string): number | null {
+  return String(form.get(name) ?? '').trim() === '' ? null : formCents(form, name, label);
+}
+
+export function formInt(form: FormData, name: string, label: string, min: number, max: number): number {
+  const n = Number(String(form.get(name) ?? '').trim());
+  if (!Number.isInteger(n) || n < min || n > max) throw new FormError(`${label}: enter a whole number from ${min} to ${max}`);
+  return n;
+}

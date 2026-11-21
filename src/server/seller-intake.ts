@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/db';
@@ -6,6 +5,7 @@ import { clients, engagements, assets, type Asset } from '@/db/schema';
 import { CLIENT_TYPES, ASSET_CATEGORIES, ASSET_KINDS, kindCategory, type AssetKind } from '@/lib/enums';
 import { normalisePhone } from '@/lib/phone';
 import { rupeesToCents } from '@/lib/money';
+import { slugFor } from '@/lib/slug';
 import { config } from '@/lib/config';
 import {
   COMMISSION_BP,
@@ -102,15 +102,6 @@ function titleFor(i: SellerIntakeInput): string {
   }
   const name = KIND_NAMES[i.kind];
   return `${name[0].toUpperCase()}${name.slice(1)}, ${i.area}`;
-}
-
-function slugFor(title: string): string {
-  const suffix = Array.from(randomBytes(6), (b) => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
-  const base = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-  return `${base}-${suffix}`;
 }
 
 function detailsFor(i: SellerIntakeInput): Asset['details'] {
