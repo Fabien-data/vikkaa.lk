@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: vikkaa
+      POSTGRES_PASSWORD: vikkaa
+      POSTGRES_DB: vikkaa
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - vikkaa_v2_pgdata:/var/lib/postgresql/data
+volumes:
+  vikkaa_v2_pgdata:
