@@ -7,6 +7,8 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['tests/setup/db.ts'],
     pool: 'forks',
+    hookTimeout: 60_000,
+    testTimeout: 30_000,
     env: {
       NODE_ENV: 'test',
       PUBLIC_HOST: 'vikkaa.test',

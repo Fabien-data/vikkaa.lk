@@ -8,6 +8,13 @@
       "when": 1795259384587,
       "tag": "0000_equal_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795260398798,
+      "tag": "0001_lucky_inhumans",
+      "breakpoints": true
     }
   ]
 }
