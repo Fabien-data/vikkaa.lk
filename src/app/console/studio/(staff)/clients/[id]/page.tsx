@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { inputClass } from '@/components/studio/Field';
 import { stageLabel } from '@/lib/enums';
 import { ClientFields } from '../client-fields';
-import { saveClient } from '../actions';
+import { portalLink, saveClient } from '../actions';
+import { ShareLinkButton } from '@/components/studio/ShareLinkButton';
 import { createEngagement } from '../../engagements/actions';
 
 export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
@@ -27,6 +28,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
           Clients
         </Link>
         <h1 className="text-2xl font-semibold">{client.name}</h1>
+        <ShareLinkButton getLink={portalLink.bind(null, client.id)} label="Get portal link" />
       </div>
 
       <section className="max-w-2xl rounded-md border bg-background p-5">

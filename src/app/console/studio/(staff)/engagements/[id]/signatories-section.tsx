@@ -3,8 +3,8 @@ import { db } from '@/db';
 import { signatories } from '@/db/schema';
 import { ActionForm } from '@/components/studio/ActionForm';
 import { Field, inputClass } from '@/components/studio/Field';
-import { removeSignatory, saveSignatory, uploadPaperScan } from './signatory-actions';
-import { SigningLinkButton } from './signing-link-button';
+import { ShareLinkButton } from '@/components/studio/ShareLinkButton';
+import { removeSignatory, saveSignatory, signingLink, uploadPaperScan } from './signatory-actions';
 
 const ROLE_TEXT = { owner: 'Owner', co_owner: 'Co-owner', poa_holder: 'Power of attorney holder' } as const;
 
@@ -33,7 +33,7 @@ export async function SignatoriesSection({ engagementId, signed }: { engagementI
                 <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-900">Signed {s.signedAt.toLocaleDateString('en-GB')}</span>
               ) : (
                 <>
-                  <SigningLinkButton signatoryId={s.id} />
+                  <ShareLinkButton getLink={signingLink.bind(null, s.id)} label="Get signing link" />
                   <form action={remove}>
                     <button className="text-xs text-destructive underline">Remove</button>
                   </form>
