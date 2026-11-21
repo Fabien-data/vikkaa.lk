@@ -3,7 +3,7 @@ import { useActionState, useState } from 'react';
 import Link from 'next/link';
 import { submitSell, type SellState } from './actions';
 import { DISTRICTS } from '@/lib/rules';
-import { Button } from '@/components/ui/button';
+import { fieldError, fieldInput as input, fieldLabel, formAlert, legend, submit } from '@/components/site/form-styles';
 
 const PROPERTY_KINDS = [
   ['house', 'House'],
@@ -18,9 +18,6 @@ const VEHICLE_KINDS = [
   ['van', 'Van'],
 ] as const;
 
-const input =
-  'w-full rounded-md border border-input bg-background px-3 py-2.5 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
-
 function Field({
   label,
   name,
@@ -34,11 +31,11 @@ function Field({
 }) {
   const error = errors?.[name]?.[0];
   return (
-    <label className="grid gap-1.5 text-sm font-medium">
+    <label className={`${fieldLabel} ${error ? '[&_:is(input,select,textarea)]:border-[#b42318]' : ''}`}>
       {label}
       {children}
       {error && (
-        <span role="alert" className="text-sm font-normal text-destructive">
+        <span role="alert" className={fieldError}>
           {error}
         </span>
       )}
@@ -53,12 +50,12 @@ export function SellForm() {
   const errors = state?.fieldErrors;
 
   return (
-    <form action={action} className="mt-10 grid gap-6" noValidate>
+    <form action={action} className="grid gap-10" noValidate>
       {/* Honeypot: hidden from people, filled by bots. */}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 text-lg font-semibold">About you</legend>
+      <fieldset className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <legend className={legend}>About you</legend>
         <Field label="Your name" name="name" errors={errors}>
           <input name="name" autoComplete="name" required className={input} />
         </Field>
@@ -79,8 +76,8 @@ export function SellForm() {
         </Field>
       </fieldset>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 text-lg font-semibold">What you’re selling</legend>
+      <fieldset className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <legend className={legend}>What you’re selling</legend>
         <Field label="Category" name="category" errors={errors}>
           <select
             name="category"
@@ -150,8 +147,8 @@ export function SellForm() {
         )}
       </fieldset>
 
-      <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="mb-2 text-lg font-semibold">A few quick questions</legend>
+      <fieldset className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+        <legend className={legend}>A few quick questions</legend>
         <Field label="When do you need it sold?" name="timeline" errors={errors}>
           <select name="timeline" className={input} defaultValue="0-3m">
             <option value="0-3m">Within 3 months</option>
@@ -188,20 +185,22 @@ export function SellForm() {
       </fieldset>
 
       {state?.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className={formAlert}>
           {state.error}
         </p>
       )}
-      <p className="text-sm text-muted-foreground">
-        By sending this you agree to our{' '}
-        <Link href="/privacy" className="underline">
-          privacy notice
-        </Link>
-        .
-      </p>
-      <Button type="submit" size="lg" disabled={pending}>
-        {pending ? 'Sending…' : 'Send my details'}
-      </Button>
+      <div className="grid gap-5 border-t border-brand/10 pt-8 sm:flex sm:items-center sm:justify-between">
+        <p className="text-sm text-ink-soft">
+          By sending this you agree to our{' '}
+          <Link href="/privacy" className="font-semibold text-brand-green underline underline-offset-4">
+            privacy notice
+          </Link>
+          .
+        </p>
+        <button type="submit" disabled={pending} className={`${submit} sm:w-auto`}>
+          {pending ? 'Sending…' : 'Send my details'}
+        </button>
+      </div>
     </form>
   );
 }

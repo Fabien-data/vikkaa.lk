@@ -1,51 +1,93 @@
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { config } from '@/lib/config';
-
-const NAV = [
-  ['/how-it-works', 'How it works'],
-  ['/portfolio', 'Portfolio'],
-  ['/sell', 'Sell with us'],
-  ['/buy', 'Find a property'],
-] as const;
+import { whatsappLink } from '@/lib/whatsapp';
+import { HeaderBar } from './HeaderBar';
+import { NAV } from './nav';
+import { TickLine } from './motion/TickLine';
 
 export const prettyPhone = (e164: string) =>
   e164.startsWith('+94') ? `0${e164.slice(3, 5)} ${e164.slice(5, 8)} ${e164.slice(8)}` : e164;
 
 export function SiteHeader() {
-  return (
-    <header className="bg-brand text-white">
-      <div className="mx-auto flex w-[min(1160px,100%-40px)] items-center justify-between py-5">
-        <Link href="/" aria-label="Vikkaa.lk home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/logo-white.png" alt="Vikkaa" width={136} height={68} className="h-10 w-auto" />
-        </Link>
-        <nav aria-label="Main" className="hidden gap-7 text-[15px] md:flex">
-          {NAV.map(([href, label]) => (
-            <Link key={href} href={href} className="opacity-90 hover:underline hover:underline-offset-4 hover:opacity-100">
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <Link href="/sell" className="rounded-sm bg-white px-4 py-2 text-sm font-semibold text-brand md:hidden">
-          Sell with us
-        </Link>
-      </div>
-    </header>
-  );
+  return <HeaderBar />;
 }
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-white/15 bg-brand-ink text-[15px] text-white/75">
-      <div className="mx-auto flex w-[min(1160px,100%-40px)] flex-wrap justify-between gap-4 py-8">
-        <span>
-          Call or WhatsApp Vikkaa on <a href={`tel:${config.vikkaaPhone}`} className="underline">{prettyPhone(config.vikkaaPhone)}</a>
-        </span>
-        <nav aria-label="Legal" className="flex gap-5">
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/terms">Terms</Link>
-          <Link href="/cookies">Cookies</Link>
-        </nav>
+    <footer className="bg-glow grain relative mt-auto overflow-hidden text-white">
+      <TickLine className="pointer-events-none absolute -right-32 -top-36 w-[min(640px,80vw)] text-glow/35" />
+      <div className="relative mx-auto w-[min(1320px,100%-40px)] pb-10 pt-24 md:pt-32">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr] md:items-end">
+          <div>
+            <p className="eyebrow text-mint">Selling something worth showing?</p>
+            <h2 className="mt-5 max-w-[14ch] font-display text-[clamp(48px,7vw,104px)] leading-[0.95]">
+              Let’s give it the campaign it <em className="text-mint">deserves.</em>
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3 md:justify-end">
+            <Link href="/sell" className="btn btn-light">
+              Get a marketing plan <ArrowUpRight className="size-4" aria-hidden="true" />
+            </Link>
+            <a href={whatsappLink(config.vikkaaWhatsapp, 'Hi Vikkaa, I’d like to talk about selling.')} className="btn btn-ghost">
+              WhatsApp us
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-20 grid gap-10 border-t border-white/15 pt-10 text-[15px] sm:grid-cols-3">
+          <nav aria-label="Footer">
+            <p className="eyebrow text-white/50">Explore</p>
+            <ul className="mt-4 grid gap-2.5">
+              {NAV.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="text-white/80 transition-colors hover:text-white">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div>
+            <p className="eyebrow text-white/50">Talk to us</p>
+            <ul className="mt-4 grid gap-2.5 text-white/80">
+              <li>
+                Call <a href={`tel:${config.vikkaaPhone}`} className="text-white underline-offset-4 hover:underline">{prettyPhone(config.vikkaaPhone)}</a>
+              </li>
+              <li>
+                WhatsApp{' '}
+                <a href={whatsappLink(config.vikkaaWhatsapp, 'Hi Vikkaa')} className="text-white underline-offset-4 hover:underline">
+                  {prettyPhone(config.vikkaaWhatsapp)}
+                </a>
+              </li>
+              <li>Western Province, Sri Lanka</li>
+            </ul>
+          </div>
+          <nav aria-label="Legal">
+            <p className="eyebrow text-white/50">Legal</p>
+            <ul className="mt-4 grid gap-2.5">
+              {[
+                ['/privacy', 'Privacy'],
+                ['/terms', 'Terms'],
+                ['/cookies', 'Cookies'],
+              ].map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="text-white/80 transition-colors hover:text-white">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+
+        <p aria-hidden="true" className="text-outline mt-16 select-none text-center text-[clamp(80px,24vw,360px)] font-black leading-[0.8] tracking-tighter [--outline:rgb(255_255_255/0.16)]">
+          Vikkaa
+        </p>
+        <div className="mt-8 flex flex-wrap justify-between gap-3 text-[13px] text-white/50">
+          <span>© {new Date().getFullYear()} Vikkaa.lk</span>
+          <span>Some photography from Unsplash until our own shoots replace it.</span>
+        </div>
       </div>
     </footer>
   );

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Gloock, Hanken_Grotesk } from 'next/font/google';
+import { Instrument_Serif, Hanken_Grotesk } from 'next/font/google';
 import { config } from '@/lib/config';
 import './globals.css';
 
 const body = Hanken_Grotesk({ variable: '--font-sans', subsets: ['latin'] });
-const display = Gloock({ variable: '--font-display-face', subsets: ['latin'], weight: '400' });
+const display = Instrument_Serif({ variable: '--font-display-face', subsets: ['latin'], weight: '400', style: ['normal', 'italic'] });
 
 // Every page reads live data (and Docker builds have no database), so nothing is prerendered at build time.
 export const dynamic = 'force-dynamic';

@@ -137,6 +137,94 @@
   --color-brand-ink: #0b281e;
   --color-brand-green: #1d6649;
   --color-mist: #EDF1EE;
-  --color-sage: #6E8579;
+  --color-sage: #6E8579; /* decorative / large text only: fails AA for body copy on paper */
+  --color-ink-soft: #4b6156; /* body copy on paper and mist (AA) */
+  --color-night: #03150f; /* deepest cinematic sections, from the brand board's dark corner */
+  --color-glow: #3aa876; /* luminous green: accents on dark backgrounds only */
+  --color-mint: #b5e8cd; /* highlight text on dark */
+  --color-paper: #f6f5f1; /* the brand board's off-white card colour: default page background */
+  --color-signal: #ee1c25; /* the brand board's notification badge: live counts and dots only */
   --font-display: var(--font-display-face), Georgia, serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-rise: rise 1.1s var(--ease-out-expo) both;
+  --animate-line: line-up 1.2s var(--ease-out-expo) both;
+  --animate-marquee: marquee 45s linear infinite;
+  --animate-ken-burns: ken-burns 18s ease-out both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); filter: blur(6px); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
+  /* For hand-split headline lines: <span class="block overflow-hidden"><span class="block motion-safe:animate-line">…</span></span> */
+  @keyframes line-up {
+    from { transform: translateY(105%); }
+    to { transform: none; }
+  }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+  @keyframes ken-burns {
+    from { transform: scale(1.14); }
+    to { transform: scale(1); }
+  }
+}
+
+/* Cinematic dark background: the brand board’s diagonal deep-green glow (bg-glow). */
+@utility bg-glow {
+  background:
+    radial-gradient(110% 80% at 88% 8%, rgb(29 102 73 / 0.6), transparent 58%),
+    radial-gradient(80% 70% at 0% 100%, rgb(29 102 73 / 0.45), transparent 55%),
+    linear-gradient(135deg, #021b15 0%, #0b281e 50%, #0e3627 100%);
+}
+
+/* Film grain over dark sections. Needs a positioned parent (relative/absolute). */
+@utility grain {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Giant outlined words behind headings. Set the stroke colour with [--outline:…]. */
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--outline, rgb(11 40 30 / 0.16));
+}
+
+@utility eyebrow {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border-radius: 999px;
+    padding: 0.95rem 1.6rem;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    transition: transform 0.5s var(--ease-out-expo), background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.5s var(--ease-out-expo);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:focus-visible { outline: 2px solid var(--color-glow); outline-offset: 3px; }
+  .btn-primary { background: var(--color-brand); color: #fff; box-shadow: 0 14px 34px -14px rgb(11 40 30 / 0.7); }
+  .btn-primary:hover { background: var(--color-brand-green); }
+  .btn-light { background: #fff; color: var(--color-brand); box-shadow: 0 14px 34px -14px rgb(0 0 0 / 0.5); }
+  .btn-light:hover { background: var(--color-mint); }
+  .btn-ghost { border: 1px solid rgb(255 255 255 / 0.4); color: #fff; background: rgb(255 255 255 / 0.06); backdrop-filter: blur(10px); }
+  .btn-ghost:hover { background: rgb(255 255 255 / 0.14); border-color: rgb(255 255 255 / 0.7); }
+  .btn-outline { border: 1px solid rgb(11 40 30 / 0.22); color: var(--color-brand); }
+  .btn-outline:hover { border-color: var(--color-brand); background: #fff; }
 }
