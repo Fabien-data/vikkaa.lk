@@ -6,8 +6,18 @@ export type RouteDecision =
   | { type: 'pass' }
   | { type: 'notFound' };
 
-/** Old vikkaa.lk URLs → new paths (filled in Task 13). */
-export const OLD_URL_REDIRECTS: Record<string, string> = {};
+/** URLs from the previous vikkaa.lk site → their new home (301). */
+export const OLD_URL_REDIRECTS: Record<string, string> = {
+  '/real-estate': '/portfolio',
+  '/pricing': '/how-it-works',
+  '/agents': '/sell',
+  '/register': '/sell',
+  '/login': '/sell',
+  '/guides': '/',
+  '/trust': '/how-it-works',
+  '/about': '/how-it-works',
+  '/contact': '/sell',
+};
 
 const INTERNAL = /^\/(site|console)(\/|$)/;
 

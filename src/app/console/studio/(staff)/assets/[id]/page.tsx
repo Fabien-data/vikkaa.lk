@@ -87,7 +87,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
               await removePhoto(id, i);
             }
             return (
-              <li key={p.src} className="grid gap-1 text-xs">
+              <li key={`${i}-${p.src}`} className="grid gap-1 text-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={p.src} srcSet={p.srcSet} sizes="200px" alt={`Photo ${i + 1}`} className="aspect-[4/3] w-full rounded object-cover" />
                 <div className="flex gap-2">

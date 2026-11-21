@@ -37,8 +37,19 @@ const schema = z
 
 export type Config = ReturnType<typeof parseConfig>;
 
+// `next build` imports every route to collect page data; secrets only exist at runtime (and Docker builds have none).
+const BUILD_PLACEHOLDERS = {
+  PUBLIC_HOST: 'build.invalid',
+  APP_HOST: 'app.build.invalid',
+  DATABASE_URL: 'postgres://build.invalid/none',
+  APP_SECRET: 'build-phase-placeholder-secret-not-used',
+  VIKKAA_PHONE: '+94000000000',
+  VIKKAA_WHATSAPP: '+94000000000',
+};
+
 export function parseConfig(source: Record<string, string | undefined>) {
-  const parsed = schema.safeParse(source);
+  const building = source.NEXT_PHASE === 'phase-production-build';
+  const parsed = schema.safeParse(building ? { ...BUILD_PLACEHOLDERS, ...source, NODE_ENV: 'build' } : source);
   if (!parsed.success) {
     throw new Error(`Invalid configuration: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`);
   }

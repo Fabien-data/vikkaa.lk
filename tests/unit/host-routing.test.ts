@@ -19,4 +19,13 @@ describe('routeForHost', () => {
   it('blocks internal prefixes on app host', () =>
     expect(routeForHost('app.vikkaa.test', '/site').type).toBe('notFound'));
   it('unknown host is notFound', () => expect(routeForHost('evil.test', '/').type).toBe('notFound'));
+  it.each([
+    ['/real-estate', '/portfolio'],
+    ['/pricing', '/how-it-works'],
+    ['/login', '/sell'],
+    ['/register', '/sell'],
+    ['/agents', '/sell'],
+    ['/guides', '/'],
+  ])('old url %s redirects 301 to %s', (from, to) =>
+    expect(routeForHost('vikkaa.test', from)).toEqual({ type: 'redirect', to, status: 301 }));
 });

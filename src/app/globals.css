@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Scan all app code explicitly (automatic detection misses files on this Windows setup). */
+@source "../";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -127,4 +130,13 @@
   html {
     @apply font-sans;
   }
+}
+/* Vikkaa brand tokens: Direction A "Estate" (design/DIRECTION.md). Swap these values if the partner picks B. */
+@theme {
+  --color-brand: #17392E;
+  --color-brand-ink: #13241F;
+  --color-accent: #B08A3E;
+  --color-mist: #EDF1EE;
+  --color-sage: #6E8579;
+  --font-display: var(--font-display-face), Georgia, serif;
 }

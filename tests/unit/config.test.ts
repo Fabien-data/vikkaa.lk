@@ -39,4 +39,8 @@ describe('parseConfig', () => {
     expect(prod.publicUrl).toBe('https://vikkaa.test');
   });
   it('defaults VAT to 0', () => expect(parseConfig(valid).vatRateBp).toBe(0));
+  it('accepts a bare environment during the production build phase only', () => {
+    expect(() => parseConfig({ NODE_ENV: 'production', NEXT_PHASE: 'phase-production-build' })).not.toThrow();
+    expect(() => parseConfig({ NODE_ENV: 'production' })).toThrow();
+  });
 });
