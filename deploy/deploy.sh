@@ -14,6 +14,8 @@ docker save "vikkaa-web:$TAG" vikkaa-web:latest | gzip | ssh "$HOST" 'gunzip | s
 scp -q deploy/docker-compose.prod.yml deploy/backup.sh "$HOST:$APP/deploy/"
 
 ssh "$HOST" "$COMPOSE up -d db"
+# TCP check: during first-boot init Postgres only listens on its socket, so this waits for the real server.
+ssh "$HOST" "for i in \$(seq 60); do $COMPOSE exec -T db pg_isready -q -h 127.0.0.1 && exit 0; sleep 2; done; echo 'db not ready'; exit 1"
 bash deploy/remote-db.sh pnpm db:migrate
 ssh "$HOST" "$COMPOSE up -d --no-build web && $COMPOSE ps"
 
