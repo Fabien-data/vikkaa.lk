@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { assets } from '@/db/schema';
+import { assets, evidenceEntries } from '@/db/schema';
+import { EvidenceTable } from '@/components/studio/EvidenceTable';
+import { LogEvidenceForm } from '@/components/studio/LogEvidenceForm';
 import { ActionForm } from '@/components/studio/ActionForm';
 import { statusLabel } from '@/lib/enums';
 import { AssetFields } from '../asset-fields';
@@ -13,6 +15,11 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
   const { id } = await params;
   const [asset] = await db.select().from(assets).where(eq(assets.id, id));
   if (!asset) notFound();
+  const entries = await db.query.evidenceEntries.findMany({
+    where: eq(evidenceEntries.assetId, id),
+    orderBy: desc(evidenceEntries.seq),
+    with: { buyer: true },
+  });
 
   return (
     <div className="grid max-w-4xl gap-6">
@@ -28,6 +35,17 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
         <ActionForm action={saveAsset} submitLabel="Save asset">
           <AssetFields asset={asset} />
         </ActionForm>
+      </section>
+
+      <section className="grid gap-4 rounded-md border bg-background p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-semibold">Buyer record</h2>
+          <Link href={`/checkin/${asset.id}`} target="_blank" className="text-sm underline">
+            Open check-in for a viewing
+          </Link>
+        </div>
+        <EvidenceTable entries={entries} show="buyer" />
+        <LogEvidenceForm assetId={asset.id} vehicle={asset.category === 'vehicle'} />
       </section>
 
       <section id="status" className="rounded-md border bg-background p-5">
