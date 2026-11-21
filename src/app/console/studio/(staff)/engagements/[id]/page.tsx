@@ -11,6 +11,7 @@ import { formatLkr } from '@/lib/money';
 import { stageLabel, statusLabel } from '@/lib/enums';
 import { addComparable, deleteComparable, recalculateFit, saveEngagement } from '../actions';
 import { NoGoForm } from './no-go-form';
+import { DocumentsSection } from './documents-section';
 
 const ANSWER_TEXT: Record<string, string> = {
   timeline: 'Timeline',
@@ -172,6 +173,8 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
           </Field>
         </ActionForm>
       </section>
+
+      <DocumentsSection engagementId={e.id} />
 
       {earlyStage && <NoGoForm engagementId={e.id} />}
     </div>
