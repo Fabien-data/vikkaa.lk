@@ -81,3 +81,19 @@ export const evidenceEntriesRelations = relations(evidenceEntries, ({ one }) => 
 
 export type Buyer = typeof buyers.$inferSelect;
 export type EvidenceEntry = typeof evidenceEntries.$inferSelect;
+
+export const enquiries = pgTable('enquiries', {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  organizationId: org(),
+  assetId: text().references(() => assets.id),
+  buyerId: text()
+    .notNull()
+    .references(() => buyers.id),
+  channel: contactChannel().notNull(),
+  message: text(),
+  createdAt: timestamp().defaultNow().notNull(),
+});
+
+export type Enquiry = typeof enquiries.$inferSelect;
