@@ -8,11 +8,12 @@ mkdir -p "$OUT"
 
 tar -czf "$OUT/files.tgz" -C "$(dirname "$OLD")" "$(basename "$OLD")"
 cp -a /etc/nginx/sites-available "$OUT/nginx-sites-available"
-if [ -f "$OLD/.env" ]; then
+ENVF="$OLD/.env"; [ -f "$ENVF" ] || ENVF="$OLD/current/.env" # release-folder layouts keep it in current/
+if [ -f "$ENVF" ]; then
   # Laravel-style .env: dump the old database if it has one.
-  DB=$(grep -E '^DB_DATABASE=' "$OLD/.env" | cut -d= -f2-)
-  USER=$(grep -E '^DB_USERNAME=' "$OLD/.env" | cut -d= -f2-)
-  PASS=$(grep -E '^DB_PASSWORD=' "$OLD/.env" | cut -d= -f2-)
+  DB=$(grep -E '^DB_DATABASE=' "$ENVF" | cut -d= -f2-)
+  USER=$(grep -E '^DB_USERNAME=' "$ENVF" | cut -d= -f2-)
+  PASS=$(grep -E '^DB_PASSWORD=' "$ENVF" | cut -d= -f2-)
   if [ -n "$DB" ]; then
     MYSQL_PWD="$PASS" mysqldump -u "$USER" "$DB" | gzip > "$OUT/db.sql.gz" || echo "Database dump failed; files are still archived."
   fi

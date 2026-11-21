@@ -1,13 +1,17 @@
-# Production on the VPS. Run from the repo root:
-#   docker compose -f deploy/docker-compose.prod.yml up -d web db
+# Production on the shared VPS. The image is built on the dev machine and shipped (see deploy/deploy.sh);
+# nothing is compiled on the server. Run from /srv/vikkaa/app:
+#   sudo docker compose -f deploy/docker-compose.prod.yml up -d --no-build web db
+name: vikkaa
+
 services:
   web:
-    build: { context: .., dockerfile: deploy/Dockerfile, target: runner }
+    image: vikkaa-web:latest
     env_file: ../.env.production
     environment:
       STORAGE_DIR: /data/storage
     ports:
-      - "127.0.0.1:3000:3000"
+      # 3000 is taken by another site on this server.
+      - "127.0.0.1:3020:3000"
     volumes:
       - /srv/vikkaa/storage:/data/storage
     depends_on: [db]
@@ -16,20 +20,12 @@ services:
   db:
     image: postgres:17
     env_file: ../.env.production
+    ports:
+      # Localhost only: migrations, seed and staff accounts run from the dev machine through an SSH tunnel (deploy/remote-db.sh).
+      - "127.0.0.1:5442:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
-
-  # One-off jobs: docker compose -f deploy/docker-compose.prod.yml --profile tools run --rm tools pnpm db:migrate
-  tools:
-    build: { context: .., dockerfile: deploy/Dockerfile, target: builder }
-    env_file: ../.env.production
-    environment:
-      STORAGE_DIR: /data/storage
-    volumes:
-      - /srv/vikkaa/storage:/data/storage
-    depends_on: [db]
-    profiles: [tools]
 
 volumes:
   pgdata:
