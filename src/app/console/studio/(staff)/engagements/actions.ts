@@ -7,6 +7,7 @@ import { clients, comparables, engagements, assets } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
 import { scoreFit, type IntakeAnswers } from '@/server/fit-scorer';
 import { rangeFor } from '@/server/area-prices';
+import { advanceEngagement } from '@/server/pipeline';
 import { whatsappLink } from '@/lib/whatsapp';
 import { ENGAGEMENT_TYPES, type EngagementType } from '@/lib/enums';
 import { COMMISSION_BP, DEFAULT_EXCLUSIVE_DAYS, DEFAULT_FOLLOW_ON_MONTHS } from '@/lib/rules';
@@ -72,14 +73,9 @@ export async function recalculateFit(engagementId: string): Promise<ActionResult
   return { ok: true };
 }
 
-// The stage change moves into Pipeline.advanceEngagement in Task 7.
 export async function markNoGo(engagementId: string, reason: string, priceRead: string): Promise<{ whatsapp: string }> {
   await requireStaff();
-  if (!reason.trim()) throw new Error('A reason is required');
-  await db
-    .update(engagements)
-    .set({ stage: 'no_go', noGoReason: reason.trim(), priceRead: priceRead.trim() || null })
-    .where(eq(engagements.id, engagementId));
+  await advanceEngagement(engagementId, 'no_go', { reason, priceRead });
   const engagement = await db.query.engagements.findFirst({ where: eq(engagements.id, engagementId), with: { client: true } });
   revalidatePath(`/studio/engagements/${engagementId}`);
   return { whatsapp: whatsappLink(engagement!.client.phone, priceRead.trim()) };

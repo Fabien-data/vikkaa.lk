@@ -6,7 +6,8 @@ import { assets } from '@/db/schema';
 import { ActionForm } from '@/components/studio/ActionForm';
 import { statusLabel } from '@/lib/enums';
 import { AssetFields } from '../asset-fields';
-import { movePhoto, removePhoto, saveAsset, uploadAssetPhotos } from '../actions';
+import { Field, inputClass } from '@/components/studio/Field';
+import { changeAssetStatus, movePhoto, removePhoto, saveAsset, uploadAssetPhotos } from '../actions';
 
 export default async function AssetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -26,6 +27,28 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
       <section className="rounded-md border bg-background p-5">
         <ActionForm action={saveAsset} submitLabel="Save asset">
           <AssetFields asset={asset} />
+        </ActionForm>
+      </section>
+
+      <section id="status" className="rounded-md border bg-background p-5">
+        <h2 className="mb-3 font-semibold">Status</h2>
+        <ActionForm action={changeAssetStatus} submitLabel="Change status" className="grid gap-3 sm:grid-cols-3 sm:items-end">
+          <input type="hidden" name="assetId" value={asset.id} />
+          <Field label="Move to">
+            <select name="status" className={inputClass} defaultValue="">
+              <option value="" disabled>
+                Choose
+              </option>
+              {(['live', 'under_offer', 'sold', 'expired', 'withdrawn'] as const).map((s) => (
+                <option key={s} value={s}>
+                  {statusLabel(s)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Sold price (Rs)" hint="Only when marking sold">
+            <input name="soldPriceRupees" className={inputClass} />
+          </Field>
         </ActionForm>
       </section>
 

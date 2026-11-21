@@ -10,7 +10,7 @@ export function NoGoForm({ engagementId }: { engagementId: string }) {
   const [pending, start] = useTransition();
 
   return (
-    <section className="rounded-md border border-red-200 bg-background p-5">
+    <section id="no-go" className="rounded-md border border-red-200 bg-background p-5">
       <h2 className="mb-3 font-semibold">Not going ahead?</h2>
       <form
         className="grid gap-3"

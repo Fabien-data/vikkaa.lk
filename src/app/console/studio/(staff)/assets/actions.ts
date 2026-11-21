@@ -7,7 +7,8 @@ import { db } from '@/db';
 import { assets, type Asset } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
 import { putPublicImage } from '@/server/storage';
-import { ASSET_KINDS, kindCategory, type AssetKind } from '@/lib/enums';
+import { ASSET_KINDS, kindCategory, type AssetKind, type AssetStatus } from '@/lib/enums';
+import { advanceAsset, InvalidTransitionError } from '@/server/pipeline';
 import { DISTRICTS } from '@/lib/rules';
 import { slugFor } from '@/lib/slug';
 import { formCents, formOptionalCents, formText, FormError, type ActionResult } from '@/lib/form';
@@ -119,4 +120,19 @@ export async function removePhoto(assetId: string, index: number): Promise<void>
   const photos = (asset?.photos ?? []).filter((_, i) => i !== index);
   await db.update(assets).set({ photos }).where(eq(assets.id, assetId));
   revalidatePath(`/studio/assets/${assetId}`);
+}
+
+export async function changeAssetStatus(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  await requireStaff();
+  const assetId = String(form.get('assetId'));
+  const to = String(form.get('status')) as AssetStatus;
+  try {
+    const soldPriceCents = to === 'sold' ? formCents(form, 'soldPriceRupees', 'Sold price') : undefined;
+    await advanceAsset(assetId, to, { soldPriceCents });
+  } catch (err) {
+    if (err instanceof FormError || err instanceof InvalidTransitionError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/studio/assets/${assetId}`);
+  return { ok: true };
 }
