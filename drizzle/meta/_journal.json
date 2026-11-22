@@ -64,6 +64,13 @@
       "when": 1795358842072,
       "tag": "0008_fluffy_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795359592325,
+      "tag": "0009_petite_human_robot",
+      "breakpoints": true
     }
   ]
 }

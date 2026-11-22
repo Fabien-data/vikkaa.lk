@@ -15,6 +15,8 @@ import { NoGoForm } from './no-go-form';
 import { DocumentsSection } from './documents-section';
 import { SignatoriesSection } from './signatories-section';
 import { BookingsSection } from './bookings-section';
+import { NotesPanel } from '@/components/studio/NotesPanel';
+import { TasksPanel } from '@/components/studio/TasksPanel';
 
 const ANSWER_TEXT: Record<string, string> = {
   timeline: 'Timeline',
@@ -185,6 +187,11 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
       <SignatoriesSection engagementId={e.id} signed={Boolean(e.signedAt)} />
 
       {earlyStage && <NoGoForm engagementId={e.id} />}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <NotesPanel subject={{ type: 'engagement', id: e.id }} />
+        <TasksPanel subject={{ type: 'engagement', id: e.id }} />
+      </div>
     </div>
   );
 }

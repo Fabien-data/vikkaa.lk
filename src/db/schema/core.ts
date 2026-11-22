@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, pgEnum, text, integer, bigint, boolean, jsonb, timestamp, date, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, text, integer, bigint, boolean, jsonb, timestamp, date, uniqueIndex, index } from 'drizzle-orm/pg-core';
 import {
   CLIENT_TYPES,
   ENGAGEMENT_TYPES,
@@ -9,7 +9,7 @@ import {
   ASSET_STATUSES,
 } from '@/lib/enums';
 import { DEFAULT_ORG_ID } from '@/lib/rules';
-import { organization } from './auth';
+import { organization, user } from './auth';
 
 export const clientType = pgEnum('client_type', CLIENT_TYPES);
 export const engagementType = pgEnum('engagement_type', ENGAGEMENT_TYPES);
@@ -153,6 +153,41 @@ export const bookings = pgTable('bookings', {
   ...timestamps,
 });
 
+/** What a note or task is about. subjectId points at that table's row (no FK: it spans four tables). */
+export const subjectType = pgEnum('subject_type', ['client', 'engagement', 'asset', 'buyer']);
+
+export const notes = pgTable(
+  'notes',
+  {
+    id: id(),
+    organizationId: org(),
+    subjectType: subjectType().notNull(),
+    subjectId: text().notNull(),
+    userId: text()
+      .notNull()
+      .references(() => user.id),
+    body: text().notNull(),
+    ...timestamps,
+  },
+  (t) => [index('notes_subject_idx').on(t.subjectType, t.subjectId)],
+);
+
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: id(),
+    organizationId: org(),
+    subjectType: subjectType().notNull(),
+    subjectId: text().notNull(),
+    title: text().notNull(),
+    dueAt: timestamp({ withTimezone: true }),
+    assignedUserId: text().references(() => user.id),
+    doneAt: timestamp({ withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [index('tasks_subject_idx').on(t.subjectType, t.subjectId)],
+);
+
 export const clientsRelations = relations(clients, ({ many }) => ({ engagements: many(engagements) }));
 export const engagementsRelations = relations(engagements, ({ one, many }) => ({
   client: one(clients, { fields: [engagements.clientId], references: [clients.id] }),
@@ -172,3 +207,6 @@ export type Asset = typeof assets.$inferSelect;
 export type AreaPrice = typeof areaPrices.$inferSelect;
 export type Comparable = typeof comparables.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
+export type Note = typeof notes.$inferSelect;
+export type Task = typeof tasks.$inferSelect;
+export type SubjectType = (typeof subjectType.enumValues)[number];

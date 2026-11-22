@@ -9,6 +9,8 @@ import { Field, inputClass } from '@/components/studio/Field';
 import { EvidenceTable } from '@/components/studio/EvidenceTable';
 import { LogEvidenceForm } from '@/components/studio/LogEvidenceForm';
 import { saveBuyer } from '../actions';
+import { NotesPanel } from '@/components/studio/NotesPanel';
+import { TasksPanel } from '@/components/studio/TasksPanel';
 
 const rupees = (c: number | null) => (c ? String(c / 100) : '');
 
@@ -77,6 +79,11 @@ export default async function BuyerPage({ params }: { params: Promise<{ id: stri
         <EvidenceTable entries={entries} show="asset" />
         {active.length > 0 && <LogEvidenceForm buyerId={b.id} assetOptions={active} />}
       </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <NotesPanel subject={{ type: 'buyer', id: b.id }} />
+        <TasksPanel subject={{ type: 'buyer', id: b.id }} />
+      </div>
     </div>
   );
 }

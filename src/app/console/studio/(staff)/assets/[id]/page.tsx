@@ -11,6 +11,8 @@ import { statusLabel } from '@/lib/enums';
 import { AssetFields } from '../asset-fields';
 import { Field, inputClass } from '@/components/studio/Field';
 import { changeAssetStatus, movePhoto, removePhoto, saveAsset, uploadAssetPhotos } from '../actions';
+import { NotesPanel } from '@/components/studio/NotesPanel';
+import { TasksPanel } from '@/components/studio/TasksPanel';
 
 export default async function AssetPage({ params }: { params: Promise<{ id: string }> }) {
   await requireStaff();
@@ -119,6 +121,11 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
           <input type="file" name="photos" accept="image/*" multiple className="text-sm" />
         </ActionForm>
       </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <NotesPanel subject={{ type: 'asset', id: asset.id }} />
+        <TasksPanel subject={{ type: 'asset', id: asset.id }} />
+      </div>
     </div>
   );
 }

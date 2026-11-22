@@ -13,6 +13,8 @@ import { ClientFields } from '../client-fields';
 import { portalLink, saveClient } from '../actions';
 import { ShareLinkButton } from '@/components/studio/ShareLinkButton';
 import { createEngagement } from '../../engagements/actions';
+import { NotesPanel } from '@/components/studio/NotesPanel';
+import { TasksPanel } from '@/components/studio/TasksPanel';
 
 export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
   await requireStaff();
@@ -65,6 +67,11 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
           </Button>
         </form>
       </section>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <NotesPanel subject={{ type: 'client', id: client.id }} />
+        <TasksPanel subject={{ type: 'client', id: client.id }} />
+      </div>
     </div>
   );
 }
