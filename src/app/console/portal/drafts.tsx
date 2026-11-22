@@ -1,6 +1,6 @@
 import { ActionForm } from '@/components/studio/ActionForm';
 import { inputClass } from '@/components/studio/Field';
-import type { Photo } from '@/db/schema';
+import type { ContentDraft, Photo } from '@/db/schema';
 import { answerDraft } from './actions';
 
 type Draft = {
@@ -9,7 +9,7 @@ type Draft = {
   files: Photo[];
   embed: string | null;
   note: string | null;
-  status: 'pending' | 'approved' | 'changes_requested';
+  status: ContentDraft['status'];
   clientComment: string | null;
 };
 

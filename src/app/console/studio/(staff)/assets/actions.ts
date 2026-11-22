@@ -11,7 +11,7 @@ import { ASSET_KINDS, kindCategory, type AssetKind, type AssetStatus } from '@/l
 import { advanceAsset, InvalidTransitionError } from '@/server/pipeline';
 import { DISTRICTS } from '@/lib/rules';
 import { slugFor } from '@/lib/slug';
-import { submitDraft, ContentError, type DraftKind } from '@/server/content-approval';
+import { addDraftToListing, submitDraft, withdrawDraft, ContentError, type DraftKind } from '@/server/content-approval';
 import { formCents, formOptionalCents, formText, FormError, type ActionResult } from '@/lib/form';
 
 const DETAIL_FIELDS = {
@@ -159,4 +159,16 @@ export async function submitContentDraft(_prev: ActionResult, form: FormData): P
   }
   revalidatePath(`/studio/assets/${assetId}`);
   return { ok: true };
+}
+
+export async function withdrawContentDraft(assetId: string, draftId: string): Promise<void> {
+  await requireStaff();
+  await withdrawDraft(draftId);
+  revalidatePath(`/studio/assets/${assetId}`);
+}
+
+export async function addContentDraftToListing(assetId: string, draftId: string): Promise<void> {
+  await requireStaff();
+  await addDraftToListing(draftId);
+  revalidatePath(`/studio/assets/${assetId}`);
 }

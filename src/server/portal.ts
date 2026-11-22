@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '@/db';
 import { assets, clients, contentDrafts, documents, engagements, enquiries, signatories, type DocumentType } from '@/db/schema';
 import { config } from '@/lib/config';
@@ -26,7 +26,11 @@ export async function getPortalDashboard(clientId: string) {
     : [];
   const enquiryCount = new Map(counts.map((c) => [c.assetId, c.n]));
   const drafts = assetIds.length
-    ? await db.select().from(contentDrafts).where(inArray(contentDrafts.assetId, assetIds)).orderBy(desc(contentDrafts.createdAt))
+    ? await db
+        .select()
+        .from(contentDrafts)
+        .where(and(inArray(contentDrafts.assetId, assetIds), ne(contentDrafts.status, 'withdrawn')))
+        .orderBy(desc(contentDrafts.createdAt))
     : [];
 
   const engagementsOut = [];

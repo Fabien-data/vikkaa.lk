@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { clients, engagements, assets, contentDrafts } from '@/db/schema';
-import { submitDraft, decideDraft, isReadyToGoLive, ContentError } from '@/server/content-approval';
+import { submitDraft, decideDraft, isReadyToGoLive, withdrawDraft, addDraftToListing, ContentError } from '@/server/content-approval';
 import { advanceAsset, InvalidTransitionError } from '@/server/pipeline';
 import { getPortalDashboard } from '@/server/portal';
 
@@ -91,5 +91,39 @@ describe('content approval', () => {
     const drafts = list.flatMap((e) => e.assets).flatMap((a) => a.drafts);
     expect(drafts).toHaveLength(1);
     expect(drafts[0]).toMatchObject({ kind: 'video', note: 'Cut 1', status: 'pending', embed: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ' });
+  });
+
+  it('staff can withdraw a draft the client asked to drop or never answered, and the client can no longer answer it', async () => {
+    const { clientId, assetId } = await seed();
+    const reel = await submitDraft(assetId, { kind: 'reel', youtubeUrl: 'https://youtu.be/dQw4w9WgXcQ' });
+    await decideDraft(clientId, reel.id, 'changes_requested', 'Skip the reel');
+    const photos = await submitDraft(assetId, { kind: 'photo_set', files: [photo] });
+    expect(await isReadyToGoLive(assetId)).toBe(false);
+
+    await withdrawDraft(reel.id);
+    await withdrawDraft(photos.id);
+    expect(await statusOf(photos.id)).toMatchObject({ status: 'withdrawn' });
+    expect(await isReadyToGoLive(assetId)).toBe(true);
+    await expect(decideDraft(clientId, photos.id, 'approved')).rejects.toBeInstanceOf(ContentError);
+    const { engagements: list } = await getPortalDashboard(clientId);
+    expect(list.flatMap((e) => e.assets).flatMap((a) => a.drafts)).toEqual([]);
+    await advanceAsset(assetId, 'live');
+  });
+
+  it('an approved draft goes onto the listing without uploading it again', async () => {
+    const { clientId, assetId } = await seed();
+    const extra = { src: '/media/drafts/y-1600.webp', srcSet: 'y' };
+    const set = await submitDraft(assetId, { kind: 'photo_set', files: [photo, extra] });
+    const video = await submitDraft(assetId, { kind: 'video', youtubeUrl: 'https://youtu.be/dQw4w9WgXcQ' });
+    await expect(addDraftToListing(set.id)).rejects.toBeInstanceOf(ContentError); // not approved yet
+
+    await decideDraft(clientId, set.id, 'approved');
+    await decideDraft(clientId, video.id, 'approved');
+    await addDraftToListing(set.id);
+    await addDraftToListing(set.id); // twice adds nothing new
+    await addDraftToListing(video.id);
+    const [a] = await db.select().from(assets).where(eq(assets.id, assetId));
+    expect(a.photos.map((p) => p.src)).toEqual([photo.src, extra.src]); // seed already had `photo`
+    expect(a.youtubeUrl).toBe('https://youtu.be/dQw4w9WgXcQ');
   });
 });

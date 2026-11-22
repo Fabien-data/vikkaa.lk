@@ -154,7 +154,7 @@ export const bookings = pgTable('bookings', {
 });
 
 export const draftKind = pgEnum('draft_kind', ['photo_set', 'video', 'reel']);
-export const draftStatus = pgEnum('draft_status', ['pending', 'approved', 'changes_requested']);
+export const draftStatus = pgEnum('draft_status', ['pending', 'approved', 'changes_requested', 'withdrawn']);
 
 /** Content shown to the client for approval before it goes live. A re-edit is a new draft. */
 export const contentDrafts = pgTable('content_drafts', {
