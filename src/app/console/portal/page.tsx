@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { forbidden } from 'next/navigation';
 import { getPortalClientId } from '@/server/portal-session';
 import { getPortalDashboard } from '@/server/portal';
+import { Drafts } from './drafts';
 
 export const metadata: Metadata = { title: 'Your Vikkaa portal', robots: { index: false } };
 
@@ -41,6 +42,7 @@ export default async function PortalPage() {
                     See your listing
                   </a>
                 )}
+                <Drafts drafts={a.drafts} />
               </li>
             ))}
           </ul>

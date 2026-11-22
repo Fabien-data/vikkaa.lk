@@ -47,7 +47,7 @@ describe('client portal', () => {
 
   it('a tampered or expired link returns 403 and no session', async () => {
     const { c } = await seedClient('+94770000002');
-    const tampered = signPath(`/portal/login/${c.id}`, 3600).replace(/sig=./, 'sig=0');
+    const tampered = signPath(`/portal/login/${c.id}`, 3600).replace(/sig=(.)/, (_, ch) => `sig=${ch === '0' ? '1' : '0'}`); // always change a character
     expect((await login(req(tampered), ctx({ clientId: c.id }))).status).toBe(403);
     const expired = signPath(`/portal/login/${c.id}`, -10);
     expect((await login(req(expired), ctx({ clientId: c.id }))).status).toBe(403);

@@ -153,6 +153,26 @@ export const bookings = pgTable('bookings', {
   ...timestamps,
 });
 
+export const draftKind = pgEnum('draft_kind', ['photo_set', 'video', 'reel']);
+export const draftStatus = pgEnum('draft_status', ['pending', 'approved', 'changes_requested']);
+
+/** Content shown to the client for approval before it goes live. A re-edit is a new draft. */
+export const contentDrafts = pgTable('content_drafts', {
+  id: id(),
+  organizationId: org(),
+  assetId: text()
+    .notNull()
+    .references(() => assets.id),
+  kind: draftKind().notNull(),
+  files: jsonb().$type<Photo[]>().notNull().default([]),
+  youtubeUrl: text(),
+  note: text(),
+  status: draftStatus().notNull().default('pending'),
+  clientComment: text(),
+  decidedAt: timestamp({ withTimezone: true }),
+  ...timestamps,
+});
+
 /** What a note or task is about. subjectId points at that table's row (no FK: it spans four tables). */
 export const subjectType = pgEnum('subject_type', ['client', 'engagement', 'asset', 'buyer']);
 
@@ -207,6 +227,7 @@ export type Asset = typeof assets.$inferSelect;
 export type AreaPrice = typeof areaPrices.$inferSelect;
 export type Comparable = typeof comparables.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
+export type ContentDraft = typeof contentDrafts.$inferSelect;
 export type Note = typeof notes.$inferSelect;
 export type Task = typeof tasks.$inferSelect;
 export type SubjectType = (typeof subjectType.enumValues)[number];

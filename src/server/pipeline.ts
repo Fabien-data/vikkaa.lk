@@ -2,6 +2,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '@/db';
 import { assets, engagements, type Asset } from '@/db/schema';
 import type { AssetStatus, EngagementStage } from '@/lib/enums';
+import { isReadyToGoLive } from '@/server/content-approval';
 
 export class InvalidTransitionError extends Error {}
 
@@ -96,6 +97,7 @@ export async function advanceAsset(id: string, to: AssetStatus, data: { soldPric
   if (to === 'live' && asset.status === 'production') {
     const missing = missingForLive(asset);
     if (missing.length) throw new InvalidTransitionError(`Cannot go live yet, missing: ${missing.join(', ')}`);
+    if (!(await isReadyToGoLive(id))) throw new InvalidTransitionError('Cannot go live yet: the client has not approved the latest content');
     await db.update(assets).set({ status: 'live', publishedAt: asset.publishedAt ?? new Date() }).where(eq(assets.id, id));
     return;
   }

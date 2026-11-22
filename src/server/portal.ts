@@ -1,8 +1,9 @@
 import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/db';
-import { assets, clients, documents, engagements, enquiries, signatories, type DocumentType } from '@/db/schema';
+import { assets, clients, contentDrafts, documents, engagements, enquiries, signatories, type DocumentType } from '@/db/schema';
 import { config } from '@/lib/config';
 import { isPublicStatus, stageLabel, statusLabel } from '@/lib/enums';
+import { youtubeEmbed } from '@/lib/youtube';
 
 /** Documents a client may see in their portal. Draft agreements and scans stay internal. */
 export const PORTAL_DOCUMENT_TYPES: DocumentType[] = ['proposal', 'invoice', 'receipt', 'agreement_signed'];
@@ -24,6 +25,9 @@ export async function getPortalDashboard(clientId: string) {
         .groupBy(enquiries.assetId)
     : [];
   const enquiryCount = new Map(counts.map((c) => [c.assetId, c.n]));
+  const drafts = assetIds.length
+    ? await db.select().from(contentDrafts).where(inArray(contentDrafts.assetId, assetIds)).orderBy(desc(contentDrafts.createdAt))
+    : [];
 
   const engagementsOut = [];
   for (const e of rows) {
@@ -45,6 +49,9 @@ export async function getPortalDashboard(clientId: string) {
         status: statusLabel(a.status),
         publicUrl: isPublicStatus(a.status) && a.publishedAt ? `${config.publicUrl}/${a.category}/${a.slug}` : null,
         enquiries: enquiryCount.get(a.id) ?? 0,
+        drafts: drafts
+          .filter((d) => d.assetId === a.id)
+          .map((d) => ({ id: d.id, kind: d.kind, files: d.files, embed: youtubeEmbed(d.youtubeUrl), note: d.note, status: d.status, clientComment: d.clientComment })),
       })),
       documents: docs,
       signatories: people.map((p) => ({ name: p.name, signed: Boolean(p.signedAt) })),

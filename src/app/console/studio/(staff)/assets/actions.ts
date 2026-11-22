@@ -11,6 +11,7 @@ import { ASSET_KINDS, kindCategory, type AssetKind, type AssetStatus } from '@/l
 import { advanceAsset, InvalidTransitionError } from '@/server/pipeline';
 import { DISTRICTS } from '@/lib/rules';
 import { slugFor } from '@/lib/slug';
+import { submitDraft, ContentError, type DraftKind } from '@/server/content-approval';
 import { formCents, formOptionalCents, formText, FormError, type ActionResult } from '@/lib/form';
 
 const DETAIL_FIELDS = {
@@ -131,6 +132,29 @@ export async function changeAssetStatus(_prev: ActionResult, form: FormData): Pr
     await advanceAsset(assetId, to, { soldPriceCents });
   } catch (err) {
     if (err instanceof FormError || err instanceof InvalidTransitionError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/studio/assets/${assetId}`);
+  return { ok: true };
+}
+
+export async function submitContentDraft(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  await requireStaff();
+  const assetId = String(form.get('assetId'));
+  const kind = String(form.get('kind')) as DraftKind;
+  if (!['photo_set', 'video', 'reel'].includes(kind)) return { error: 'Choose what you are sending' };
+  const files = kind === 'photo_set' ? form.getAll('photos').filter((f): f is File => f instanceof File && f.size > 0) : [];
+  for (const f of files) {
+    if (!f.type.startsWith('image/')) return { error: `${f.name} is not an image` };
+    if (f.size > MAX_PHOTO_BYTES) return { error: `${f.name} is larger than 15 MB` };
+  }
+  try {
+    // shortcut: draft photos sit under public/media behind an unguessable path; move to a signed route if drafts must stay strictly private.
+    const photos = [];
+    for (const f of files) photos.push(await putPublicImage(`drafts/${assetId}/${randomUUID()}`, Buffer.from(await f.arrayBuffer())));
+    await submitDraft(assetId, { kind, files: photos, youtubeUrl: formText(form, 'youtubeUrl'), note: formText(form, 'note') });
+  } catch (err) {
+    if (err instanceof ContentError) return { error: err.message };
     throw err;
   }
   revalidatePath(`/studio/assets/${assetId}`);

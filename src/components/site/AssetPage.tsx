@@ -9,6 +9,7 @@ import type { AssetCategory } from '@/lib/enums';
 import { assetJsonLd, getPublicAsset, publicPath, type PublicAsset } from '@/server/public-assets';
 import { EnquiryForm } from './EnquiryForm';
 import { Reveal } from './motion/Reveal';
+import { youtubeEmbed } from '@/lib/youtube';
 
 const FACTS: Record<AssetCategory, [string, string, string?][]> = {
   property: [
@@ -30,11 +31,6 @@ const TRUST = [
   ['Filmed by us', 'The photos and film were shot by our own crew, not the seller’s phone.'],
   ['You deal with Vikkaa', 'Every question, viewing and offer goes through us, not the seller.'],
 ] as const;
-
-function youtubeEmbed(url: string): string | null {
-  const id = url.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/)?.[1];
-  return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
-}
 
 export async function assetMetadata(category: AssetCategory, slug: string): Promise<Metadata> {
   const a = await getPublicAsset(category, slug);
