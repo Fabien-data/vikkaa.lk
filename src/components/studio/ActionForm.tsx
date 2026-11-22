@@ -30,7 +30,12 @@ export function ActionForm({
             {state.error}
           </p>
         )}
-        {state?.ok && !pending && (
+        {state?.ok && !pending && state.warning && (
+          <p role="status" className="text-sm text-amber-700">
+            {state.warning}
+          </p>
+        )}
+        {state?.ok && !pending && !state.warning && (
           <p role="status" className="text-sm text-emerald-700">
             Saved
           </p>

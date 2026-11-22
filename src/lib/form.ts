@@ -1,9 +1,17 @@
 import { rupeesToCents } from '@/lib/money';
 
-export type ActionResult = { ok?: true; error?: string } | undefined;
+export type ActionResult = { ok?: true; error?: string; warning?: string } | undefined;
 
 /** A user-facing validation problem in a Studio form. */
 export class FormError extends Error {}
+
+/** Studio datetime-local inputs are Sri Lanka time (UTC+05:30); the server runs in UTC. Empty means now. */
+export function sriLankaTime(value: string | null): Date {
+  if (!value) return new Date();
+  const d = new Date(`${value}:00+05:30`);
+  if (Number.isNaN(d.getTime())) throw new FormError('Enter a valid date and time');
+  return d;
+}
 
 export function formText(form: FormData, name: string): string | null {
   const v = String(form.get(name) ?? '').trim();

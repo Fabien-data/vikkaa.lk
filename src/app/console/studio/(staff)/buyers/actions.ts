@@ -7,15 +7,7 @@ import { requireStaff } from '@/server/auth-guard';
 import { appendEvidence, EvidenceError } from '@/server/evidence-log';
 import { upsertBuyerByPhone } from '@/server/buyers';
 import { normalisePhone } from '@/lib/phone';
-import { formCents, formOptionalCents, formText, FormError, type ActionResult } from '@/lib/form';
-
-/** Studio datetime-local inputs are Sri Lanka time (UTC+05:30); the server runs in UTC. */
-function sriLankaTime(value: string | null): Date {
-  if (!value) return new Date();
-  const d = new Date(`${value}:00+05:30`);
-  if (Number.isNaN(d.getTime())) throw new FormError('Enter a valid date and time');
-  return d;
-}
+import { formCents, formOptionalCents, formText, sriLankaTime, FormError, type ActionResult } from '@/lib/form';
 
 async function guard(work: () => Promise<void>, paths: string[]): Promise<ActionResult> {
   try {

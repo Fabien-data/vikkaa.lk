@@ -14,6 +14,7 @@ import { addComparable, deleteComparable, recalculateFit, saveEngagement } from 
 import { NoGoForm } from './no-go-form';
 import { DocumentsSection } from './documents-section';
 import { SignatoriesSection } from './signatories-section';
+import { BookingsSection } from './bookings-section';
 
 const ANSWER_TEXT: Record<string, string> = {
   timeline: 'Timeline',
@@ -134,6 +135,8 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
           ))}
         </ul>
       </section>
+
+      <BookingsSection engagementId={e.id} assets={e.assets} />
 
       <section className="rounded-md border bg-background p-5">
         <h2 className="mb-3 font-semibold">Comparables (for the market report)</h2>

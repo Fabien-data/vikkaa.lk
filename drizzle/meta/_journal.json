@@ -57,6 +57,13 @@
       "when": 1795265923365,
       "tag": "0007_jittery_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795358842072,
+      "tag": "0008_fluffy_sentry",
+      "breakpoints": true
     }
   ]
 }

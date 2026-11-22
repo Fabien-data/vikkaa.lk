@@ -136,6 +136,23 @@ export const comparables = pgTable('comparables', {
   ...timestamps,
 });
 
+export const bookingType = pgEnum('booking_type', ['visit', 'shoot']);
+
+export const bookings = pgTable('bookings', {
+  id: id(),
+  organizationId: org(),
+  engagementId: text()
+    .notNull()
+    .references(() => engagements.id),
+  assetId: text().references(() => assets.id),
+  type: bookingType().notNull(),
+  startsAt: timestamp({ withTimezone: true }).notNull(),
+  durationMinutes: integer().notNull(),
+  area: text().notNull(),
+  notes: text(),
+  ...timestamps,
+});
+
 export const clientsRelations = relations(clients, ({ many }) => ({ engagements: many(engagements) }));
 export const engagementsRelations = relations(engagements, ({ one, many }) => ({
   client: one(clients, { fields: [engagements.clientId], references: [clients.id] }),
@@ -154,3 +171,4 @@ export type Engagement = typeof engagements.$inferSelect;
 export type Asset = typeof assets.$inferSelect;
 export type AreaPrice = typeof areaPrices.$inferSelect;
 export type Comparable = typeof comparables.$inferSelect;
+export type Booking = typeof bookings.$inferSelect;

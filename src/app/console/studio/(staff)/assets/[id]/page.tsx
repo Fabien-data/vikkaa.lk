@@ -31,6 +31,9 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-semibold">{asset.title}</h1>
         <span className="rounded bg-muted px-2 py-0.5 text-sm">{statusLabel(asset.status)}</span>
+        <Link href={`/studio/assets/${asset.id}/shot-list`} className="ml-auto text-sm underline">
+          Shot list
+        </Link>
       </div>
 
       <section className="rounded-md border bg-background p-5">
