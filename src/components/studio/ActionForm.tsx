@@ -22,7 +22,7 @@ export function ActionForm({
     <form action={formAction} className={className} encType={encType}>
       {children}
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
           {pending ? 'Saving…' : submitLabel}
         </Button>
         {state?.error && (

@@ -38,12 +38,12 @@ export default async function BuyersPage({ searchParams }: { searchParams: Promi
       <table className="w-full rounded-md border bg-background text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
-            <th className="p-3">Buyer</th>
-            <th className="p-3">Phone</th>
-            <th className="p-3">Budget up to</th>
-            <th className="p-3">Areas</th>
-            <th className="p-3">Vikkaa Circle</th>
-            <th className="p-3">Contacts</th>
+            <th scope="col" className="p-3">Buyer</th>
+            <th scope="col" className="p-3">Phone</th>
+            <th scope="col" className="p-3">Budget up to</th>
+            <th scope="col" className="p-3">Areas</th>
+            <th scope="col" className="p-3">Vikkaa Circle</th>
+            <th scope="col" className="p-3">Contacts</th>
           </tr>
         </thead>
         <tbody>

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vikkaa.lk: Court Brief, 22 Nov 2026</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  :root { --ink:#0b281e; --deep:#0e3627; --green:#1d6649; --accent:#3aa876; --mint:#b5e8cd; --paper:#f6f5f1; --soft:#EDF1EE; --grey:#4b6156; --mute:#6E8579; --red:#c8202a; --amber:#b7791f; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body { font-family: "Segoe UI", Inter, Arial, sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.45; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1, h2, h3 { margin: 0; line-height: 1.15; }
+  h2 { font-size: 17pt; color: var(--ink); margin-bottom: 3mm; }
+  h2 .num { color: var(--accent); margin-right: 2mm; }
+  h3 { font-size: 11pt; margin: 3.5mm 0 1.5mm; color: var(--green); }
+  p { margin: 0 0 2mm; }
+  ul, ol { margin: 0 0 2mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .kicker { font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+  .lede { font-size: 10.5pt; color: var(--grey); margin-bottom: 4mm; }
+  .tag { display:inline-block; font-size:7.5pt; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding: .6mm 2mm; border-radius: 1mm; }
+  .tag.court { background: var(--ink); color: #fff; }
+  .tag.mine { background: var(--mint); color: var(--ink); }
+
+  /* cover */
+  .cover-top { display:flex; justify-content:space-between; align-items:center; margin-bottom: 8mm; }
+  .cover-top img { height: 11mm; }
+  .cover-title { font-size: 26pt; font-weight: 800; letter-spacing: -.01em; margin: 2mm 0 2mm; }
+  .verdict { background: var(--ink); color: #fff; border-radius: 3mm; padding: 7mm 8mm; margin: 5mm 0 5mm; }
+  .verdict .big { font-size: 34pt; font-weight: 800; letter-spacing: -.01em; }
+  .verdict .big span { color: var(--mint); }
+  .verdict .sub { color: var(--mint); font-size: 11pt; margin-top: 1mm; }
+  .verdict .case { margin-top: 4mm; font-size: 9.5pt; color: #d9e6df; border-top: 1px solid rgba(255,255,255,.2); padding-top: 3mm; }
+  .sentence { border-left: 1.4mm solid var(--accent); background: var(--soft); padding: 4mm 5mm; font-size: 12.5pt; font-weight: 600; margin: 4mm 0; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .grid3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; }
+  .card { border: 1px solid #dfe6e1; border-radius: 2.5mm; padding: 4mm; background: #fff; break-inside: avoid; }
+  .card h4 { margin: 0 0 1.5mm; font-size: 10.5pt; }
+  .card .count { font-size: 8pt; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+  .card.charge { border-top: 1.2mm solid var(--red); }
+  .card.cond { border-top: 1.2mm solid var(--accent); }
+  .note { font-size: 8.5pt; color: var(--mute); }
+
+  /* tables */
+  table { width:100%; border-collapse: collapse; margin: 2mm 0 3mm; font-size: 9.2pt; }
+  th { text-align:left; background: var(--ink); color:#fff; font-weight:600; padding: 2mm 2.5mm; }
+  td { padding: 2mm 2.5mm; border-bottom: 1px solid #e3e9e5; vertical-align: top; }
+  tr { break-inside: avoid; }
+  tr:nth-child(even) td { background: #fafbfa; }
+  .dot { display:inline-block; width: 2.6mm; height: 2.6mm; border-radius: 50%; margin-right: 1.5mm; vertical-align: middle; }
+  .g { background: var(--accent); } .a { background: var(--amber); } .r { background: var(--red); }
+  .fill td:last-child { width: 38%; border-bottom: 1px dashed #9fb3a8; }
+
+  /* swot */
+  .swot { display:grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; }
+  .swot .q { border-radius: 2.5mm; padding: 4mm; break-inside: avoid; }
+  .swot .q h3 { margin-top: 0; font-size: 12pt; }
+  .q.s { background: #e6f4ec; } .q.s h3 { color: var(--green); }
+  .q.w { background: #fbeaea; } .q.w h3 { color: var(--red); }
+  .q.o { background: #eaf1fb; } .q.o h3 { color: #22568f; }
+  .q.t { background: #fbf3e4; } .q.t h3 { color: var(--amber); }
+  .swot li { font-size: 9.2pt; }
+
+  /* timeline */
+  .tl { position: relative; margin-left: 4mm; border-left: .8mm solid var(--mint); padding-left: 6mm; }
+  .tl .step { position: relative; margin-bottom: 3.5mm; break-inside: avoid; }
+  .tl .step::before { content:""; position:absolute; left: -8.4mm; top: 1mm; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: var(--accent); border: .8mm solid #fff; }
+  .tl .step.gate::before { background: var(--ink); width: 4.4mm; height: 4.4mm; left: -8.8mm; }
+  .tl .when { font-weight: 700; font-size: 9.5pt; color: var(--green); }
+  .tl .gatebox { background: var(--ink); color: #fff; border-radius: 2mm; padding: 2.5mm 3.5mm; }
+  .tl .gatebox .when { color: var(--mint); }
+
+  .five { counter-reset: f; list-style: none; padding: 0; }
+  .five li { counter-increment: f; position: relative; padding: 3mm 3mm 3mm 13mm; margin-bottom: 2.5mm; background: var(--soft); border-radius: 2mm; break-inside: avoid; }
+  .five li::before { content: counter(f); position:absolute; left: 3mm; top: 2.6mm; width: 7mm; height: 7mm; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 800; text-align: center; line-height: 7mm; }
+  .footer-note { margin-top: 5mm; font-size: 8pt; color: var(--mute); border-top: 1px solid #e3e9e5; padding-top: 2mm; }
+  .jury td:first-child { width: 22%; font-weight: 600; }
+  .jury td { font-size: 8.6pt; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER + VERDICT -->
+<section class="page">
+  <div class="cover-top">
+    <img src="file:///D:/Vikkaa.lk/public/brand/logo.png" alt="Vikkaa.lk">
+    <div class="kicker">Court brief · 22 November 2026</div>
+  </div>
+  <div class="kicker">For the two co-founders</div>
+  <div class="cover-title">Put on trial: can Vikkaa.lk dominate?</div>
+  <p class="lede">Twelve independent jurors heard a prosecution and a defense, then voted without seeing each other: an accountant, a first-time seller, a competitor, a retired judge, a teenager, an engineer, a small-business owner, a statistician, a parent, an investor, a designer and a lawyer. <span class="tag court">Court</span> pages are their verdict, quoted unchanged. <span class="tag mine">Plan</span> pages are my analysis built from it.</p>
+
+  <div class="verdict">
+    <div class="kicker" style="color:#9fc9b3">The verdict</div>
+    <div class="big">GUILTY, <span>12 to 0</span></div>
+    <div class="sub">The case fails <b>as stated</b>. It should not go ahead the way it is described.</div>
+    <div class="case"><b>The case:</b> "Two co-founders with zero capital will make Vikkaa.lk the best property and vehicle advertising/marketing company: one that dominates in Sri Lanka and is capable of serving international markets as well."</div>
+  </div>
+
+  <p><b>The verdict is on the plan as stated today.</b> Every juror wrote down what would flip their vote, and nearly all of them named the same event: <b>one paying client, under a real contract, before the money runs out.</b></p>
+
+  <div class="sentence">"Stop building; start selling. Set your price, sign one paying client under a real contract, and claim no more than you can prove."<div class="note" style="font-weight:400;margin-top:1mm">The judge's sentence</div></div>
+
+  <h3>Charges that stuck <span class="tag court">Court</span></h3>
+  <div class="grid3">
+    <div class="card charge"><div class="count">7 jurors</div><h4>No cash before the money runs out</h4><p>Nobody has agreed to pay, the fee is "not decided yet", commission waits for a deed signing, and the runway is under 3 months.</p></div>
+    <div class="card charge"><div class="count">6 jurors</div><h4>The claim outruns the evidence</h4><p>"Dominates in Sri Lanka" and international reach rest on zero clients, sales or audience. Even the defense conceded it.</p></div>
+    <div class="card charge"><div class="count">5 jurors</div><h4>Too much trust asked by an unknown firm</h4><p>An exclusive, an upfront fee, commission "no matter who found the buyer" and a 6-month tail, with no case study.</p></div>
+  </div>
+</section>
+
+<!-- PAGE 2: CONDITIONS + DEFENSE + WHERE YOU STAND -->
+<section class="page">
+  <h2><span class="num">01</span>What flips the verdict</h2>
+  <p class="lede">The jury's conditions for acquittal. Meet all three and the case can go back to court with new facts. <span class="tag court">Court</span></p>
+  <div class="grid3">
+    <div class="card cond"><div class="count">8 jurors</div><h4>Set the price and sell it</h4><p>Fix the fee and retainer this week. Pitch dealers and developers until one signs and pays before the runway ends.</p></div>
+    <div class="card cond"><div class="count">8 jurors</div><h4>Shrink the claim</h4><p>One offer: done-for-you property sales in the Western Province. Drop "dominance" and "international" for now.</p></div>
+    <div class="card cond"><div class="count">4 jurors</div><h4>Get the contract drafted</h4><p>A lawyer covers the exclusive, the tail, ad-deposit refunds, and the fee if nothing sells. Decide who pays the lawyer.</p></div>
+  </div>
+
+  <h3>What the defense got right <span class="tag court">Court</span></h3>
+  <ul>
+    <li><b>It's a service, not a marketplace:</b> one signed seller is already a live campaign. This fixes what killed the first attempt, and the prosecution agreed.</li>
+    <li><b>It fits zero capital:</b> the gear is owned, clients fund their own ads, and a fee or retainer is paid before any sale.</li>
+  </ul>
+
+  <h2 style="margin-top:6mm"><span class="num">02</span>Where Vikkaa stands today</h2>
+  <table>
+    <tr><th style="width:26%">Area</th><th>Status</th></tr>
+    <tr><td><span class="dot g"></span>Software</td><td>Live since 21 Nov: intake and fit score, pipeline, PDFs, one-time-code signing, evidence log, portal, content approval, calendar.</td></tr>
+    <tr><td><span class="dot g"></span>Gear and skills</td><td>2 Sony Alpha, 2 DJI drones, lights, phones. Agency-trained marketing and content.</td></tr>
+    <tr><td><span class="dot r"></span>Clients</td><td>None. No seller or dealer has agreed yet.</td></tr>
+    <tr><td><span class="dot r"></span>Audience and brand</td><td>Zero. No following and no name in property or cars.</td></tr>
+    <tr><td><span class="dot r"></span>Track record</td><td>Zero sales, zero case studies.</td></tr>
+    <tr><td><span class="dot r"></span>Price</td><td>The upfront fee is not decided.</td></tr>
+    <tr><td><span class="dot r"></span>Contract</td><td>Not yet drafted by the lawyer.</td></tr>
+    <tr><td><span class="dot a"></span>Setup gaps</td><td>Business phone, SMS and email keys, bank details, price guide, staff accounts.</td></tr>
+    <tr><td><span class="dot a"></span>Approvals</td><td>Meta/WhatsApp, TikTok and YouTube APIs still pending.</td></tr>
+    <tr><td><span class="dot r"></span>Runway</td><td>Under 3 months, so roughly until mid-to-late February 2027.</td></tr>
+  </table>
+  <div class="sentence" style="font-size:11pt">The machine is built, but nothing is going through it. All the remaining risk is commercial, not technical.</div>
+</section>
+
+<!-- PAGE 3: SUCCESS RATE + SWOT -->
+<section class="page">
+  <h2><span class="num">03</span>The success rate: an honest read <span class="tag mine">Plan</span></h2>
+  <p>There's no honest percentage yet. As the Statistician juror said, every number you'd need is zero, and comparing yourselves to "top realtors and car dealers" "only counts the winners."</p>
+  <div class="grid2">
+    <div class="card charge"><h4>As stated</h4><p>Dominate Sri Lanka and go international, on under 3 months of runway with zero clients. <b>The court says it fails, and I agree.</b></p></div>
+    <div class="card cond"><h4>Narrowed</h4><p>Done-for-you property sales in the Western Province, plus dealer and developer retainers. <b>A real business with a fighting chance, if one paying client signs before about 31 Jan 2027.</b></p></div>
+  </div>
+  <p style="margin-top:3mm"><b>Your first real success rate is pitch-to-paid conversion.</b> Count every pitch. 30 pitches producing 1–2 paying clients means you have a business to grow. 40 pitches producing none means the offer or price is wrong, so change it rather than pitch harder.</p>
+
+  <h2 style="margin-top:5mm"><span class="num">04</span>SWOT <span class="tag mine">Plan</span></h2>
+  <div class="swot">
+    <div class="q s"><h3>Strengths</h3><ul>
+      <li>Agency-trained marketing and content: premium production classifieds can't match.</li>
+      <li>All the gear is owned, so shoots cost no capital.</li>
+      <li>A live platform: the portal, weekly reports and evidence log make transparency visible.</li>
+      <li>A service, not a marketplace: one client is revenue.</li>
+      <li>Clients fund their own ads.</li>
+      <li>An AI engineer on the team: a WhatsApp assistant can multiply capacity later.</li>
+      <li>Focus chosen: Western Province, property first.</li>
+    </ul></div>
+    <div class="q w"><h3>Weaknesses</h3><ul>
+      <li>Zero clients, zero audience, zero track record.</li>
+      <li>Under 3 months of runway.</li>
+      <li>No price set and no contract drafted.</li>
+      <li>Two people do everything, and one also writes the software.</li>
+      <li>A blurred offer: "marketing company" or exclusive sales agent?</li>
+      <li>A habit of building before selling. The first attempt died of it.</li>
+    </ul></div>
+    <div class="q o"><h3>Opportunities</h3><ul>
+      <li>A market of low-quality classified ads, where premium, honest presentation stands out.</li>
+      <li>Dealers, developers and condo projects: one relationship means monthly retainers.</li>
+      <li>Sri Lankans abroad need someone trusted at home, and the platform is built for that.</li>
+      <li>Every shoot is also founder content: the personal brand comes as a by-product.</li>
+      <li>The Vikkaa Circle buyer list compounds with every campaign.</li>
+      <li>The platform becomes a sellable product once proven.</li>
+    </ul></div>
+    <div class="q t"><h3>Obstacles</h3><ul>
+      <li>The trust barrier: exclusive, fee, commission "no matter who found the buyer", 6-month tail.</li>
+      <li>Incumbents with names. "Drone footage … I can hire in a week," said the Competitor.</li>
+      <li>Cheap alternatives: ikman, or an agent the seller already knows.</li>
+      <li>Long cycles: commission only at deed signing or transfer.</li>
+      <li>Legal: enforceability, ad-deposit handling, the PDPA.</li>
+      <li>Burnout, or a founder forced back to a job.</li>
+      <li>Ops: pending approvals, and a shared server about 88% full.</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- PAGE 4: FAILURE MODES -->
+<section class="page">
+  <h2><span class="num">05</span>Every way this fails, and the guard against each <span class="tag mine">Plan</span></h2>
+  <p class="lede">Ranked by how many jurors flagged each one. The guard is what stops it happening.</p>
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:27%">Failure mode</th><th style="width:17%">Flagged by</th><th>The guard</th></tr>
+    <tr><td>1</td><td><b>Cash runs out before the first payment</b></td><td>7 jurors</td><td>Set the price this week. Sell retainers and pilots to dealers and developers first, because they pay upfront. Hard gate: one paid client by 31 Jan.</td></tr>
+    <tr><td>2</td><td><b>Overclaiming kills credibility</b></td><td>6 jurors</td><td>One offer you can prove: "We market and sell your property in the Western Province. You see everything live." No number you haven't earned.</td></tr>
+    <tr><td>3</td><td><b>Nobody signs the trust-heavy terms</b></td><td>5 jurors</td><td>Founding-client terms for the first 3 private sellers. Publish your terms and refund rules openly. Show the portal in every pitch.</td></tr>
+    <tr><td>4</td><td><b>The first client becomes a dispute</b></td><td>4 jurors</td><td>No signature without a lawyer-drafted agreement covering the exclusive, the tail, ad-deposit refunds, and the fee if nothing sells.</td></tr>
+    <tr><td>5</td><td><b>Two people break under the load</b></td><td>Engineer, Small-Business Owner</td><td>A cap of 3 live campaigns until the first sale. Group viewings. No new code unless a paying client needs it.</td></tr>
+    <tr><td>6</td><td><b>Building instead of selling</b></td><td>Teenager, Prosecution, Judge</td><td>Freeze features now. Measure each week by pitches made, not commits pushed.</td></tr>
+    <tr><td>7</td><td><b>One founder leaves for a job</b></td><td>Prosecution, Engineer</td><td>Decide Plan B now: if Gate B is missed, one founder takes part-time income while the other keeps selling. The business shrinks instead of dying.</td></tr>
+  </table>
+
+  <h2 style="margin-top:6mm"><span class="num">06</span>Pricing: two tracks <span class="tag mine">Plan</span></h2>
+  <p>The jury pulled in two directions. Eight jurors want a fixed fee paid inside the runway, while the First-Time Customer wants no upfront risk. Two tracks satisfy both.</p>
+  <div class="grid2">
+    <div class="card cond"><div class="count">Track 1 · pays the bills</div><h4>Dealers and developers</h4><ul>
+      <li><b>Dealer retainer:</b> a fixed monthly fee for N cars (shoot, edit, campaign, enquiries), paid in advance.</li>
+      <li><b>Developer pilot:</b> a fixed price for one project page or plot batch, with 1 month of campaigning, designed to become a retainer.</li>
+      <li>Paid before work starts. That's the cash inside the runway.</li></ul></div>
+    <div class="card"><div class="count">Track 2 · builds the proof</div><h4>2–3 founding private sellers</h4><ul>
+      <li>A low or zero upfront fee, commission on sale only, and a shorter exclusive (for example 45–60 days).</li>
+      <li>In return: the right to publish the case study and a video testimonial.</li>
+      <li>The client still pays the ad budget. Cap it at 3, then switch to standard terms.</li></ul></div>
+  </div>
+</section>
+
+<!-- PAGE 5: NUMBERS + 90 DAY PLAN -->
+<section class="page">
+  <h2><span class="num">07</span>Numbers to decide this week</h2>
+  <table class="fill">
+    <tr><th>Decision</th><th>Your number</th></tr>
+    <tr><td>Both founders' combined minimum monthly cost</td><td>Rs</td></tr>
+    <tr><td>Dealer retainer: price per month / cars included</td><td>Rs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; / &nbsp;&nbsp;&nbsp;&nbsp; cars</td></tr>
+    <tr><td>Developer pilot price</td><td>Rs</td></tr>
+    <tr><td>Standard private-seller upfront fee</td><td>Rs</td></tr>
+    <tr><td>Founding-client terms (fee / exclusive length / case-study rights)</td><td></td></tr>
+    <tr><td>Vehicle commission (percentage or minimum)</td><td></td></tr>
+    <tr><td>Lawyer's fee, and who pays it</td><td>Rs</td></tr>
+    <tr><td><b>Break-even = monthly cost ÷ retainer price</b></td><td><b>retainers</b></td></tr>
+  </table>
+  <p class="note">The last line is your survival number: how many paying dealers or developers keep both founders in the business.</p>
+
+  <h2 style="margin-top:5mm"><span class="num">08</span>The 90-day foundation plan <span class="tag mine">Plan</span></h2>
+  <div class="tl">
+    <div class="step"><div class="when">Week 1 · 23–29 Nov</div>Set every price. Brief the lawyer. Close the setup gaps (phone, bank, SMS and email keys). Rewrite the homepage to one offer. List 30 target dealers, developers and condo projects, plus former agency contacts.</div>
+    <div class="step"><div class="when">Weeks 2–4 · 30 Nov – 20 Dec</div>Make 30+ pitches, in person, each with a 60-second portal demo. Sign 2–3 founding sellers. Start founder content (3 posts a week). Open Vikkaa Circle. Push before 20 Dec, because decisions slow over the holidays.</div>
+    <div class="step gate"><div class="gatebox"><div class="when">Gate A · 20 Dec</div>The lawyer-drafted agreement is in hand. At least 1 paid client, or 3 in final talks.</div></div>
+    <div class="step"><div class="when">Weeks 5–8 · 21 Dec – 17 Jan</div>First shoots and campaigns go live. Weekly portal reports. Collect testimonials on the process and production, without waiting for a sale.</div>
+    <div class="step gate"><div class="gatebox"><div class="when">Gate B · 31 Jan 2027</div>At least one paying dealer or developer, with the money received. If not, change the offer or price and trigger Plan B.</div></div>
+    <div class="step gate"><div class="gatebox"><div class="when">Gate C · end of Feb 2027</div>Recurring revenue covers a known share of founder costs. The first sale is in negotiation and the first case study is drafted.</div></div>
+  </div>
+</section>
+
+<!-- PAGE 6: TRUST, BRAND, BIG CLIENTS -->
+<section class="page">
+  <h2><span class="num">09</span>Trust and personal brand: the realtor playbook <span class="tag mine">Plan</span></h2>
+  <p class="lede">Top agents and dealers win because they are <b>visible</b>, <b>specific</b> and show <b>proof</b>. You don't have proof yet, so lead with the first two and let the proof build.</p>
+  <div class="grid2">
+    <div class="card"><h4>Trust basics (done once)</h4><ul>
+      <li>A registered business and a business bank account. Never ask for transfers to a personal account.</li>
+      <li>One real phone and WhatsApp number, answered fast.</li>
+      <li>A Google Business Profile, so reviews start from client one.</li>
+      <li>Publish your terms, refund rules and the "if it doesn't sell" policy openly.</li>
+      <li>Show the portal: "You see every enquiry, viewing and rupee of ad spend, live."</li></ul></div>
+    <div class="card"><h4>One lane per founder</h4><ul>
+      <li><b>The numbers founder</b> (the AI engineer): a weekly "Western Province price read", area price explainers, and how to price right. Authority without a sales record.</li>
+      <li><b>The storyteller founder</b> (runs social): behind-the-scenes from every shoot, walkthroughs, seller and buyer stories.</li>
+      <li>Both on camera, under your own names, linked to Vikkaa.</li></ul></div>
+  </div>
+  <div class="card" style="margin-top:3.5mm"><h4>Content rhythm, made from work you already do</h4>
+    <ul><li>3 posts a week minimum. Every shoot yields at least one founder post.</li>
+    <li>A free 10-minute price read as the lead magnet (it's already in your design for no-go sellers). Cap it at a few a week.</li>
+    <li>One case study per sale, with the seller on video.</li>
+    <li><b>Never post a claim you can't back.</b> One real result beats ten big promises.</li></ul></div>
+
+  <h2 style="margin-top:5mm"><span class="num">10</span>Big clients and networking <span class="tag mine">Plan</span></h2>
+  <ul>
+    <li><b>Start warm.</b> Former agency clients and contacts are the shortest path to a first developer or dealer.</li>
+    <li><b>Pitch with their own ads.</b> Put their current classified listing next to a Vikkaa-style shot of the same kind of asset.</li>
+    <li><b>Pilot, then retainer.</b> A fixed-price one-month pilot is easy to agree to. Fix the retainer terms in advance.</li>
+    <li><b>Ask every client for two introductions.</b> Dealers know dealers, and developers know builders. Referral rewards are already in your design.</li>
+    <li><b>Be in the room:</b> property and vehicle exhibitions, developer launches, dealer associations. Carry the portal demo on your phone.</li>
+  </ul>
+</section>
+
+<!-- PAGE 7: COMMUNITY, INTERNATIONAL, FIVE THINGS -->
+<section class="page">
+  <div class="grid2">
+    <div>
+      <h2><span class="num">11</span>Community</h2>
+      <p><b>The Vikkaa Circle</b> <span class="tag mine">Plan</span></p>
+      <ul>
+        <li>Open sign-ups now, with recorded consent. "We never contact you without permission" is itself a trust message.</li>
+        <li>Members see new assets 48 hours early (already designed).</li>
+        <li>Give value when there's nothing to buy: monthly price reads and buying guides.</li>
+        <li>Target from your design: 1,500 consented buyers by month 6. Track it weekly.</li>
+      </ul>
+    </div>
+    <div>
+      <h2><span class="num">12</span>International</h2>
+      <p><b>When, not now</b> <span class="tag mine">Plan</span></p>
+      <ul>
+        <li>Not before 3–5 published local case studies. International trust is borrowed from local proof.</li>
+        <li>First market: Sri Lankans abroad selling property at home. Remote signing, live reports and the evidence log are built for them.</li>
+        <li>Channels: relatives of local clients, diaspora groups, referrals.</li>
+        <li>Hold the claim until a real overseas seller has been served.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="margin-top:6mm"><span class="num">13</span>Five things to do before Friday 27 Nov</h2>
+  <ol class="five">
+    <li><b>Write down every price</b> in the table on page 5, including the break-even number.</li>
+    <li><b>Brief the lawyer</b> and agree who pays.</li>
+    <li><b>Close the setup gaps:</b> business phone, business bank account, SMS and email keys.</li>
+    <li><b>Rewrite the one-line offer</b> across the site and socials: done-for-you property sales in the Western Province, where you see everything live.</li>
+    <li><b>Build the list of 30 targets</b> and book the first 10 pitches.</li>
+  </ol>
+  <div class="sentence" style="font-size:11pt">When these five are done and one client has paid, take the case back to court with the new facts. Almost every juror named that event as the thing that would flip their vote.</div>
+</section>
+
+<!-- PAGE 8: APPENDIX JURY -->
+<section class="page">
+  <h2>Appendix: how each juror voted <span class="tag court">Court</span></h2>
+  <p class="lede">Every vote was GUILTY. The flip conditions below are shortened from each juror's own words. The full text is in the trial folder.</p>
+  <table class="jury">
+    <tr><th>Juror</th><th>Would flip if…</th></tr>
+    <tr><td>The Accountant</td><td>A dealer retainer or founding-client agreement is signed at a fixed fee, paid inside the runway, covering founder costs plus the lawyer's fee.</td></tr>
+    <tr><td>The First-Time Customer</td><td>Founding clients get risk-free terms (no upfront fee, commission only on sale, a short exclusive they can leave), or there's one real completed sale with a case study.</td></tr>
+    <tr><td>The Competitor</td><td>One car dealer or land developer has already signed and paid a retainer or upfront fee.</td></tr>
+    <tr><td>The Retired Judge</td><td>The case is limited to Western Province property, and one seller or dealer has signed a lawyer-drafted agreement and paid before the runway ends.</td></tr>
+    <tr><td>The Teenager</td><td>It's pitched as a Western Province property service, with one founding client signed and paying, and the first campaign gets people talking.</td></tr>
+    <tr><td>The Engineer</td><td>It's a Western Province, property-only pilot capped at what two people can physically run, with one paying client before the runway ends.</td></tr>
+    <tr><td>The Small-Business Owner</td><td>One dealer or developer signs a retainer or pays a set fee before the runway ends, and the claim is cut to Western Province property.</td></tr>
+    <tr><td>The Statistician</td><td>The claim is cut to Western Province property, and several sellers or dealers have signed and paid: a real conversion rate.</td></tr>
+    <tr><td>The Parent</td><td>The lawyer-drafted agreement is in hand and the claim is scoped to Western Province property, before any seller is asked to sign or pay.</td></tr>
+    <tr><td>The Investor</td><td>The claim covers only Western Province property, and one seller or dealer has signed and paid a fixed fee or retainer.</td></tr>
+    <tr><td>The Designer</td><td>There's one plain offer: done-for-you property sales in the Western Province, with a set fee and stated founding-client terms.</td></tr>
+    <tr><td>The Lawyer</td><td>A lawyer-drafted agreement is in hand before the first signing, covering commission and the tail, ad-deposit handling and refunds, and the fee if unsold.</td></tr>
+  </table>
+  <div class="footer-note">Sources: the founders' design document (21 Nov 2026), the founders' answers on 22 Nov 2026, and the trial record. No outside market research was used. Full trial and markdown brief: D:\Vikkaa.lk\docs\court\2026-11-22-vikkaa-trial\. Trial run with the /court skill (12 jurors, seed 339817).</div>
+</section>
+
+</body>
+</html>

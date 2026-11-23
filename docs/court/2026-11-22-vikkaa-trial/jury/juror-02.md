@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: As a seller hearing of Vikkaa for the first time, I would not pay an upfront fee and an ad deposit by bank transfer, sign a 60–90 day exclusive, and owe commission "no matter who found the buyer" plus a 6-month tail to a firm that has never sold anything, when I can still list on ikman or use an agent I already know.
+DECIDING FACT: The record says "no sales, no case studies yet" and "no known name in property or cars," while the agreement asks for "an upfront fee plus a separate ad budget, by bank transfer" and an exclusive with commission due "no matter who found the buyer."
+WOULD FLIP IF: The case offered founding clients terms that take the risk off me (no upfront fee, commission only on sale, and a short exclusive I can leave), or showed one real completed sale with its case study.

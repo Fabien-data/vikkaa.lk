@@ -8,9 +8,6 @@ import { rupeesToCents } from '@/lib/money';
 import { slugFor } from '@/lib/slug';
 import { config } from '@/lib/config';
 import {
-  COMMISSION_BP,
-  DEFAULT_EXCLUSIVE_DAYS,
-  DEFAULT_FOLLOW_ON_MONTHS,
   DEFAULT_ORG_ID,
   DISTRICTS,
   WESTERN_PROVINCE,
@@ -18,6 +15,8 @@ import {
 import { scoreFit, type IntakeAnswers } from '@/server/fit-scorer';
 import { rangeFor } from '@/server/area-prices';
 import { sendEmail } from '@/server/email';
+import { getSettings } from '@/server/settings';
+import { linkProspectToClient } from '@/server/prospects';
 
 const optionalText = z
   .string()
@@ -122,8 +121,9 @@ export async function submitSellerIntake(input: SellerIntakeInput): Promise<{ en
     inWesternProvince: WESTERN_PROVINCE.includes(input.district),
   };
   const title = titleFor(input);
+  const { commission } = await getSettings();
 
-  const { engagementId, asset } = await db.transaction(async (tx) => {
+  const { engagementId, asset, clientId } = await db.transaction(async (tx) => {
     let [client] = await tx
       .select()
       .from(clients)
@@ -141,9 +141,10 @@ export async function submitSellerIntake(input: SellerIntakeInput): Promise<{ en
         clientId: client.id,
         type: 'single',
         intakeAnswers: { ...answers, reason: input.reason },
-        commissionRateBp: COMMISSION_BP[input.category],
-        exclusiveDays: DEFAULT_EXCLUSIVE_DAYS,
-        followOnMonths: DEFAULT_FOLLOW_ON_MONTHS,
+        commissionRateBp: input.category === 'vehicle' ? commission.vehicleBp : commission.propertyBp,
+        commissionMinCents: input.category === 'vehicle' ? commission.vehicleMinCents : 0,
+        exclusiveDays: commission.exclusiveDays,
+        followOnMonths: commission.followOnMonths,
       })
       .returning();
 
@@ -162,8 +163,9 @@ export async function submitSellerIntake(input: SellerIntakeInput): Promise<{ en
       })
       .returning();
 
-    return { engagementId: engagement.id, asset };
+    return { engagementId: engagement.id, asset, clientId: client.id };
   });
+  await linkProspectToClient(input.phone, clientId);
 
   // Scored after commit: the score is advisory and staff can recalculate it from the Studio.
   const { score, flags } = scoreFit(answers, asset.askingPriceCents, await rangeFor(asset));

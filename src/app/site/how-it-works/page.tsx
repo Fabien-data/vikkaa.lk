@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
-import { config } from '@/lib/config';
+import { priceGuide } from '@/server/packages';
 import { formatLkr } from '@/lib/money';
 import { PageHero } from '@/components/site/PageHero';
 import { ScrollProgress } from '@/components/site/ScrollProgress';
@@ -33,8 +33,8 @@ const FACTS = [
   ['Rs 0', '', 'until you agree to the plan'],
 ] as const;
 
-export default function HowItWorks() {
-  const { propertyCents, vehicleCents } = config.priceGuide;
+export default async function HowItWorks() {
+  const { propertyCents, vehicleCents } = await priceGuide();
   return (
     <main>
       <PageHero

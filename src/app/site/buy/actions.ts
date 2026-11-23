@@ -5,6 +5,7 @@ import { normalisePhone } from '@/lib/phone';
 import { ASSET_KINDS, type AssetKind } from '@/lib/enums';
 import { formOptionalCents, formText, FormError, type ActionResult } from '@/lib/form';
 import { upsertBuyerByPhone } from '@/server/buyers';
+import { recordConsent } from '@/server/consent';
 import { clientIp } from '../sell/actions';
 
 export async function submitBrief(_prev: ActionResult, form: FormData): Promise<ActionResult> {
@@ -30,8 +31,8 @@ export async function submitBrief(_prev: ActionResult, form: FormData): Promise<
       financing: formText(form, 'financing'),
       source: 'buyer_brief',
       privacyAcceptedAt: now,
-      circleConsentAt: form.get('circle') === 'on' ? now : undefined,
     });
+    if (form.get('circle') === 'on') await recordConsent({ contact: phone, purpose: 'circle', granted: true, source: 'buyer_brief', at: now });
   } catch (err) {
     if (err instanceof FormError) return { error: err.message };
     throw err;

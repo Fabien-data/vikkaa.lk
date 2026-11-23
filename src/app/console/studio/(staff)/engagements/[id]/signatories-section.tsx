@@ -1,4 +1,5 @@
 import { asc, eq } from 'drizzle-orm';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import { db } from '@/db';
 import { signatories } from '@/db/schema';
 import { ActionForm } from '@/components/studio/ActionForm';
@@ -35,7 +36,7 @@ export async function SignatoriesSection({ engagementId, signed }: { engagementI
                 <>
                   <ShareLinkButton getLink={signingLink.bind(null, s.id)} label="Get signing link" />
                   <form action={remove}>
-                    <button className="text-xs text-destructive underline">Remove</button>
+                    <SubmitButton plain confirm="Remove this signatory?" className="text-xs text-destructive">Remove</SubmitButton>
                   </form>
                 </>
               )}
@@ -71,7 +72,13 @@ export async function SignatoriesSection({ engagementId, signed }: { engagementI
             <h3 className="mb-2 text-sm font-semibold">Signed on paper instead?</h3>
             <ActionForm action={uploadPaperScan} submitLabel="Upload scan and mark signed" encType="multipart/form-data" className="flex flex-wrap items-center gap-3">
               <input type="hidden" name="engagementId" value={engagementId} />
-              <input name="scan" type="file" accept="application/pdf,image/*" className="text-sm" />
+              <input name="scan" type="file" accept="application/pdf,image/*" className="text-sm" aria-label="Scanned agreement" />
+              <input
+                name="lawyerName"
+                placeholder="Lawyer who drafted it (if the wording here is not approved)"
+                aria-label="Lawyer who drafted the paper agreement"
+                className="min-w-72 rounded-md border px-3 py-2 text-sm"
+              />
             </ActionForm>
           </div>
         </>

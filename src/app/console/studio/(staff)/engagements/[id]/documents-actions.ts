@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { requireStaff } from '@/server/auth-guard';
 import { DocumentError, generateAgreementDraft, generateProposal, issueInvoice, recordAdDeposit, recordPayment } from '@/server/documents';
 import { PAYMENT_METHODS, type PaymentMethod } from '@/db/schema';
+import { issueRetainerInvoice, periodOf, voidInvoice } from '@/server/billing';
 import { formCents, formText, FormError, type ActionResult } from '@/lib/form';
 
 function dateFrom(form: FormData): Date {
@@ -28,7 +29,12 @@ export async function createDocument(_prev: ActionResult, form: FormData): Promi
   await requireStaff();
   const engagementId = String(form.get('engagementId'));
   const op = String(form.get('op'));
-  const make = { proposal: generateProposal, agreement: generateAgreementDraft, invoice: issueInvoice }[op];
+  const make = {
+    proposal: generateProposal,
+    agreement: generateAgreementDraft,
+    invoice: issueInvoice,
+    retainer: (id: string) => issueRetainerInvoice(id, periodOf(new Date())),
+  }[op];
   if (!make) return { error: 'Unknown document' };
   return run(engagementId, () => make(engagementId));
 }
@@ -57,5 +63,15 @@ export async function addPayment(_prev: ActionResult, form: FormData): Promise<A
       dateFrom(form),
       userId,
     );
+  });
+}
+
+export async function cancelInvoice(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  await requireStaff();
+  const engagementId = String(form.get('engagementId'));
+  return run(engagementId, async () => {
+    const reason = formText(form, 'reason');
+    if (!reason) throw new FormError('Say why the invoice is cancelled');
+    await voidInvoice(String(form.get('documentId')), reason);
   });
 }

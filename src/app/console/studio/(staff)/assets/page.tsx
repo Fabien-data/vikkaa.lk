@@ -28,11 +28,11 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
       <table className="w-full rounded-md border bg-background text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
-            <th className="p-3">Title</th>
-            <th className="p-3">Area</th>
-            <th className="p-3">Status</th>
-            <th className="p-3">Asking</th>
-            <th className="p-3">Photos</th>
+            <th scope="col" className="p-3">Title</th>
+            <th scope="col" className="p-3">Area</th>
+            <th scope="col" className="p-3">Status</th>
+            <th scope="col" className="p-3">Asking</th>
+            <th scope="col" className="p-3">Photos</th>
           </tr>
         </thead>
         <tbody>

@@ -5,6 +5,7 @@ import { config } from '@/lib/config';
 import { upsertBuyerByPhone } from '@/server/buyers';
 import { appendEvidence } from '@/server/evidence-log';
 import { sendEmail } from '@/server/email';
+import { recordConsent } from '@/server/consent';
 
 /** A buyer enquiry about an asset: buyer record, enquiry row, evidence entry, staff email. Phone must be E.164. */
 export async function recordEnquiry(
@@ -18,8 +19,8 @@ export async function recordEnquiry(
     email: input.email,
     source: channel,
     privacyAcceptedAt: now,
-    circleConsentAt: input.circle ? now : undefined,
   });
+  if (input.circle) await recordConsent({ contact: input.phone, purpose: 'circle', granted: true, source: 'enquiry_form', at: now });
   const [enquiry] = await db.insert(enquiries).values({ assetId, buyerId: buyer.id, channel, message: input.message || null }).returning();
 
   // appendEvidence decides first contact vs later contact inside its locked transaction.

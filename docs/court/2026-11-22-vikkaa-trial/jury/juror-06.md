@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: The software can be built, and a live site shows it has been, but the operation as described sends every site visit, shoot, edit, buyer enquiry, viewing and negotiation through two unpaid people, one of whom also builds the platform, while the plan aims to dominate the country, go international and enter several markets at once; that load breaks the first month it grows, and under 3 months of runway can take away half the crew before it grows at all.
+DECIDING FACT: Both founders "act as the entire crew for the first 6 months, taking no salary," with "Runway: under 3 months," after which "one of them has to take other work," while the goal is "6–8 property campaigns plus several car campaigns a month."
+WOULD FLIP IF: The case were restated as a Western Province, property-only pilot capped at the number of campaigns two people can physically run, with one founding client signed and paying the upfront fee before the runway ends.

@@ -74,7 +74,7 @@ describe('notes and tasks', () => {
     await addTask(engagement, { title: 'overdue 1 hour', dueAt: hoursFromNow(-1), assignedUserId: me });
     await addTask(client, { title: "partner's", dueAt: hoursFromNow(-72), assignedUserId: partner });
     const done = await addTask(client, { title: 'done already', dueAt: hoursFromNow(-96), assignedUserId: me });
-    await setTaskDone(done.id, true);
+    await setTaskDone(done!.id, true);
 
     const mine = await myOpenTasks(me);
     expect(mine.map((t) => t.title)).toEqual(['overdue 2 days', 'overdue 1 hour', 'tomorrow, unassigned', 'next week', 'no date']);

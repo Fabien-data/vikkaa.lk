@@ -7,6 +7,7 @@ import { signatories, SIGNATORY_ROLES, type SignatoryRole } from '@/db/schema';
 import { requireStaff } from '@/server/auth-guard';
 import { putPrivate } from '@/server/storage';
 import { signWithPaperScan } from '@/server/agreement-signer';
+import { signingBlocker } from '@/server/agreement-templates';
 import { InvalidTransitionError } from '@/server/pipeline';
 import { normalisePhone } from '@/lib/phone';
 import { signPath } from '@/lib/signed-url';
@@ -55,10 +56,12 @@ export async function removeSignatory(id: string, engagementId: string): Promise
   revalidatePath(`/studio/engagements/${engagementId}`);
 }
 
-export async function signingLink(signatoryId: string): Promise<{ url: string; whatsapp: string }> {
+export async function signingLink(signatoryId: string): Promise<{ url: string; whatsapp: string } | { error: string }> {
   await requireStaff();
   const [s] = await db.select().from(signatories).where(eq(signatories.id, signatoryId));
-  if (!s) throw new Error('Signatory not found');
+  if (!s) return { error: 'Signatory not found' };
+  const blocker = await signingBlocker(s.engagementId);
+  if (blocker) return { error: blocker };
   const url = `${config.appUrl}${signPath(`/sign/${s.id}`, LINK_TTL_SECONDS)}`;
   const text = `Hello ${s.name}, here is your Vikkaa agreement to review and sign. The link works for 7 days: ${url}`;
   return { url, whatsapp: whatsappLink(s.phone, text) };
@@ -71,7 +74,7 @@ export async function uploadPaperScan(_prev: ActionResult, form: FormData): Prom
   if (!scan) return { error: 'Choose the scanned agreement.' };
   if (scan.size > MAX_UPLOAD_BYTES) return { error: 'The scan is larger than 20 MB.' };
   try {
-    await signWithPaperScan(engagementId, Buffer.from(await scan.arrayBuffer()), scan.name);
+    await signWithPaperScan(engagementId, Buffer.from(await scan.arrayBuffer()), scan.name, formText(form, 'lawyerName'));
   } catch (err) {
     if (err instanceof InvalidTransitionError) return { error: err.message };
     throw err;

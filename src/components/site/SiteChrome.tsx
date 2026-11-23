@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { config } from '@/lib/config';
 import { whatsappLink } from '@/lib/whatsapp';
+import { publicChannels } from '@/server/channels';
 import { HeaderBar } from './HeaderBar';
 import { NAV } from './nav';
 import { TickLine } from './motion/TickLine';
@@ -13,7 +14,8 @@ export function SiteHeader() {
   return <HeaderBar />;
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const channels = await publicChannels();
   return (
     <footer className="bg-glow grain relative mt-auto overflow-hidden text-white">
       <TickLine className="pointer-events-none absolute -right-32 -top-36 w-[min(640px,80vw)] text-glow/35" />
@@ -35,11 +37,11 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-20 grid gap-10 border-t border-white/15 pt-10 text-[15px] sm:grid-cols-3">
+        <div className={`mt-20 grid gap-10 border-t border-white/15 pt-10 text-[15px] sm:grid-cols-2 ${channels.length ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
           <nav aria-label="Footer">
             <p className="eyebrow text-white/50">Explore</p>
             <ul className="mt-4 grid gap-2.5">
-              {NAV.map(([href, label]) => (
+              {[...NAV, ['/dealers', 'For car dealers'] as const, ['/developers', 'For developers'] as const].map(([href, label]) => (
                 <li key={href}>
                   <Link href={href} className="text-white/80 transition-colors hover:text-white">
                     {label}
@@ -63,6 +65,20 @@ export function SiteFooter() {
               <li>Western Province, Sri Lanka</li>
             </ul>
           </div>
+          {channels.length > 0 && (
+            <nav aria-label="Follow Vikkaa">
+              <p className="eyebrow text-white/50">Follow</p>
+              <ul className="mt-4 grid gap-2.5">
+                {channels.map((c) => (
+                  <li key={c.key}>
+                    <a href={c.url} target="_blank" rel="noopener noreferrer me" className="text-white/80 transition-colors hover:text-white">
+                      {c.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
           <nav aria-label="Legal">
             <p className="eyebrow text-white/50">Legal</p>
             <ul className="mt-4 grid gap-2.5">

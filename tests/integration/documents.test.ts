@@ -115,4 +115,34 @@ describe('documents', () => {
     const [fresh] = await db.select().from(engagements).where(eq(engagements.id, e.id));
     expect(fresh.paidAt).toBeInstanceOf(Date);
   });
+  it('a proposal needs some price: a fee, a monthly fee or founding terms', async () => {
+    const { e } = await seed({ upfrontFeeCents: 0 });
+    await expect(generateProposal(e.id)).rejects.toThrow(/upfront fee, monthly fee or founding terms/);
+  });
+
+  it('founding (zero-fee) proposal renders, and the ad deposit alone marks it paid', async () => {
+    const { e, a } = await seed({ upfrontFeeCents: 0, foundingTerms: true, stage: 'proposal' });
+    const doc = await generateProposal(e.id);
+    expect((await readPrivate(doc.storageKey)).subarray(0, 4).toString()).toBe('%PDF');
+    await markSigned(e.id, new Date());
+    await recordAdDeposit(e.id, 5_000_000, 'TX9', new Date());
+    expect((await db.select().from(assets).where(eq(assets.id, a.id)))[0].status).toBe('production');
+  });
+
+  it('a dealer retainer can be quoted and drafted before any car is added', async () => {
+    const [c] = await db.insert(clients).values({ type: 'dealer', name: 'Lanka Auto', phone: '+94112345678' }).returning();
+    const [e] = await db
+      .insert(engagements)
+      .values({ clientId: c.id, type: 'retainer', commissionRateBp: 150, exclusiveDays: 90, followOnMonths: 6, monthlyFeeCents: 15_000_000, unitsPerMonth: 8, billingDay: 1, contentPlan: '8 cars a month: photos, walkaround video, reels' })
+      .returning();
+    for (const doc of [await generateProposal(e.id), await generateAgreementDraft(e.id)]) {
+      expect((await readPrivate(doc.storageKey)).subarray(0, 4).toString()).toBe('%PDF');
+    }
+  });
+
+  it('a retainer is not marked paid by a deposit alone', async () => {
+    const { e } = await seed({ upfrontFeeCents: 0, monthlyFeeCents: 15_000_000 });
+    await recordAdDeposit(e.id, 5_000_000, 'TX10', new Date());
+    expect((await db.select().from(engagements).where(eq(engagements.id, e.id)))[0].paidAt).toBeNull();
+  });
 });

@@ -45,9 +45,42 @@ export async function saveBooking(_prev: ActionResult, form: FormData): Promise<
   }
 }
 
+/** A pitch visit or call with a prospect, grouped by area in the calendar like any other trip. */
+export async function saveProspectBooking(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  await requireStaff();
+  const prospectId = String(form.get('prospectId'));
+  try {
+    const type = String(form.get('type'));
+    if (type !== 'pitch' && type !== 'call') throw new FormError('Choose a pitch visit or a call');
+    const when = formText(form, 'startsAt');
+    if (!when) throw new FormError('Enter the date and time');
+    const area = formText(form, 'area');
+    if (!area) throw new FormError('Area: enter where this is, e.g. Nugegoda');
+    const { overlaps } = await addBooking({
+      prospectId,
+      type,
+      startsAt: sriLankaTime(when),
+      durationMinutes: formInt(form, 'durationMinutes', 'Duration (minutes)', 15, 720),
+      area,
+      notes: formText(form, 'notes'),
+    });
+    revalidatePath(`/studio/prospects/${prospectId}`);
+    revalidatePath('/studio/calendar');
+    if (overlaps.length) {
+      const list = overlaps.map((b) => `${b.type} in ${b.area} on ${sriLankaDay(b.startsAt)} at ${timeText(b.startsAt)}`).join('; ');
+      return { ok: true, warning: `Saved, but it overlaps: ${list}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof FormError) return { error: err.message };
+    throw err;
+  }
+}
+
 export async function deleteBooking(id: string): Promise<void> {
   await requireStaff();
   const [b] = await db.delete(bookings).where(eq(bookings.id, id)).returning();
-  if (b) revalidatePath(`/studio/engagements/${b.engagementId}`);
+  if (b?.engagementId) revalidatePath(`/studio/engagements/${b.engagementId}`);
+  if (b?.prospectId) revalidatePath(`/studio/prospects/${b.prospectId}`);
   revalidatePath('/studio/calendar');
 }

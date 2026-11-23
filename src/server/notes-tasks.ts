@@ -45,12 +45,17 @@ export async function notesFor(subject: Subject) {
     .orderBy(desc(notes.createdAt));
 }
 
-export async function addTask(subject: Subject, input: { title: string; dueAt?: Date | null; assignedUserId?: string | null }): Promise<Task> {
+/** Adds a task. With a dedupeKey, the same automated task is only ever created once (returns undefined the second time). */
+export async function addTask(
+  subject: Subject,
+  input: { title: string; dueAt?: Date | null; assignedUserId?: string | null; dedupeKey?: string },
+): Promise<Task | undefined> {
   const title = input.title.trim();
   if (!title) throw new NoteError('Give the task a title');
   const [task] = await db
     .insert(tasks)
-    .values({ subjectType: subject.type, subjectId: subject.id, title, dueAt: input.dueAt ?? null, assignedUserId: input.assignedUserId ?? null })
+    .values({ subjectType: subject.type, subjectId: subject.id, title, dueAt: input.dueAt ?? null, assignedUserId: input.assignedUserId ?? null, dedupeKey: input.dedupeKey })
+    .onConflictDoNothing()
     .returning();
   return task;
 }

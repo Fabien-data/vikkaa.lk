@@ -1,18 +1,14 @@
 import { and, asc, eq, getTableColumns, gte, lt, ne, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { assets, bookings, clients, engagements, type Booking } from '@/db/schema';
+import { assets, bookings, clients, engagements, prospects, type Booking } from '@/db/schema';
 import type { AssetKind } from '@/lib/enums';
+import { DAY_MS, sriLankaDay, sriLankaMidnight } from '@/lib/sl-time';
 
-export type BookingInput = Pick<typeof bookings.$inferInsert, 'engagementId' | 'assetId' | 'type' | 'startsAt' | 'durationMinutes' | 'area' | 'notes'>;
+export type BookingInput = Pick<typeof bookings.$inferInsert, 'engagementId' | 'prospectId' | 'assetId' | 'type' | 'startsAt' | 'durationMinutes' | 'area' | 'notes'>;
 export type CalendarBooking = Booking & { clientName: string; assetTitle: string | null; assetKind: AssetKind | null };
 export type CalendarDay = { day: string; areas: Array<{ area: string; bookings: CalendarBooking[] }> };
 
-const DAY_MS = 86_400_000;
-const SRI_LANKA_OFFSET_MS = 330 * 60_000;
-
-/** The Sri Lanka calendar date (YYYY-MM-DD) an instant falls on. */
-export const sriLankaDay = (d: Date) => new Date(d.getTime() + SRI_LANKA_OFFSET_MS).toISOString().slice(0, 10);
-const sriLankaMidnight = (day: string) => new Date(`${day}T00:00:00+05:30`);
+export { sriLankaDay };
 
 /** Other bookings whose time overlaps this one. A warning only: overlapping bookings still save. */
 export async function findOverlaps(b: Pick<Booking, 'startsAt' | 'durationMinutes'> & { id?: string }): Promise<Booking[]> {
@@ -43,10 +39,16 @@ export async function weekView(weekStart: Date): Promise<CalendarDay[]> {
   const start = sriLankaMidnight(sriLankaDay(weekStart));
   const end = new Date(start.getTime() + 7 * DAY_MS);
   const rows = await db
-    .select({ ...getTableColumns(bookings), clientName: clients.name, assetTitle: assets.title, assetKind: assets.kind })
+    .select({
+      ...getTableColumns(bookings),
+      clientName: sql<string>`coalesce(${clients.name}, ${prospects.name}, '')`,
+      assetTitle: assets.title,
+      assetKind: assets.kind,
+    })
     .from(bookings)
-    .innerJoin(engagements, eq(bookings.engagementId, engagements.id))
-    .innerJoin(clients, eq(engagements.clientId, clients.id))
+    .leftJoin(engagements, eq(bookings.engagementId, engagements.id))
+    .leftJoin(clients, eq(engagements.clientId, clients.id))
+    .leftJoin(prospects, eq(bookings.prospectId, prospects.id))
     .leftJoin(assets, eq(bookings.assetId, assets.id))
     .where(and(gte(bookings.startsAt, start), lt(bookings.startsAt, end)))
     .orderBy(asc(bookings.startsAt));

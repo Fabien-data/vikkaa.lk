@@ -3,14 +3,14 @@ import type { Asset, Client, Comparable, Engagement } from '@/db/schema';
 import { formatLkr } from '@/lib/money';
 import { config } from '@/lib/config';
 import { pdf, Letterhead } from './render';
-import { AgreementTerms, LEGAL_REVIEWED } from './agreement-terms';
 
 export type EngagementForPdf = Engagement & { client: Client; assets: Asset[]; comparables: Comparable[] };
 
 const percent = (bp: number) => (bp / 100).toFixed(bp % 100 === 0 ? 0 : 2);
 
-function Bank() {
-  const b = config.bank;
+export type BankDetails = { accountName: string; accountNumber: string; bank: string; branch: string };
+
+function Bank({ b }: { b: BankDetails }) {
   if (!b.accountNumber) return <Text style={pdf.muted}>Bank details will be provided separately.</Text>;
   return (
     <View>
@@ -40,14 +40,15 @@ function AssetList({ assets }: { assets: Asset[] }) {
   );
 }
 
-export function ProposalPdf({ e, date }: { e: EngagementForPdf; date: Date }) {
+export function ProposalPdf({ e, date, bank }: { e: EngagementForPdf; date: Date; bank: BankDetails }) {
+  const retainer = e.monthlyFeeCents > 0;
   return (
     <PdfDocument title="Vikkaa proposal">
       <Page size="A4" style={pdf.page}>
         <Letterhead title="Marketing proposal" date={date} />
         <Text style={{ marginTop: 8 }}>Prepared for {e.client.name}</Text>
 
-        <Text style={pdf.h2}>Market report</Text>
+        {(e.assets.length > 0 || e.comparables.length > 0) && <Text style={pdf.h2}>Market report</Text>}
         {e.comparables.length > 0 && (
           <View style={{ marginBottom: 8 }}>
             {e.comparables.map((c) => (
@@ -62,8 +63,10 @@ export function ProposalPdf({ e, date }: { e: EngagementForPdf; date: Date }) {
         )}
         {e.assets.map((a) => (
           <Text key={a.id}>
-            {a.title}: recommended asking price {formatLkr(a.recommendedPriceCents ?? 0)} (your asking price{' '}
-            {formatLkr(a.askingPriceCents)})
+            {a.title}
+            {a.recommendedPriceCents
+              ? `: recommended asking price ${formatLkr(a.recommendedPriceCents)} (your asking price ${formatLkr(a.askingPriceCents)})`
+              : `: asking ${formatLkr(a.askingPriceCents)}`}
           </Text>
         ))}
         {e.marketNotes ? <Text style={{ marginTop: 6 }}>{e.marketNotes}</Text> : null}
@@ -72,27 +75,48 @@ export function ProposalPdf({ e, date }: { e: EngagementForPdf; date: Date }) {
         <Text>{e.contentPlan}</Text>
 
         <Text style={pdf.h2}>Quote</Text>
-        <View style={pdf.row}>
-          <Text style={pdf.cell}>Upfront marketing fee</Text>
-          <Text style={pdf.right}>{formatLkr(e.upfrontFeeCents)}</Text>
-        </View>
-        <View style={pdf.row}>
-          <Text style={pdf.cell}>Advertising deposit (spent on your ads, shown live in your portal)</Text>
-          <Text style={pdf.right}>{formatLkr(e.adBudgetCents)}</Text>
-        </View>
-        {e.commissionApplies && (
+        {e.foundingTerms && (
+          <Text style={{ marginBottom: 6 }}>
+            Founding client terms: you are one of our first clients, so you agree that we may publish this campaign as a case study.
+          </Text>
+        )}
+        {retainer && (
           <View style={pdf.row}>
-            <Text style={pdf.cell}>Commission on sale</Text>
-            <Text style={pdf.right}>{percent(e.commissionRateBp)}% of the sale price</Text>
+            <Text style={pdf.cell}>
+              Monthly retainer{e.unitsPerMonth ? `: up to ${e.unitsPerMonth} listings a month` : ''}, billed in advance on day {e.billingDay ?? 1}
+            </Text>
+            <Text style={pdf.right}>{formatLkr(e.monthlyFeeCents)} / month</Text>
           </View>
         )}
-        <Text style={{ marginTop: 8 }}>
-          Exclusive agreement period: {e.exclusiveDays} days. If your asset sells within that period, the upfront fee is
-          credited against the commission.
-        </Text>
+        {(e.upfrontFeeCents > 0 || (!retainer && !e.foundingTerms)) && (
+          <View style={pdf.row}>
+            <Text style={pdf.cell}>Upfront marketing fee</Text>
+            <Text style={pdf.right}>{formatLkr(e.upfrontFeeCents)}</Text>
+          </View>
+        )}
+        {e.adBudgetCents > 0 && (
+          <View style={pdf.row}>
+            <Text style={pdf.cell}>Advertising deposit (spent on your ads, shown live in your portal)</Text>
+            <Text style={pdf.right}>{formatLkr(e.adBudgetCents)}</Text>
+          </View>
+        )}
+        {e.commissionApplies && (
+          <View style={pdf.row}>
+            <Text style={pdf.cell}>Commission on sale{retainer ? ' (to buyers we introduce)' : ''}</Text>
+            <Text style={pdf.right}>
+              {percent(e.commissionRateBp)}% of the sale price{e.commissionMinCents > 0 ? `, minimum ${formatLkr(e.commissionMinCents)}` : ''}
+            </Text>
+          </View>
+        )}
+        {!retainer && (
+          <Text style={{ marginTop: 8 }}>
+            Exclusive agreement period: {e.exclusiveDays} days.
+            {e.upfrontFeeCents > 0 ? ' If your asset sells within that period, the upfront fee is credited against the commission.' : ''}
+          </Text>
+        )}
 
         <Text style={pdf.h2}>Payment</Text>
-        <Bank />
+        <Bank b={bank} />
       </Page>
     </PdfDocument>
   );
@@ -103,34 +127,51 @@ export type SignatureLine = { name: string; idNumber: string; phone: string; sig
 export function AgreementPdf({
   e,
   date,
+  title,
+  clauses,
+  legalApproved,
   signatures,
   draftSha256,
 }: {
   e: EngagementForPdf;
   date: Date;
+  title: string;
+  clauses: string[];
+  legalApproved: boolean;
   signatures?: SignatureLine[];
   draftSha256?: string;
 }) {
   return (
-    <PdfDocument title="Vikkaa exclusive marketing and sale agreement">
+    <PdfDocument title={`Vikkaa: ${title}`}>
       <Page size="A4" style={pdf.page}>
-        {!LEGAL_REVIEWED && <Text style={pdf.banner}>DRAFT WORDING, PENDING LEGAL REVIEW. Do not sign with a client yet.</Text>}
-        <Letterhead title="Exclusive marketing and sale agreement" date={date} />
+        {!legalApproved && <Text style={pdf.banner}>DRAFT WORDING, NOT APPROVED BY THE LAWYER. Do not sign.</Text>}
+        <Letterhead title={title} date={date} />
         <Text style={{ marginTop: 8 }}>
-          Between Vikkaa.lk and {e.client.name} ({e.client.phone}), the seller.
+          Between Vikkaa.lk and {e.client.name} ({e.client.phone}).
         </Text>
-        <Text style={pdf.h2}>Assets</Text>
-        <AssetList assets={e.assets} />
+        {e.assets.length > 0 && (
+          <>
+            <Text style={pdf.h2}>Assets</Text>
+            <AssetList assets={e.assets} />
+          </>
+        )}
         <Text style={pdf.h2}>Fees</Text>
-        <Text>Upfront marketing fee: {formatLkr(e.upfrontFeeCents)}</Text>
-        <Text>Advertising deposit: {formatLkr(e.adBudgetCents)}</Text>
+        {e.monthlyFeeCents > 0 && (
+          <Text>
+            Monthly retainer: {formatLkr(e.monthlyFeeCents)}
+            {e.unitsPerMonth ? ` for up to ${e.unitsPerMonth} listings a month` : ''}, billed in advance on day {e.billingDay ?? 1}
+          </Text>
+        )}
+        {(e.upfrontFeeCents > 0 || e.monthlyFeeCents === 0) && <Text>Upfront marketing fee: {formatLkr(e.upfrontFeeCents)}</Text>}
+        {e.adBudgetCents > 0 && <Text>Advertising deposit: {formatLkr(e.adBudgetCents)}</Text>}
         <Text style={pdf.h2}>Terms</Text>
-        <AgreementTerms
-          exclusiveDays={e.exclusiveDays}
-          followOnMonths={e.followOnMonths}
-          commissionPercent={percent(e.commissionRateBp)}
-          commissionApplies={e.commissionApplies}
-        />
+        <View>
+          {clauses.map((c, i) => (
+            <Text key={i} style={{ marginBottom: 6 }}>
+              {i + 1}. {c}
+            </Text>
+          ))}
+        </View>
       </Page>
       {signatures && (
         <Page size="A4" style={pdf.page}>
@@ -157,31 +198,42 @@ export function AgreementPdf({
   );
 }
 
+export type InvoiceLine = { label: string; amountCents: number };
+
 export function InvoicePdf({
   e,
   number,
   date,
-  amountCents,
+  lines,
   vatCents,
   totalCents,
+  dueOn,
+  bank,
+  title = 'Invoice',
 }: {
   e: EngagementForPdf;
   number: string;
   date: Date;
-  amountCents: number;
+  lines: InvoiceLine[];
   vatCents: number;
   totalCents: number;
+  dueOn?: string | null;
+  bank: BankDetails;
+  title?: string;
 }) {
   return (
-    <PdfDocument title={`Invoice ${number}`}>
+    <PdfDocument title={`${title} ${number}`}>
       <Page size="A4" style={pdf.page}>
-        <Letterhead title="Invoice" number={number} date={date} />
+        <Letterhead title={title} number={number} date={date} />
         <Text style={{ marginTop: 8 }}>Bill to: {e.client.name}, {e.client.phone}</Text>
+        {dueOn ? <Text style={pdf.muted}>Due by {dueOn}</Text> : null}
         <View style={{ marginTop: 16 }}>
-          <View style={pdf.row}>
-            <Text style={pdf.cell}>Marketing campaign fee: {e.assets.map((a) => a.title).join(', ')}</Text>
-            <Text style={pdf.right}>{formatLkr(amountCents)}</Text>
-          </View>
+          {lines.map((l, i) => (
+            <View key={i} style={pdf.row}>
+              <Text style={pdf.cell}>{l.label}</Text>
+              <Text style={pdf.right}>{formatLkr(l.amountCents)}</Text>
+            </View>
+          ))}
           {vatCents > 0 && (
             <View style={pdf.row}>
               <Text style={pdf.cell}>VAT {percent(config.vatRateBp)}%</Text>
@@ -194,7 +246,7 @@ export function InvoicePdf({
           </View>
         </View>
         <Text style={pdf.h2}>Pay by bank transfer</Text>
-        <Bank />
+        <Bank b={bank} />
         <Text style={[pdf.muted, { marginTop: 8 }]}>Please use {number} as the payment reference.</Text>
       </Page>
     </PdfDocument>
@@ -226,6 +278,68 @@ export function ReceiptPdf({
         <Text>Payment reference: {reference}</Text>
         <Text style={[pdf.muted, { marginTop: 8 }]}>
           This deposit is spent on paid advertising for your listing. You can follow the spend in your Vikkaa portal.
+        </Text>
+      </Page>
+    </PdfDocument>
+  );
+}
+
+export type ClaimEntry = { seq: number; type: string; channel: string; happenedAt: Date; recordedAt: Date; hash: string; assetTitle: string };
+
+/** Evidence for a commission claim: the signed terms, every recorded contact with the buyer, and the chain check. */
+export function ClaimPackPdf({
+  e,
+  date,
+  buyer,
+  entries,
+  chainOk,
+  signedAgreement,
+}: {
+  e: EngagementForPdf;
+  date: Date;
+  buyer: { name: string | null; phone: string } | null;
+  entries: ClaimEntry[];
+  chainOk: boolean;
+  signedAgreement: { sha256: string; issuedAt: Date } | null;
+}) {
+  const when = (d: Date) => d.toLocaleString('en-GB', { timeZone: 'Asia/Colombo' });
+  return (
+    <PdfDocument title="Vikkaa commission claim pack">
+      <Page size="A4" style={pdf.page}>
+        <Letterhead title="Commission claim pack" date={date} />
+        <Text style={{ marginTop: 8 }}>Client: {e.client.name} ({e.client.phone})</Text>
+        {buyer ? <Text>Buyer: {buyer.name ?? 'Unnamed'} ({buyer.phone})</Text> : null}
+        <Text style={pdf.h2}>Signed terms</Text>
+        <Text>
+          Signed {e.signedAt ? when(new Date(e.signedAt)) : 'not signed'} · exclusive period {e.exclusiveDays} days
+          {e.endsAt ? ` (ended ${when(new Date(e.endsAt))})` : ''} · follow-on {e.followOnMonths} months · commission {percent(e.commissionRateBp)}%
+        </Text>
+        {signedAgreement ? (
+          <Text style={pdf.muted}>
+            Signed agreement fingerprint (SHA-256): {signedAgreement.sha256}, stored {when(signedAgreement.issuedAt)}
+          </Text>
+        ) : null}
+        <Text style={pdf.h2}>Recorded contacts</Text>
+        {entries.map((x) => (
+          <View key={x.seq} style={pdf.row} wrap={false}>
+            <Text style={pdf.cell}>
+              #{x.seq} {when(x.happenedAt)}
+            </Text>
+            <Text style={pdf.cell}>
+              {x.type.replace('_', ' ')} by {x.channel.replace('_', ' ')}: {x.assetTitle}
+            </Text>
+            <Text style={[pdf.muted, { width: 150 }]}>{x.hash.slice(0, 24)}…</Text>
+          </View>
+        ))}
+        {entries.length === 0 ? <Text style={pdf.muted}>No recorded contacts.</Text> : null}
+        <Text style={pdf.h2}>Integrity</Text>
+        <Text>
+          {chainOk
+            ? 'The evidence log was re-checked when this pack was made: every entry is unchanged and in its original order.'
+            : 'WARNING: the evidence log check failed. Do not rely on this pack until the log is investigated.'}
+        </Text>
+        <Text style={[pdf.muted, { marginTop: 6 }]}>
+          Each entry is chained to the one before it with a SHA-256 fingerprint, recorded at the time shown, and cannot be edited or deleted.
         </Text>
       </Page>
     </PdfDocument>

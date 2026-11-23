@@ -1,10 +1,11 @@
 import { sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { numberSequences } from '@/db/schema';
+import { sriLankaYear } from '@/lib/sl-time';
 
-/** Next number like "VKA-2026-001". One atomic upsert, so concurrent calls never collide. Resets each calendar year. */
+/** Next number like "VKA-2026-001". One atomic upsert, so concurrent calls never collide. Resets each Sri Lanka calendar year. */
 export async function nextDocumentNumber(prefix: 'VKA' | 'RCP', at: Date = new Date()): Promise<string> {
-  const year = at.getUTCFullYear();
+  const year = sriLankaYear(at);
   const [row] = await db
     .insert(numberSequences)
     .values({ key: `${prefix}-${year}`, last: 1 })

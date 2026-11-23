@@ -1,4 +1,5 @@
 import { requireStaff } from '@/server/auth-guard';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import { asc } from 'drizzle-orm';
 import { db } from '@/db';
 import { areaPrices } from '@/db/schema';
@@ -25,11 +26,11 @@ export default async function AreaPricesPage() {
       <table className="w-full rounded-md border bg-background text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
-            <th className="p-3">Kind</th>
-            <th className="p-3">Where / which</th>
-            <th className="p-3">Range</th>
-            <th className="p-3">Source</th>
-            <th className="p-3" />
+            <th scope="col" className="p-3">Kind</th>
+            <th scope="col" className="p-3">Where / which</th>
+            <th scope="col" className="p-3">Range</th>
+            <th scope="col" className="p-3">Source</th>
+            <th scope="col" className="p-3" />
           </tr>
         </thead>
         <tbody>
@@ -48,7 +49,7 @@ export default async function AreaPricesPage() {
                 <td className="p-3 text-muted-foreground">{r.source}</td>
                 <td className="p-3 text-right">
                   <form action={remove}>
-                    <button className="text-xs text-destructive underline">Delete</button>
+                    <SubmitButton plain confirm="Delete this price?" className="text-xs text-destructive">Delete</SubmitButton>
                   </form>
                 </td>
               </tr>

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { ArrowUpRight, Clapperboard, HandCoins, Radio } from 'lucide-react';
 import { listPortfolio } from '@/server/public-assets';
+import { publicChannels } from '@/server/channels';
+import { config } from '@/lib/config';
 import { AssetCard } from '@/components/site/AssetCard';
 import { STOCK, stockUrl, type StockPhoto } from '@/components/site/stock';
 import { TICK_PATH, TICK_VIEWBOX } from '@/components/site/tick';
@@ -58,8 +60,19 @@ const LiveDot = () => (
 
 export default async function Home() {
   const latest = (await listPortfolio(3)).slice(0, 3);
+  const organization = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateAgent',
+    name: 'Vikkaa.lk',
+    url: config.publicUrl,
+    logo: `${config.publicUrl}/brand/logo.png`,
+    telephone: config.vikkaaPhone,
+    areaServed: 'Western Province, Sri Lanka',
+    sameAs: (await publicChannels()).map((c) => c.url),
+  };
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization).replace(/</g, '\\u003c') }} />
       <Hero />
 
       {/* Where every campaign goes live: the brand film plays inside the platform names */}
@@ -414,7 +427,7 @@ function Hero() {
       <div className={`${wrap} grid gap-10 pb-10 pt-32 md:grid-cols-[1fr_auto] md:items-end md:pb-14`}>
         <div>
           <p className="eyebrow text-white/80 motion-safe:animate-rise">
-            Property and vehicle marketing<span className="hidden sm:inline">, Sri Lanka</span>
+            Verified property sales<span className="hidden sm:inline">, Western Province</span>
           </p>
           <h1 id="hero-h" className="mt-6 font-display text-[clamp(46px,7.6vw,128px)] leading-[0.94] tracking-[-0.01em]">
             {HERO_LINES.map((line, i) => (
@@ -426,7 +439,8 @@ function Hero() {
             ))}
           </h1>
           <p className="mt-7 max-w-[50ch] text-[17px] text-white/85 motion-safe:animate-rise md:text-lg" style={{ animationDelay: '520ms' }}>
-            We price it with real market data, film it ourselves, run it on every platform at once and handle every buyer until it sells.
+            Filmed, marketed and sold for you. We price it with real market data, film it ourselves, run it on every platform at once and handle
+            every buyer until it sells.
           </p>
           <div className="mt-9 flex flex-wrap gap-3 motion-safe:animate-rise" style={{ animationDelay: '640ms' }}>
             <Link href="/sell" className="btn btn-light">

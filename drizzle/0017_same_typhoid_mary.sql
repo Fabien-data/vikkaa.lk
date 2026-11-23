@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "deals_one_open_per_asset_idx" ON "deals" USING btree ("asset_id") WHERE "deals"."status" = 'agreed';

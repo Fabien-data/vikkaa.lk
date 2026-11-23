@@ -1,5 +1,5 @@
 'use client';
-import { useActionState, useState } from 'react';
+import { cloneElement, isValidElement, useActionState, useState, type ReactElement } from 'react';
 import Link from 'next/link';
 import { submitSell, type SellState } from './actions';
 import { DISTRICTS } from '@/lib/rules';
@@ -30,10 +30,12 @@ function Field({
   children: React.ReactNode;
 }) {
   const error = errors?.[name]?.[0];
+  // Mark the control itself invalid so screen readers announce it on focus, not only when the error appears.
+  const control = error && isValidElement(children) ? cloneElement(children as ReactElement<{ 'aria-invalid'?: boolean }>, { 'aria-invalid': true }) : children;
   return (
     <label className={`${fieldLabel} ${error ? '[&_:is(input,select,textarea)]:border-[#b42318]' : ''}`}>
       {label}
-      {children}
+      {control}
       {error && (
         <span role="alert" className={fieldError}>
           {error}

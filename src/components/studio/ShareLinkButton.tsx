@@ -6,10 +6,11 @@ export function ShareLinkButton({
   getLink,
   label,
 }: {
-  getLink: () => Promise<{ url: string; whatsapp: string }>;
+  getLink: () => Promise<{ url: string; whatsapp: string } | { error: string }>;
   label: string;
 }) {
   const [link, setLink] = useState<{ url: string; whatsapp: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
 
@@ -33,8 +34,26 @@ export function ShareLinkButton({
     );
   }
   return (
-    <button type="button" disabled={pending} className="text-xs underline" onClick={() => start(async () => setLink(await getLink()))}>
-      {label}
-    </button>
+    <span className="flex flex-wrap items-center gap-2 text-xs">
+      <button
+        type="button"
+        disabled={pending}
+        className="underline"
+        onClick={() =>
+          start(async () => {
+            const r = await getLink();
+            if ('error' in r) setError(r.error);
+            else setLink(r);
+          })
+        }
+      >
+        {label}
+      </button>
+      {error && (
+        <span role="alert" className="text-destructive">
+          {error}
+        </span>
+      )}
+    </span>
   );
 }

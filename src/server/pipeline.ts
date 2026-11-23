@@ -40,6 +40,11 @@ export async function advanceEngagement(
     await db.update(engagements).set({ stage: 'intake' }).where(eq(engagements.id, id));
     return;
   }
+  if (from === 'signed' && to === 'closed') {
+    if (!data.reason?.trim()) throw new InvalidTransitionError('Say why the file is being closed (sold, expired, client ended it…)');
+    await db.update(engagements).set({ stage: 'closed', closedReason: data.reason.trim() }).where(eq(engagements.id, id));
+    return;
+  }
   throw new InvalidTransitionError(`Cannot move an engagement from ${from} to ${to}`);
 }
 

@@ -1,4 +1,5 @@
 import { requireStaff } from '@/server/auth-guard';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { asc, eq } from 'drizzle-orm';
@@ -10,7 +11,10 @@ import { Field, inputClass } from '@/components/studio/Field';
 import { Button } from '@/components/ui/button';
 import { formatLkr } from '@/lib/money';
 import { stageLabel, statusLabel } from '@/lib/enums';
-import { addComparable, deleteComparable, recalculateFit, saveEngagement } from '../actions';
+import { addComparable, applyPackageAction, closeFile, deleteComparable, recalculateFit, saveEngagement } from '../actions';
+import { listPackages } from '@/server/packages';
+import { AGREEMENT_TITLES, kindFor } from '@/server/agreement-templates';
+import { AGREEMENT_KINDS } from '@/db/schema';
 import { NoGoForm } from './no-go-form';
 import { DocumentsSection } from './documents-section';
 import { SignatoriesSection } from './signatories-section';
@@ -34,9 +38,10 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const e = await db.query.engagements.findFirst({
     where: eq(engagements.id, id),
-    with: { client: true, assets: { orderBy: asc(assets.createdAt) }, comparables: { orderBy: asc(comparables.observedOn) } },
+    with: { client: true, package: true, assets: { orderBy: asc(assets.createdAt) }, comparables: { orderBy: asc(comparables.observedOn) } },
   });
   if (!e) notFound();
+  const offers = await listPackages({ activeOnly: true });
 
   async function recalc() {
     'use server';
@@ -66,6 +71,16 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
         {e.stage === 'no_go' && (
           <p className="text-sm text-muted-foreground">Not going ahead: {e.noGoReason}</p>
         )}
+        {e.stage === 'closed' && <p className="text-sm text-muted-foreground">Closed: {e.closedReason}</p>}
+        {e.stage === 'signed' && (
+          <details className="text-sm">
+            <summary className="cursor-pointer text-muted-foreground underline">Close this file</summary>
+            <ActionForm action={closeFile} submitLabel="Close file" className="mt-2 flex flex-wrap items-end gap-2">
+              <input type="hidden" name="id" value={e.id} />
+              <input name="reason" placeholder="Sold and paid, expired, client ended it…" aria-label="Why the file is closed" className={`${inputClass} max-w-md`} />
+            </ActionForm>
+          </details>
+        )}
       </header>
 
       {answers.length > 0 && (
@@ -83,6 +98,39 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
       )}
 
       <section className="rounded-md border bg-background p-5">
+        <h2 className="mb-1 font-semibold">Package</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          {e.package ? (
+            <>
+              Applied: <span className="font-medium text-foreground">{e.package.name}</span>
+              {e.foundingTerms && <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs text-foreground">Founding terms</span>}
+              . Applying again overwrites the terms below.
+            </>
+          ) : (
+            'Apply a package from the price book to fill the terms below, or type them by hand.'
+          )}
+        </p>
+        {offers.length ? (
+          <ActionForm action={applyPackageAction} submitLabel="Apply package" className="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="id" value={e.id} />
+            <select name="packageId" defaultValue={e.packageId ?? ''} className={`${inputClass} max-w-md`}>
+              <option value="">Choose a package…</option>
+              {offers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({formatLkr(p.priceCents)}
+                  {p.kind === 'retainer' ? ' / month' : ''})
+                </option>
+              ))}
+            </select>
+          </ActionForm>
+        ) : (
+          <Link href="/studio/settings/prices" className="text-sm underline">
+            Add packages to the price book first
+          </Link>
+        )}
+      </section>
+
+      <section className="rounded-md border bg-background p-5">
         <h2 className="mb-4 font-semibold">Terms and plan</h2>
         <ActionForm action={saveEngagement} submitLabel="Save terms">
           <input type="hidden" name="id" value={e.id} />
@@ -90,11 +138,23 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
             <Field label="Upfront fee (Rs)">
               <input name="upfrontFeeRupees" defaultValue={rupees(e.upfrontFeeCents)} className={inputClass} />
             </Field>
+            <Field label="Monthly fee (Rs)" hint="Retainers only">
+              <input name="monthlyFeeRupees" defaultValue={rupees(e.monthlyFeeCents)} className={inputClass} />
+            </Field>
+            <Field label="Listings a month" hint="Retainers only">
+              <input name="unitsPerMonth" defaultValue={e.unitsPerMonth ?? ''} className={inputClass} />
+            </Field>
+            <Field label="Billing day (1–28)" hint="Retainers only">
+              <input name="billingDay" defaultValue={e.billingDay ?? ''} className={inputClass} />
+            </Field>
             <Field label="Ad budget (Rs)" hint="Paid by the client as a deposit">
               <input name="adBudgetRupees" defaultValue={rupees(e.adBudgetCents)} className={inputClass} />
             </Field>
             <Field label="Commission (%)">
               <input name="commissionPercent" defaultValue={e.commissionRateBp / 100} className={inputClass} />
+            </Field>
+            <Field label="Minimum commission (Rs)">
+              <input name="commissionMinRupees" defaultValue={rupees(e.commissionMinCents)} className={inputClass} />
             </Field>
             <Field label="Exclusive period (days)">
               <input name="exclusiveDays" defaultValue={e.exclusiveDays} className={inputClass} />
@@ -106,6 +166,15 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
               <input type="checkbox" name="commissionApplies" defaultChecked={e.commissionApplies} /> Commission applies
             </label>
           </div>
+          <Field label="Agreement wording" hint="Set automatically from the package; change only if this deal needs different wording">
+            <select name="agreementKind" defaultValue={kindFor(e)} className={inputClass}>
+              {AGREEMENT_KINDS.map((k) => (
+                <option key={k} value={k}>
+                  {AGREEMENT_TITLES[k]}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Content plan">
             <textarea name="contentPlan" rows={4} defaultValue={e.contentPlan ?? ''} className={inputClass} />
           </Field>
@@ -157,7 +226,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
                   <td className="py-2 text-muted-foreground">{c.observedOn}</td>
                   <td className="py-2 text-right">
                     <form action={remove}>
-                      <button className="text-xs text-destructive underline">Remove</button>
+                      <SubmitButton plain confirm="Remove this comparable?" className="text-xs text-destructive">Remove</SubmitButton>
                     </form>
                   </td>
                 </tr>

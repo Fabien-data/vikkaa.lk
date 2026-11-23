@@ -1,4 +1,5 @@
 import { requireStaff } from '@/server/auth-guard';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { desc, eq } from 'drizzle-orm';
@@ -13,11 +14,13 @@ import { Field, inputClass } from '@/components/studio/Field';
 import { changeAssetStatus, movePhoto, removePhoto, saveAsset, uploadAssetPhotos } from '../actions';
 import { NotesPanel } from '@/components/studio/NotesPanel';
 import { ContentSection } from './content-section';
+import { DealSection } from './deal-section';
 import { TasksPanel } from '@/components/studio/TasksPanel';
 
-export default async function AssetPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AssetPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ buyer?: string }> }) {
   await requireStaff();
   const { id } = await params;
+  const { buyer } = await searchParams;
   const [asset] = await db.select().from(assets).where(eq(assets.id, id));
   if (!asset) notFound();
   const entries = await db.query.evidenceEntries.findMany({
@@ -110,7 +113,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
                     </button>
                   </form>
                   <form action={remove}>
-                    <button className="text-destructive underline">Remove</button>
+                    <SubmitButton plain confirm="Remove this photo?" className="text-destructive">Remove</SubmitButton>
                   </form>
                 </div>
               </li>
@@ -122,6 +125,8 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
           <input type="file" name="photos" accept="image/*" multiple className="text-sm" />
         </ActionForm>
       </section>
+
+      <DealSection assetId={asset.id} preselectBuyer={buyer} />
 
       <ContentSection assetId={asset.id} />
 

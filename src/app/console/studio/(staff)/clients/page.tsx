@@ -31,10 +31,10 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
       <table className="w-full rounded-md border bg-background text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
-            <th className="p-3">Name</th>
-            <th className="p-3">Type</th>
-            <th className="p-3">Phone</th>
-            <th className="p-3">Engagements</th>
+            <th scope="col" className="p-3">Name</th>
+            <th scope="col" className="p-3">Type</th>
+            <th scope="col" className="p-3">Phone</th>
+            <th scope="col" className="p-3">Engagements</th>
           </tr>
         </thead>
         <tbody>

@@ -37,11 +37,11 @@ export default async function EngagementsPage({ searchParams }: { searchParams: 
       <table className="w-full rounded-md border bg-background text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
-            <th className="p-3">Client</th>
-            <th className="p-3">Assets</th>
-            <th className="p-3">Stage</th>
-            <th className="p-3">Fit</th>
-            <th className="p-3">Received</th>
+            <th scope="col" className="p-3">Client</th>
+            <th scope="col" className="p-3">Assets</th>
+            <th scope="col" className="p-3">Stage</th>
+            <th scope="col" className="p-3">Fit</th>
+            <th scope="col" className="p-3">Received</th>
           </tr>
         </thead>
         <tbody>

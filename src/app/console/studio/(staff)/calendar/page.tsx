@@ -1,4 +1,5 @@
 import { requireStaff } from '@/server/auth-guard';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import Link from 'next/link';
 import { sriLankaDay, weekView } from '@/server/bookings';
 import { deleteBooking } from './actions';
@@ -61,7 +62,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                         {time(b.startsAt)}–{time(new Date(b.startsAt.getTime() + b.durationMinutes * 60_000))}
                       </span>
                       <span className="font-medium capitalize">{b.type}</span>
-                      <Link href={`/studio/engagements/${b.engagementId}`} className="hover:underline">
+                      <Link href={b.engagementId ? `/studio/engagements/${b.engagementId}` : `/studio/prospects/${b.prospectId}`} className="hover:underline">
                         {b.clientName}
                         {b.assetTitle && `: ${b.assetTitle}`}
                       </Link>
@@ -72,7 +73,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
                         </Link>
                       )}
                       <form action={remove} className="ml-auto">
-                        <button className="text-xs text-destructive underline">Cancel</button>
+                        <SubmitButton plain confirm="Cancel this booking?" className="text-xs text-destructive">Cancel</SubmitButton>
                       </form>
                     </li>
                   );

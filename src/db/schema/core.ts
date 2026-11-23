@@ -1,5 +1,5 @@
-import { relations } from 'drizzle-orm';
-import { pgTable, pgEnum, text, integer, bigint, boolean, jsonb, timestamp, date, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
+import { pgTable, pgEnum, text, integer, bigint, boolean, jsonb, timestamp, date, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
 import {
   CLIENT_TYPES,
   ENGAGEMENT_TYPES,
@@ -47,10 +47,44 @@ export const clients = pgTable(
     phone: text().notNull(),
     email: text(),
     notes: text(),
+    /** Where the client came from: a prospect segment, referral, web form… */
+    source: text(),
     ...timestamps,
   },
   (t) => [uniqueIndex('clients_org_phone_idx').on(t.organizationId, t.phone)],
 );
+
+export const AGREEMENT_KINDS = ['seller_exclusive', 'founding', 'retainer', 'pilot'] as const;
+export type AgreementKind = (typeof AGREEMENT_KINDS)[number];
+export const agreementKind = pgEnum('agreement_kind', AGREEMENT_KINDS);
+
+export const PACKAGE_KINDS = ['upfront', 'retainer', 'pilot'] as const;
+export type PackageKind = (typeof PACKAGE_KINDS)[number];
+export const packageKind = pgEnum('package_kind', PACKAGE_KINDS);
+
+/** The price book. Applying a package copies its terms onto the engagement, so later price changes never alter a quote. */
+export const packages = pgTable('packages', {
+  id: id(),
+  organizationId: org(),
+  name: text().notNull(),
+  /** Who it is for: dealer, developer, private, overseas. */
+  segment: text().notNull(),
+  category: assetCategory().notNull(),
+  kind: packageKind().notNull(),
+  priceCents: money().notNull(),
+  unitsPerMonth: integer(),
+  exclusiveDays: integer(),
+  followOnMonths: integer(),
+  /** null keeps the engagement's rate; 0 means no commission. */
+  commissionBp: integer(),
+  commissionMinCents: money().notNull().default(0),
+  founding: boolean().notNull().default(false),
+  /** Used for the public "campaigns from Rs X" guide. */
+  publicFrom: boolean().notNull().default(false),
+  active: boolean().notNull().default(true),
+  sortOrder: integer().notNull().default(0),
+  ...timestamps,
+});
 
 export const engagements = pgTable('engagements', {
   id: id(),
@@ -59,6 +93,17 @@ export const engagements = pgTable('engagements', {
     .notNull()
     .references(() => clients.id),
   type: engagementType().notNull(),
+  packageId: text().references(() => packages.id),
+  /** Which agreement wording applies; derived from the terms when null (see agreement-templates.ts). */
+  agreementKind: agreementKind(),
+  foundingTerms: boolean().notNull().default(false),
+  monthlyFeeCents: money().notNull().default(0),
+  unitsPerMonth: integer(),
+  /** Day of the month retainer invoices are issued (1–28). */
+  billingDay: integer(),
+  retainerEndsOn: date(),
+  /** Contract minimum commission (vehicles), snapshotted per engagement. */
+  commissionMinCents: money().notNull().default(0),
   stage: engagementStage().notNull().default('intake'),
   parentEngagementId: text(),
   intakeAnswers: jsonb().$type<Record<string, unknown>>(),
@@ -73,6 +118,7 @@ export const engagements = pgTable('engagements', {
   contentPlan: text(),
   marketNotes: text(),
   noGoReason: text(),
+  closedReason: text(),
   priceRead: text(),
   signedAt: timestamp(),
   endsAt: timestamp(),
@@ -136,22 +182,26 @@ export const comparables = pgTable('comparables', {
   ...timestamps,
 });
 
-export const bookingType = pgEnum('booking_type', ['visit', 'shoot']);
+export const bookingType = pgEnum('booking_type', ['visit', 'shoot', 'call', 'pitch']);
 
-export const bookings = pgTable('bookings', {
-  id: id(),
-  organizationId: org(),
-  engagementId: text()
-    .notNull()
-    .references(() => engagements.id),
-  assetId: text().references(() => assets.id),
-  type: bookingType().notNull(),
-  startsAt: timestamp({ withTimezone: true }).notNull(),
-  durationMinutes: integer().notNull(),
-  area: text().notNull(),
-  notes: text(),
-  ...timestamps,
-});
+export const bookings = pgTable(
+  'bookings',
+  {
+    id: id(),
+    organizationId: org(),
+    engagementId: text().references(() => engagements.id),
+    /** A pitch visit or call with a prospect. FK added in migration 0014 (prospects live in growth.ts). */
+    prospectId: text(),
+    assetId: text().references(() => assets.id),
+    type: bookingType().notNull(),
+    startsAt: timestamp({ withTimezone: true }).notNull(),
+    durationMinutes: integer().notNull(),
+    area: text().notNull(),
+    notes: text(),
+    ...timestamps,
+  },
+  (t) => [check('bookings_owner_check', sql`${t.engagementId} is not null or ${t.prospectId} is not null`)],
+);
 
 export const draftKind = pgEnum('draft_kind', ['photo_set', 'video', 'reel']);
 export const draftStatus = pgEnum('draft_status', ['pending', 'approved', 'changes_requested', 'withdrawn']);
@@ -174,7 +224,7 @@ export const contentDrafts = pgTable('content_drafts', {
 });
 
 /** What a note or task is about. subjectId points at that table's row (no FK: it spans four tables). */
-export const subjectType = pgEnum('subject_type', ['client', 'engagement', 'asset', 'buyer']);
+export const subjectType = pgEnum('subject_type', ['client', 'engagement', 'asset', 'buyer', 'prospect']);
 
 export const notes = pgTable(
   'notes',
@@ -203,6 +253,8 @@ export const tasks = pgTable(
     dueAt: timestamp({ withTimezone: true }),
     assignedUserId: text().references(() => user.id),
     doneAt: timestamp({ withTimezone: true }),
+    /** Makes automated tasks happen exactly once (reminders, alerts). */
+    dedupeKey: text().unique(),
     ...timestamps,
   },
   (t) => [index('tasks_subject_idx').on(t.subjectType, t.subjectId)],
@@ -211,6 +263,7 @@ export const tasks = pgTable(
 export const clientsRelations = relations(clients, ({ many }) => ({ engagements: many(engagements) }));
 export const engagementsRelations = relations(engagements, ({ one, many }) => ({
   client: one(clients, { fields: [engagements.clientId], references: [clients.id] }),
+  package: one(packages, { fields: [engagements.packageId], references: [packages.id] }),
   assets: many(assets),
   comparables: many(comparables),
 }));
@@ -223,6 +276,7 @@ export const comparablesRelations = relations(comparables, ({ one }) => ({
 
 export type Client = typeof clients.$inferSelect;
 export type Engagement = typeof engagements.$inferSelect;
+export type Package = typeof packages.$inferSelect;
 export type Asset = typeof assets.$inferSelect;
 export type AreaPrice = typeof areaPrices.$inferSelect;
 export type Comparable = typeof comparables.$inferSelect;

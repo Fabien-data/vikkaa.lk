@@ -7,6 +7,7 @@ import { verifySignedPath } from '@/lib/signed-url';
 import { rateLimit } from '@/lib/rate-limit';
 import { sendSigningCode, OtpTooSoonError } from '@/server/otp';
 import { signAgreement, SigningError } from '@/server/agreement-signer';
+import { signingBlocker } from '@/server/agreement-templates';
 
 export type CodeState = { sent?: string; error?: string } | undefined;
 export type SignState = { signed?: true; allSigned?: boolean; error?: string } | undefined;
@@ -20,6 +21,8 @@ function mask(contact: string): string {
 export async function requestCode(id: string, exp: string, sig: string): Promise<CodeState> {
   if (!linkOk(id, exp, sig)) return { error: 'This link has expired. Ask Vikkaa for a new one.' };
   if (!rateLimit(`otp:${id}`, 5, 3_600_000)) return { error: 'Too many codes requested. Try again in an hour.' };
+  const [owner] = await db.select({ engagementId: signatories.engagementId }).from(signatories).where(eq(signatories.id, id));
+  if (!owner || (await signingBlocker(owner.engagementId))) return { error: 'This agreement is not ready to sign yet. Ask Vikkaa for a new link.' };
   try {
     const channel = await sendSigningCode(id);
     const [s] = await db.select({ phone: signatories.phone, email: signatories.email }).from(signatories).where(eq(signatories.id, id));

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
-import { clients, engagements, assets, signatories, documents } from '@/db/schema';
+import { clients, engagements, assets, signatories, documents, agreementTemplates } from '@/db/schema';
 
 const sms: { to: string; message: string }[] = [];
 const emails: { to: unknown; text: string }[] = [];
@@ -22,6 +22,7 @@ vi.mock('next/cache', () => ({ revalidatePath: () => {} }));
 import { sendSigningCode, verifySigningCode, OtpTooSoonError } from '@/server/otp';
 import { signAgreement, signWithPaperScan } from '@/server/agreement-signer';
 import { generateAgreementDraft } from '@/server/documents';
+import { ensureDraftTemplates } from '@/server/agreement-templates';
 import { saveSignatory } from '@/app/console/studio/(staff)/engagements/[id]/signatory-actions';
 import { saveEngagement } from '@/app/console/studio/(staff)/engagements/actions';
 
@@ -37,6 +38,9 @@ async function seed(people: { phone: string; email?: string }[] = [{ phone: '+94
   await db.insert(assets).values({
     engagementId: e.id, category: 'property', kind: 'house', title: 'House', slug: `h-${crypto.randomUUID()}`, district: 'Colombo', area: 'Nugegoda', askingPriceCents: 100,
   });
+  // These tests are about signing mechanics, so the wording counts as lawyer-approved here.
+  await ensureDraftTemplates();
+  await db.update(agreementTemplates).set({ approvedAt: new Date(), approvedBy: 'Test Lawyer', approvalReference: 'test' });
   await generateAgreementDraft(e.id);
   const rows = await db
     .insert(signatories)

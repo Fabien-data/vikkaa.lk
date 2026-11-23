@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: The plan has strangers sign an exclusive, owe commission "no matter who found the buyer" with a 6-month tail, and hand over an upfront fee plus an ad deposit to an unknown firm, but the contract that would make any of it enforceable does not exist yet. The record also never says who pays the lawyer when capital is zero, how the ad deposit is held or refunded, or whether the fee is refunded if nothing sells, and that is how a first client turns into a dispute instead of a case study.
+DECIDING FACT: "A lawyer is to draft the agreement wording," while founding-client work is planned for "the first week of December 2026."
+WOULD FLIP IF: A lawyer-drafted exclusive agreement were in hand before the first signing, covering the commission and follow-on terms, how the client's ad deposit is held and refunded, and what happens to the upfront fee if the asset does not sell.

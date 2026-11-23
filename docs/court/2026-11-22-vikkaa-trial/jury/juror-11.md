@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: A stranger cannot tell in five seconds what Vikkaa is. The case calls it an "advertising/marketing company" that will dominate Sri Lanka and go international, chasing "several markets at once". The design underneath is an exclusive, commission-taking sales agent. Its fee is "not decided yet" and it has no case study to show, so the offer is blurred and so is the reason to trust it.
+DECIDING FACT: The defense itself concedes that "dominates in Sri Lanka", international reach and "several markets at once" "cannot be defended now; only the Western Province property plan can".
+WOULD FLIP IF: The case were restated as one plain offer, a done-for-you property sales service in the Western Province with a set upfront fee and stated founding-client terms. Then a stranger could grasp what they are signing and why in one read.

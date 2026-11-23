@@ -89,7 +89,7 @@ export function assetJsonLd(a: PublicAsset): Record<string, unknown> {
   };
 }
 
-const STATIC_PAGES = ['/', '/how-it-works', '/portfolio', '/sell', '/buy', '/privacy', '/terms'];
+const STATIC_PAGES = ['/', '/how-it-works', '/portfolio', '/sell', '/buy', '/dealers', '/developers', '/privacy', '/terms'];
 
 export async function sitemapXml(): Promise<string> {
   const items = await listPortfolio(5000);

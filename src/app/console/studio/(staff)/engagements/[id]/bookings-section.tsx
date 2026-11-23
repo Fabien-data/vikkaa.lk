@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SubmitButton } from '@/components/studio/SubmitButton';
 import { asc, eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { bookings, type Asset } from '@/db/schema';
@@ -41,7 +42,7 @@ export async function BookingsSection({ engagementId, assets }: { engagementId: 
                 </Link>
               )}
               <form action={remove} className="ml-auto">
-                <button className="text-xs text-destructive underline">Cancel</button>
+                <SubmitButton plain confirm="Cancel this booking?" className="text-xs text-destructive">Cancel</SubmitButton>
               </form>
             </li>
           );
