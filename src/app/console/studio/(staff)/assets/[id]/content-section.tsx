@@ -16,7 +16,7 @@ export async function ContentSection({ assetId }: { assetId: string }) {
   ]);
 
   return (
-    <section className="rounded-md border bg-background p-5">
+    <section className="panel p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-semibold">Content for client approval</h2>
         <span className={`text-sm ${ready ? 'text-emerald-700' : 'text-amber-700'}`}>

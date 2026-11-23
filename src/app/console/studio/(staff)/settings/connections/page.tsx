@@ -31,7 +31,7 @@ export default async function ConnectionsPage() {
   return (
     <div className="grid gap-6">
       <header className="grid gap-3">
-        <h1 className="text-2xl font-semibold">Channels and connections</h1>
+        <h1 className="page-title">Channels and connections</h1>
         <SettingsNav current="/studio/settings/connections" />
         <p className="max-w-3xl text-sm text-muted-foreground">
           {set} of {rows.length} set. Save each handle and link as you create the account. Public channels appear in the site footer as soon
@@ -48,7 +48,7 @@ export default async function ConnectionsPage() {
             {inGroup.map((r) => {
               const def = channelDef(r.key)!;
               return (
-                <div key={r.key} className="rounded-md border bg-background p-4">
+                <div key={r.key} className="panel p-4">
                   <div className="mb-3 flex flex-wrap items-center gap-3">
                     <span className="font-medium">{def.label}</span>
                     <span className={`rounded px-2 py-0.5 text-xs ${STATUS_STYLE[r.status]}`}>{STATUS_TEXT[r.status]}</span>

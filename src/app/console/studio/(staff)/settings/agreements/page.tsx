@@ -10,7 +10,7 @@ export default async function AgreementsPage() {
   return (
     <div className="grid gap-6">
       <header className="grid gap-3">
-        <h1 className="text-2xl font-semibold">Agreement wording</h1>
+        <h1 className="page-title">Agreement wording</h1>
         <SettingsNav current="/studio/settings/agreements" />
         <p className="max-w-3xl text-sm text-muted-foreground">
           Nobody can sign until the lawyer approves the wording. Type in the lawyer&rsquo;s text, send them the preview, and once they confirm in
@@ -21,13 +21,13 @@ export default async function AgreementsPage() {
         const list = versions.filter((v) => v.kind === kind);
         const live = list.find((v) => v.approvedAt);
         return (
-          <section key={kind} className="rounded-md border bg-background p-5">
+          <section key={kind} className="panel p-5">
             <h2 className="flex flex-wrap items-center gap-3 font-semibold">
               {AGREEMENT_TITLES[kind]}
               {live ? (
-                <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-900">Signable: version {live.version}</span>
+                <span className="chip bg-emerald-100 text-xs text-emerald-900">Signable: version {live.version}</span>
               ) : (
-                <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-900">Not signable yet</span>
+                <span className="chip bg-amber-100 text-xs text-amber-900">Not signable yet</span>
               )}
             </h2>
             <ul className="mt-3 grid gap-1 text-sm">

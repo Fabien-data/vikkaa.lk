@@ -36,15 +36,16 @@ describe('scoreFit', () => {
     expect(scoreFit(ideal, null, range).flags).toEqual(['no_market_data']);
   });
 
-  it('flags testing the market, document issues, owner disagreement and no exclusivity as red', () => {
+  it('flags testing the market, document issues and owner disagreement as red; no exclusivity is only noted', () => {
     const r = scoreFit(
       { timeline: 'testing', documents: 'lease_owed', ownersAgree: false, exclusiveOk: false, inWesternProvince: true },
       1_000_000_000,
       range,
     );
     expect(r.flags).toEqual(['testing_market', 'document_issue', 'owners_disagree', 'no_exclusivity']);
-    expect(r.score).toBe(30);
+    expect(r.score).toBe(45);
     expect(r.suggestNoGo).toBe(true);
+    expect(scoreFit({ ...ideal, exclusiveOk: false }, 1_000_000_000, range)).toEqual({ score: 100, flags: ['no_exclusivity'], suggestNoGo: false });
   });
 
   it('outside WP is not red', () => {

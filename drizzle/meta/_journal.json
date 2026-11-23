@@ -127,6 +127,13 @@
       "when": 1795374034117,
       "tag": "0017_same_typhoid_mary",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1795430345430,
+      "tag": "0018_condemned_kang",
+      "breakpoints": true
     }
   ]
 }

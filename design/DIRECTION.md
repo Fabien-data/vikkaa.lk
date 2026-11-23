@@ -78,6 +78,24 @@
 
 **Honesty rule.** Never invent statistics, testimonials, client names, awards or founder photos. Counters may only state true facts about the service (for example "1 visit to shoot everything", or "Rs 0 until you approve the plan").
 
+## Studio edition (app.vikkaa.lk, 23 November 2026)
+
+The working app uses the same brand, tuned for daily use.
+
+- **Scope.** `src/app/console/layout.tsx` wraps every app page in `.app`, which maps shadcn's tokens to the brand. Pages using `bg-background`, `bg-muted`, `text-muted-foreground` or `bg-primary` are themed automatically. The public site is not affected.
+- **Canvas and surfaces.** Pages sit on paper with a faint green glow. Sections use the `panel` utility: a white surface with `rounded-[1.25rem]` corners, a hairline border and a soft green-tinted shadow.
+- **Shell.** On desktop there is a fixed `bg-glow grain` sidebar, with nav grouped into Sell / Deliver / Run, lucide icons and a mint active bar. On mobile it becomes a top bar with an accessible drawer. Sign out lives in the sidebar footer.
+- **Type.** Page `h1`s use `page-title` (Instrument Serif). Small section labels use `eyebrow`. Hero headlines put one italic phrase in mint.
+- **Controls.**
+  - Buttons are pills; primary is deep green and turns brand green on hover.
+  - Inputs are `inputClass`: rounded-xl, with a brand-green focus ring.
+  - Status tags use the `chip` utility.
+- **Motion.**
+  - `(staff)/template.tsx` adds `.page-enter`, so each page's sections rise in a short stagger.
+  - `skeleton` shimmers while a page loads, and `live-dot` pulses for live counts.
+  - All of it is off under `prefers-reduced-motion`.
+- **Signature screens.** The war room opens with a cinematic hero (greeting, today's numbers, a pitch ring). The login page is a split screen with a photo. The client portal has a glow hero and big serif enquiry counts.
+
 ## Earlier layout and type options (superseded by "Verified cinema")
 - The site is built on **Direction A, "Estate"** (`design/mockups/direction-a.html`):
   - Gloock headlines, Hanken Grotesk body text;

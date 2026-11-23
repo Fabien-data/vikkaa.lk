@@ -96,7 +96,7 @@ export function ProposalPdf({ e, date, bank }: { e: EngagementForPdf; date: Date
         )}
         {e.adBudgetCents > 0 && (
           <View style={pdf.row}>
-            <Text style={pdf.cell}>Advertising deposit (spent on your ads, shown live in your portal)</Text>
+            <Text style={pdf.cell}>Advertising deposit (spent only on your ads, shown in your weekly report)</Text>
             <Text style={pdf.right}>{formatLkr(e.adBudgetCents)}</Text>
           </View>
         )}
@@ -108,10 +108,15 @@ export function ProposalPdf({ e, date, bank }: { e: EngagementForPdf; date: Date
             </Text>
           </View>
         )}
-        {!retainer && (
+        {!retainer && e.commissionApplies && (
           <Text style={{ marginTop: 8 }}>
             Exclusive agreement period: {e.exclusiveDays} days.
             {e.upfrontFeeCents > 0 ? ' If your asset sells within that period, the upfront fee is credited against the commission.' : ''}
+          </Text>
+        )}
+        {!retainer && !e.commissionApplies && (
+          <Text style={{ marginTop: 8 }}>
+            Campaign period: {e.exclusiveDays} days. The fee buys the work in the written scope; no sale is guaranteed.
           </Text>
         )}
 

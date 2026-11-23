@@ -14,18 +14,18 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="grid gap-6">
-      <h1 className="text-2xl font-semibold">Assets</h1>
+      <h1 className="page-title">Assets</h1>
       <nav className="flex flex-wrap gap-2 text-sm" aria-label="Filter by status">
-        <Link href="/studio/assets" className={`rounded px-3 py-1 ${!filter ? 'bg-foreground text-background' : 'border bg-background'}`}>
+        <Link href="/studio/assets" className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${!filter ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}>
           All
         </Link>
         {ASSET_STATUSES.map((s) => (
-          <Link key={s} href={`/studio/assets?status=${s}`} className={`rounded px-3 py-1 ${filter === s ? 'bg-foreground text-background' : 'border bg-background'}`}>
+          <Link key={s} href={`/studio/assets?status=${s}`} className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${filter === s ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}>
             {statusLabel(s)}
           </Link>
         ))}
       </nav>
-      <table className="w-full rounded-md border bg-background text-sm">
+      <table className="w-full panel text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
             <th scope="col" className="p-3">Title</th>

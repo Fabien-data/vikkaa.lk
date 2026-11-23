@@ -10,7 +10,7 @@ const pct = (bp: number) => String(bp / 100);
 
 function Section({ section, title, hint, children }: { section: SettingsSection; title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-md border bg-background p-5">
+    <section className="panel p-5">
       <h2 className="font-semibold">{title}</h2>
       {hint && <p className="mb-4 mt-1 text-sm text-muted-foreground">{hint}</p>}
       <ActionForm action={saveSettingsSection} submitLabel={`Save ${title.toLowerCase()}`}>
@@ -27,7 +27,7 @@ export default async function SettingsPage() {
   return (
     <div className="grid gap-6">
       <header className="grid gap-3">
-        <h1 className="text-2xl font-semibold">Settings</h1>
+        <h1 className="page-title">Settings</h1>
         <SettingsNav current="/studio/settings" />
       </header>
 
@@ -43,6 +43,9 @@ export default async function SettingsPage() {
         </Field>
         <Field label="Gate C: recurring revenue must cover (%)" hint="Share of monthly cost">
           <input name="gateCSharePercent" defaultValue={pct(s.runway.gateCShareBp)} className={inputClass} />
+        </Field>
+        <Field label="Delivery cost per client a month (Rs)" hint="Travel, contractors, tools. Replace the estimate with real costs">
+          <input name="directCostPerClientRupees" defaultValue={rupees(s.runway.directCostPerClientCents)} className={inputClass} />
         </Field>
       </Section>
 

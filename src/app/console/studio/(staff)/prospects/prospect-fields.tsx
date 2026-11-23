@@ -82,6 +82,12 @@ export function ProspectFields({ p, staff }: { p: Prospect; staff: { id: string;
       <Field label="Stock or project notes" hint="What they are selling, how much, how long it has sat">
         <textarea name="stockNote" rows={3} defaultValue={p.stockNote ?? ''} className={inputClass} />
       </Field>
+      <Field label="What we saw (shown on their pitch page)" hint="Facts they told you or you checked: which stock sits longest, where buyers drop out">
+        <textarea name="diagnosis" rows={3} defaultValue={p.diagnosis ?? ''} className={inputClass} />
+      </Field>
+      <Field label="What we agreed next (shown on their pitch page)" hint="Only what they agreed to, e.g. “Call Friday after 3pm to go through the scope”">
+        <input name="agreedNextStep" defaultValue={p.agreedNextStep ?? ''} className={inputClass} />
+      </Field>
     </>
   );
 }

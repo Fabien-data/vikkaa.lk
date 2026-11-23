@@ -16,7 +16,7 @@ export function SettingsNav({ current }: { current: (typeof LINKS)[number][0] })
           key={href}
           href={href}
           aria-current={href === current ? 'page' : undefined}
-          className={`rounded-full px-3 py-1 ${href === current ? 'bg-foreground text-background' : 'border bg-background'}`}
+          className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${href === current ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}
         >
           {label}
         </Link>

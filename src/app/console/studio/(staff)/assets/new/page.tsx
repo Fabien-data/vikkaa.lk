@@ -20,8 +20,8 @@ export default async function NewAssetPage({ searchParams }: { searchParams: Pro
       <Link href={`/studio/engagements/${e.id}`} className="text-sm text-muted-foreground">
         Back to engagement
       </Link>
-      <h1 className="text-2xl font-semibold">Add an asset</h1>
-      <section className="rounded-md border bg-background p-5">
+      <h1 className="page-title">Add an asset</h1>
+      <section className="panel p-5">
         <ActionForm action={saveAsset} submitLabel="Create asset">
           <AssetFields engagementId={e.id} />
         </ActionForm>

@@ -18,12 +18,12 @@ export default async function AreaPricesPage() {
   return (
     <div className="grid gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Area prices</h1>
+        <h1 className="page-title">Area prices</h1>
         <p className="text-sm text-muted-foreground">
           The price ranges the fit score compares asking prices against. Fill in from public price guides and your own sales.
         </p>
       </div>
-      <table className="w-full rounded-md border bg-background text-sm">
+      <table className="w-full panel text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
             <th scope="col" className="p-3">Kind</th>
@@ -57,7 +57,7 @@ export default async function AreaPricesPage() {
           })}
         </tbody>
       </table>
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-4 font-semibold">Add a price range</h2>
         <ActionForm action={saveAreaPrice} submitLabel="Add range">
           <div className="grid gap-4 sm:grid-cols-4">

@@ -38,7 +38,7 @@ export async function recordConsent(input: ConsentInput): Promise<void> {
     recordedByUserId: input.recordedByUserId,
     at,
   });
-  if (input.purpose === 'marketing') return;
+  if (input.purpose === 'marketing' || input.purpose === 'outreach') return;
   const where = contact.includes('@') ? eq(buyers.email, contact) : eq(buyers.phone, contact);
   // Keep the first opt-in date while it stands; a re-join after withdrawing starts a new one.
   if (input.granted && input.purpose === 'circle') {
@@ -66,20 +66,28 @@ async function latest(contact: string, purposes: ConsentPurpose[]) {
   return row;
 }
 
+/** How we came to be allowed to contact a prospect. A public address or a directory listing is not one. */
+export const OUTREACH_BASES = ['introduction', 'inbound_request', 'asked_in_person', 'existing_relationship'] as const;
+export type OutreachBasis = (typeof OUTREACH_BASES)[number];
+
+/** Records the basis for contacting a prospect, with who recorded it and the wording they agreed to. */
+export async function recordOutreachBasis(
+  contact: string,
+  basis: OutreachBasis,
+  opts: { note?: string | null; recordedByUserId?: string; at?: Date } = {},
+): Promise<void> {
+  await recordConsent({ contact, purpose: 'outreach', granted: true, source: basis, evidence: { note: opts.note ?? null }, recordedByUserId: opts.recordedByUserId, at: opts.at });
+}
+
 /**
  * May we send this kind of message to this contact?
  * - transactional (receipts, codes, reminders about their own deal): always.
- * - outreach (one-to-one business contact): unless they asked to stop everything.
- * - circle / marketing: only with a grant that is newer than any withdrawal.
+ * - outreach / circle / marketing: only with a grant for that purpose (outreach: a recorded basis) newer than any withdrawal.
  */
 export async function canSend(rawContact: string, purpose: MessagePurpose): Promise<boolean> {
   if (purpose === 'transactional') return true;
   const contact = contactKey(rawContact);
   if (!contact) return false;
-  if (purpose === 'outreach') {
-    const last = await latest(contact, ['all']);
-    return !last || last.granted;
-  }
   const last = await latest(contact, [purpose, 'all']);
   return Boolean(last?.granted && last.purpose === purpose);
 }

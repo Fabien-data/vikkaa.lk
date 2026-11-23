@@ -5,7 +5,7 @@ import { config } from '@/lib/config';
 import { normalisePhone } from '@/lib/phone';
 import { addTask } from '@/server/notes-tasks';
 import { sendEmail } from '@/server/email';
-import { recordConsent } from '@/server/consent';
+import { recordConsent, recordOutreachBasis } from '@/server/consent';
 import { findProspectByPhone, quickAdd } from '@/server/prospects';
 
 /** Link-preview fetchers and crawlers: WhatsApp and Facebook fetch a link the moment it is sent. */
@@ -28,7 +28,8 @@ export async function getPitch(token: string): Promise<Pitch | null> {
 }
 
 /**
- * Counts a real view of a pitch page. The first view creates an urgent call task for the owner.
+ * Counts a real view of a pitch page. The first view creates a follow-up task for the owner:
+ * a view is interest, not permission to call, so the task points back to what was agreed.
  * Returns `first: true` only once, so the caller can send one alert.
  */
 export async function recordPitchView(token: string, opts: { userAgent?: string | null; preview?: boolean } = {}, now = new Date()): Promise<{ first: boolean; prospect: Prospect } | null> {
@@ -45,7 +46,7 @@ export async function recordPitchView(token: string, opts: { userAgent?: string 
     .returning();
   if (!prospect) return null;
   if (firstHit) {
-    await addTask({ type: 'prospect', id: prospect.id }, { title: `${prospect.name} opened their pitch page: call now`, dueAt: now, assignedUserId: prospect.ownerUserId, dedupeKey: `pitch-view:${prospect.id}` });
+    await addTask({ type: 'prospect', id: prospect.id }, { title: `${prospect.name} opened their pitch page: follow up as agreed`, dueAt: now, assignedUserId: prospect.ownerUserId, dedupeKey: `pitch-view:${prospect.id}` });
   }
   return { first: Boolean(firstHit), prospect };
 }
@@ -87,6 +88,7 @@ export async function requestCall(token: string, input: { phone?: string | null;
     sentAt: now,
   });
   if (!p.phone && phone && !(await findProspectByPhone(phone))) await db.update(prospects).set({ phone }).where(eq(prospects.id, p.id));
+  if (phone ?? p.phone) await recordOutreachBasis((phone ?? p.phone)!, 'inbound_request', { note: 'Pressed "Request a call" on their pitch page', at: now });
   await db
     .update(prospects)
     .set({ status: 'replied', statusChangedAt: now, nextActionAt: null })
@@ -130,6 +132,8 @@ export async function recordInbound(input: InboundInput, now = new Date()): Prom
   if (p.status === 'new' || p.status === 'contacted' || p.status === 'nurture') {
     await db.update(prospects).set({ status: 'replied', statusChangedAt: now, nextActionAt: null }).where(eq(prospects.id, p.id));
   }
+  await recordOutreachBasis(phone, 'inbound_request', { note: `${input.segment} page form`, at: now });
+  if (input.email) await recordOutreachBasis(input.email, 'inbound_request', { note: `${input.segment} page form`, at: now });
   if (input.updatesConsent) {
     await recordConsent({ contact: phone, purpose: 'marketing', granted: true, source: `${input.segment}_page`, at: now });
     if (input.email) await recordConsent({ contact: input.email, purpose: 'marketing', granted: true, source: `${input.segment}_page`, at: now });

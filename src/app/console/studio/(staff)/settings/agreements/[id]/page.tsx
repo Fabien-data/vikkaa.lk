@@ -48,22 +48,22 @@ export default async function AgreementVersionPage({ params }: { params: Promise
         <Link href="/studio/settings/agreements" className="text-sm text-muted-foreground">
           ← Agreement wording
         </Link>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="page-title">
           {AGREEMENT_TITLES[t.kind]}, version {t.version}
         </h1>
         <p className="text-sm">
           {t.approvedAt ? (
-            <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-900">
+            <span className="chip bg-emerald-100 text-emerald-900">
               Approved by {t.approvedBy} ({t.approvalReference}) on {t.approvedAt.toLocaleDateString('en-GB')}. Read-only.
             </span>
           ) : (
-            <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-900">Draft: not signable</span>
+            <span className="chip bg-amber-100 text-amber-900">Draft: not signable</span>
           )}
         </p>
       </header>
 
       {!t.approvedAt ? (
-        <section className="rounded-md border bg-background p-5">
+        <section className="panel p-5">
           <h2 className="mb-2 font-semibold">Clauses</h2>
           <p className="mb-3 text-sm text-muted-foreground">
             One clause per paragraph, with a blank line between clauses. Start a clause with a condition to include it only when it applies:{' '}
@@ -87,7 +87,7 @@ export default async function AgreementVersionPage({ params }: { params: Promise
         </form>
       )}
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-2 font-semibold">Preview with sample terms</h2>
         <p className="mb-3 text-sm text-muted-foreground">
           3% commission, Rs 75,000 fee, Rs 50,000 deposit, Rs 150,000 a month for 8 listings, 90 days, 6-month tail.
@@ -102,7 +102,7 @@ export default async function AgreementVersionPage({ params }: { params: Promise
       </section>
 
       {!t.approvedAt && (
-        <section className="rounded-md border border-emerald-300 bg-background p-5">
+        <section className="panel border-emerald-300 p-5">
           <h2 className="mb-2 font-semibold">Lawyer&rsquo;s approval</h2>
           {undecided > 0 && (
             <p className="mb-3 text-sm text-amber-800">

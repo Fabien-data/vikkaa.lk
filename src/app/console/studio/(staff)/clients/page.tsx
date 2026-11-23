@@ -23,12 +23,12 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="grid gap-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Clients</h1>
+        <h1 className="page-title">Clients</h1>
         <form className="flex gap-2">
           <input name="q" defaultValue={q} placeholder="Search name or phone" className={inputClass} />
         </form>
       </div>
-      <table className="w-full rounded-md border bg-background text-sm">
+      <table className="w-full panel text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
             <th scope="col" className="p-3">Name</th>
@@ -59,7 +59,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
           )}
         </tbody>
       </table>
-      <section className="max-w-2xl rounded-md border bg-background p-5">
+      <section className="max-w-2xl panel p-5">
         <h2 className="mb-4 font-semibold">Add a client</h2>
         <ActionForm action={saveClient} submitLabel="Add client">
           <ClientFields />

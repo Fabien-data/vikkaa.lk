@@ -35,20 +35,20 @@ export default async function AssetPage({ params, searchParams }: { params: Prom
         Back to engagement
       </Link>
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold">{asset.title}</h1>
+        <h1 className="page-title">{asset.title}</h1>
         <span className="rounded bg-muted px-2 py-0.5 text-sm">{statusLabel(asset.status)}</span>
         <Link href={`/studio/assets/${asset.id}/shot-list`} className="ml-auto text-sm underline">
           Shot list
         </Link>
       </div>
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <ActionForm action={saveAsset} submitLabel="Save asset">
           <AssetFields asset={asset} />
         </ActionForm>
       </section>
 
-      <section className="grid gap-4 rounded-md border bg-background p-5">
+      <section className="grid gap-4 panel p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-semibold">Buyer record</h2>
           <Link href={`/checkin/${asset.id}`} target="_blank" className="text-sm underline">
@@ -59,7 +59,7 @@ export default async function AssetPage({ params, searchParams }: { params: Prom
         <LogEvidenceForm assetId={asset.id} vehicle={asset.category === 'vehicle'} />
       </section>
 
-      <section id="status" className="rounded-md border bg-background p-5">
+      <section id="status" className="panel p-5">
         <h2 className="mb-3 font-semibold">Status</h2>
         <ActionForm action={changeAssetStatus} submitLabel="Change status" className="grid gap-3 sm:grid-cols-3 sm:items-end">
           <input type="hidden" name="assetId" value={asset.id} />
@@ -81,7 +81,7 @@ export default async function AssetPage({ params, searchParams }: { params: Prom
         </ActionForm>
       </section>
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-3 font-semibold">Photos ({asset.photos.length})</h2>
         <ol className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {asset.photos.map((p, i) => {

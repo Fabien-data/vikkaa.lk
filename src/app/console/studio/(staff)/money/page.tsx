@@ -49,13 +49,13 @@ export default async function MoneyPage() {
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Money</h1>
+        <h1 className="page-title">Money</h1>
         <p className="text-sm text-muted-foreground">
           Owed to us {formatLkr(owed)} · monthly recurring {formatLkr(mrr)}
         </p>
       </div>
 
-      <section className="rounded-md border bg-background p-5" aria-labelledby="owed-h">
+      <section className="panel p-5" aria-labelledby="owed-h">
         <h2 id="owed-h" className="mb-3 font-semibold">Owed to us</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -92,7 +92,7 @@ export default async function MoneyPage() {
         </div>
       </section>
 
-      <section className="rounded-md border bg-background p-5" aria-labelledby="ret-h">
+      <section className="panel p-5" aria-labelledby="ret-h">
         <h2 id="ret-h" className="mb-1 font-semibold">Retainers</h2>
         <p className="mb-3 text-sm text-muted-foreground">Invoices are issued automatically on each billing day. Use the button only to issue early.</p>
         <ul className="grid gap-2 text-sm">
@@ -118,7 +118,7 @@ export default async function MoneyPage() {
         </ul>
       </section>
 
-      <section className="rounded-md border bg-background p-5" aria-labelledby="watch-h">
+      <section className="panel p-5" aria-labelledby="watch-h">
         <h2 id="watch-h" className="mb-1 font-semibold">Follow-on watch</h2>
         <p className="mb-3 text-sm text-muted-foreground">
           Agreements that have ended but whose follow-on period is still running. If one of these buyers buys, commission is still due.
@@ -155,7 +155,7 @@ export default async function MoneyPage() {
         </ul>
       </section>
 
-      <section className="rounded-md border bg-background p-5" aria-labelledby="ads-h">
+      <section className="panel p-5" aria-labelledby="ads-h">
         <h2 id="ads-h" className="mb-1 font-semibold">Ad budgets</h2>
         <p className="mb-3 text-sm text-muted-foreground">Record what was spent from each client&rsquo;s ad deposit (from Ads Manager), so the balance and any refund are always clear.</p>
         <ul className="mb-4 grid gap-1 text-sm">
@@ -205,7 +205,7 @@ export default async function MoneyPage() {
         )}
       </section>
 
-      <section className="rounded-md border bg-background p-5" aria-labelledby="paid-h">
+      <section className="panel p-5" aria-labelledby="paid-h">
         <h2 id="paid-h" className="mb-3 font-semibold">Recent payments</h2>
         <ul className="grid gap-1 text-sm">
           {recent.map(({ p, number, type, engagementId }) => (

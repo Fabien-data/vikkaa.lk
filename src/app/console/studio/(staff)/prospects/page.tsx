@@ -19,7 +19,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Prospects</h1>
+        <h1 className="page-title">Prospects</h1>
         <form className="flex gap-2" role="search">
           {status && <input type="hidden" name="status" value={status} />}
           <label className="sr-only" htmlFor="prospect-search">
@@ -29,7 +29,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
         </form>
       </div>
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-3 font-semibold">Quick add</h2>
         <ActionForm action={addProspect} submitLabel="Add prospect" className="grid gap-3">
           <div className="grid gap-3 sm:grid-cols-5">
@@ -56,14 +56,14 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       </section>
 
       <nav aria-label="Filter by status" className="flex flex-wrap gap-2 text-sm">
-        <Link href="/studio/prospects" className={`rounded-full px-3 py-1 ${!status ? 'bg-foreground text-background' : 'border bg-background'}`} aria-current={!status ? 'page' : undefined}>
+        <Link href="/studio/prospects" className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${!status ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`} aria-current={!status ? 'page' : undefined}>
           All
         </Link>
         {PROSPECT_STATUSES.map((s) => (
           <Link
             key={s}
             href={`/studio/prospects?status=${s}`}
-            className={`rounded-full px-3 py-1 ${status === s ? 'bg-foreground text-background' : 'border bg-background'}`}
+            className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${status === s ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}
             aria-current={status === s ? 'page' : undefined}
           >
             {STATUS_TEXT[s]}
@@ -72,7 +72,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       </nav>
 
       <div className="overflow-x-auto">
-        <table className="w-full rounded-md border bg-background text-sm">
+        <table className="w-full panel text-sm">
           <thead className="text-left text-muted-foreground">
             <tr>
               <th scope="col" className="p-3">Name</th>

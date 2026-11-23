@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(config.publicUrl),
   title: { default: 'Vikkaa.lk: property and vehicle marketing in Sri Lanka', template: '%s | Vikkaa.lk' },
   description:
-    'Vikkaa prices your property or vehicle with real market data, films it with our own crew, runs it on every platform at once and handles every buyer until it sells.',
+    'Vikkaa checks the price of your property or vehicle against real market data, films it with our own crew, runs the campaign and handles every buyer enquiry while it runs.',
   openGraph: {
     siteName: 'Vikkaa.lk',
     locale: 'en_LK',

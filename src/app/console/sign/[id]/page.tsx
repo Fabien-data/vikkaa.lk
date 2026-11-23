@@ -26,14 +26,18 @@ export default async function SignPage({
   if (!s) forbidden();
 
   return (
-    <main className="mx-auto max-w-lg px-5 py-12">
-      <p className="text-sm font-semibold">Vikkaa.lk</p>
-      <h1 className="mt-2 text-3xl font-semibold">Your agreement</h1>
+    <main className="mx-auto w-full max-w-lg px-5 py-12 motion-safe:animate-rise">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/logo.png" alt="Vikkaa" width={112} height={56} className="h-9 w-auto" />
+      <p className="eyebrow mt-10 text-brand-green">Sign with Vikkaa</p>
+      <h1 className="page-title mt-3">
+        Your <em className="text-brand-green">agreement</em>
+      </h1>
       <p className="mt-3 text-muted-foreground">
         For {s.engagement.assets.map((a) => a.title).join(', ')}. Signing as {s.name}.
       </p>
       {s.signedAt ? (
-        <p role="status" className="mt-8 rounded-md bg-emerald-50 p-4 text-emerald-900">
+        <p role="status" className="panel mt-8 border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
           You have already signed this agreement on {s.signedAt.toLocaleDateString('en-GB')}. Thank you.
         </p>
       ) : (
@@ -42,7 +46,7 @@ export default async function SignPage({
             href={`/sign/${id}/agreement?exp=${exp}&sig=${sig}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-6 inline-block underline"
+            className="btn btn-outline mt-6 px-5 py-3 text-sm"
           >
             Read the agreement (PDF)
           </a>

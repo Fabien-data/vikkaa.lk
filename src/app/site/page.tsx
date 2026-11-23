@@ -24,8 +24,8 @@ const PLATFORMS = ['Facebook', 'Instagram', 'TikTok', 'YouTube', 'Property porta
 
 const PROMISES = [
   { icon: Clapperboard, title: 'Filmed by us, not your phone', line: 'Photos, drone and a walkthrough film, shot by the two of us on our own Sony cameras and DJI drones.' },
-  { icon: Radio, title: 'Every enquiry, in front of you', line: 'Your client portal shows each campaign, each enquiry and each offer as it happens.', live: true },
-  { icon: HandCoins, title: 'Your fee comes back when it sells', line: 'Sell within the agreement period and your upfront fee is credited against our commission.' },
+  { icon: Radio, title: 'Every enquiry, in front of you', line: 'Your client portal shows each campaign and each enquiry, and a weekly report covers viewings and ad spend.', live: true },
+  { icon: HandCoins, title: 'One prepaid campaign, a clear scope', line: '30 days of filming, ads and buyer follow-up for a fixed fee, written down before you pay. No sale is guaranteed.' },
 ];
 
 // Only true facts about the service (design/DIRECTION.md, honesty rule).
@@ -427,7 +427,7 @@ function Hero() {
       <div className={`${wrap} grid gap-10 pb-10 pt-32 md:grid-cols-[1fr_auto] md:items-end md:pb-14`}>
         <div>
           <p className="eyebrow text-white/80 motion-safe:animate-rise">
-            Verified property sales<span className="hidden sm:inline">, Western Province</span>
+            Filmed, marketed and followed up<span className="hidden sm:inline">, Western Province</span>
           </p>
           <h1 id="hero-h" className="mt-6 font-display text-[clamp(46px,7.6vw,128px)] leading-[0.94] tracking-[-0.01em]">
             {HERO_LINES.map((line, i) => (
@@ -439,8 +439,8 @@ function Hero() {
             ))}
           </h1>
           <p className="mt-7 max-w-[50ch] text-[17px] text-white/85 motion-safe:animate-rise md:text-lg" style={{ animationDelay: '520ms' }}>
-            Filmed, marketed and sold for you. We price it with real market data, film it ourselves, run it on every platform at once and handle
-            every buyer until it sells.
+            Filmed, marketed and followed up for you. We check the price against real market data, film it ourselves, run the campaign and
+            handle every buyer enquiry for the campaign period.
           </p>
           <div className="mt-9 flex flex-wrap gap-3 motion-safe:animate-rise" style={{ animationDelay: '640ms' }}>
             <Link href="/sell" className="btn btn-light">

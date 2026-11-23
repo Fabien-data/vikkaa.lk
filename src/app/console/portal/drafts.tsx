@@ -18,11 +18,11 @@ const KIND_TEXT = { photo_set: 'Photos', video: 'Video', reel: 'Reel' } as const
 export function Drafts({ drafts }: { drafts: Draft[] }) {
   if (!drafts.length) return null;
   return (
-    <div className="mt-4 grid gap-4 border-t pt-4">
+    <div className="mt-5 grid gap-4 border-t border-brand/10 pt-5">
       <h3 className="text-sm font-semibold">Content for your approval</h3>
       {drafts.map((d) =>
         d.status === 'pending' ? (
-          <div key={d.id} className="grid gap-3 rounded-md border bg-background p-3">
+          <div key={d.id} className="grid gap-3 panel p-3">
             <p className="text-sm">
               <span className="font-semibold">{KIND_TEXT[d.kind]}</span>
               {d.note && <span className="text-muted-foreground"> · {d.note}</span>}
@@ -32,7 +32,7 @@ export function Drafts({ drafts }: { drafts: Draft[] }) {
                 {d.files.map((f, i) => (
                   <a key={f.src} href={f.src} target="_blank" rel="noreferrer">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.src} srcSet={f.srcSet} sizes="(min-width: 640px) 240px, 50vw" alt={`Photo ${i + 1}`} className="aspect-[4/3] w-full rounded object-cover" />
+                    <img src={f.src} srcSet={f.srcSet} sizes="(min-width: 640px) 240px, 50vw" alt={`Photo ${i + 1}`} className="aspect-[4/3] w-full rounded-xl object-cover transition-transform duration-500 hover:scale-[1.02]" />
                   </a>
                 ))}
               </div>
@@ -41,7 +41,7 @@ export function Drafts({ drafts }: { drafts: Draft[] }) {
               <iframe
                 src={d.embed}
                 title={KIND_TEXT[d.kind]}
-                className={`w-full rounded ${d.kind === 'reel' ? 'mx-auto aspect-[9/16] max-w-xs' : 'aspect-video'}`}
+                className={`w-full rounded-xl ${d.kind === 'reel' ? 'mx-auto aspect-[9/16] max-w-xs' : 'aspect-video'}`}
                 allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />

@@ -13,16 +13,16 @@ import { STOCK } from '@/components/site/stock';
 
 export const metadata: Metadata = {
   title: 'How it works',
-  description: 'From a three-minute form to a signed deed: how Vikkaa markets and sells your property or vehicle, and what it costs.',
+  description: 'From a three-minute form to a 30-day campaign: how Vikkaa films, markets and follows up buyers for your property or vehicle, and what it costs.',
 };
 
 const STEPS = [
   ['Tell us about it', 'Fill in a three-minute form. We call you within one working day to talk it through.'],
   ['We visit and price it', 'One of us visits, checks the documents and prepares a market report with real comparable prices and a recommended asking price.'],
-  ['You see the plan', 'A proposal with the content plan, the quote and our exclusive agreement. Nothing is paid until you agree.'],
+  ['You see the plan', 'A proposal with the content plan, the written scope and the fixed fee. Nothing is paid until you agree.'],
   ['We film it', 'Our own crew shoots photos, drone footage, a walkthrough film and reels in one visit.'],
   ['It goes live everywhere', 'Your listing launches on Facebook, Instagram, TikTok, YouTube and the big portals on the same day, with paid reach.'],
-  ['We handle buyers', 'Every enquiry comes to us. We qualify buyers, run viewings or test drives, and negotiate until the deed is signed.'],
+  ['We handle buyers', 'Every enquiry comes to us. We qualify buyers and coordinate viewings or test drives. You approve the price and make the final decision.'],
 ] as const;
 
 // True facts about the service only (design/DIRECTION.md, honesty rule).
@@ -40,7 +40,7 @@ export default async function HowItWorks() {
       <PageHero
         eyebrow="How it works"
         title={['How a sale with', <>Vikkaa <em>works</em></>]}
-        sub="From a three-minute form to a signed deed. We price it, film it, run the campaign everywhere at once and handle every buyer until it sells."
+        sub="From a three-minute form to a 30-day campaign. We check the price, film it, run the campaign and handle every buyer enquiry while it runs."
         photo={STOCK.droneFlying}
         outline="Process"
       >
@@ -127,7 +127,8 @@ export default async function HowItWorks() {
                 What it <em className="text-mint">costs</em>
               </SplitReveal>
               <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-white/80">
-                You pay an upfront marketing fee and an advertising deposit. When it sells, we charge a commission.
+                One prepaid 30-day campaign: filming, ads, buyer follow-up and a weekly report, for a fixed fee. Your ad budget is separate. No sale is guaranteed.
+                Prefer to pay only on success? Ask about our commission option.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <Link href="/sell" className="btn btn-light">
@@ -161,8 +162,8 @@ export default async function HowItWorks() {
                   className="text-white/90 [&_li>span:first-child]:bg-mint [&_li>span:first-child]:text-brand"
                   items={[
                     'Nothing is paid until you agree to the plan.',
-                    'Your advertising deposit is spent on your ads, and shown live in your portal.',
-                    'If it sells within the agreement period, your upfront fee is credited against our commission.',
+                    'Your ad budget is capped at what you agree, spent only on your ads, and shown in your weekly report.',
+                    'The fee buys the work in your written scope. If we do not deliver it, the agreement says what you get back.',
                   ]}
                 />
               </Reveal>

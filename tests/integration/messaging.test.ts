@@ -8,7 +8,7 @@ vi.mock('@/server/email', () => ({ sendEmail: (input: unknown) => sendEmail(inpu
 
 import { sendTrackedEmail, unsubscribeUrl, whatsappDraft } from '@/server/messaging';
 import { saveSettings } from '@/server/settings';
-import { withdrawAll } from '@/server/consent';
+import { recordOutreachBasis, withdrawAll } from '@/server/consent';
 import { templateVars } from '@/server/prospects';
 import { render } from '@/server/templates';
 
@@ -29,7 +29,18 @@ const mail = (over: Partial<Parameters<typeof sendTrackedEmail>[0]> = {}) => ({
 });
 
 describe('messaging', () => {
-  beforeEach(() => sendEmail.mockClear());
+  beforeEach(async () => {
+    sendEmail.mockClear();
+    for (const c of ['owner@dealer.lk', 'a@x.lk', 'b@x.lk', 'c@x.lk', '+94771234567']) await recordOutreachBasis(c, 'asked_in_person', { at: new Date('2026-11-01') });
+  });
+
+  it('outreach without a recorded basis is blocked and leaves no row, so the same step can send once a basis exists', async () => {
+    expect(await sendTrackedEmail(mail({ to: 'new@dealer.lk', dedupeKey: 'outreach:p1:0' }))).toMatchObject({ status: 'blocked', reason: 'No contact basis recorded' });
+    expect(await db.select().from(messages)).toHaveLength(0);
+    expect(await whatsappDraft('0779990000', 'Hi', 'outreach')).toBeNull();
+    await recordOutreachBasis('new@dealer.lk', 'inbound_request');
+    expect(await sendTrackedEmail(mail({ to: 'new@dealer.lk', dedupeKey: 'outreach:p1:0' }))).toMatchObject({ status: 'sent' });
+  });
 
   it('sends outreach with an unsubscribe link and header, from the founder, and logs it', async () => {
     const f = await founder();

@@ -18,7 +18,7 @@ export async function NotesPanel({ subject }: { subject: Subject }) {
   );
 
   return (
-    <section className="rounded-md border bg-background p-5">
+    <section className="panel p-5">
       <h2 className="mb-3 font-semibold">Notes</h2>
       <ActionForm action={saveNote} submitLabel="Add note" className="mb-4 grid gap-2">
         {hidden}

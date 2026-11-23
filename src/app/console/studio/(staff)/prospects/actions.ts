@@ -8,6 +8,7 @@ import {
   markDoNotContact,
   markWhatsappSent,
   ProspectError,
+  recordProspectBasis,
   quickAdd,
   sendAllDue,
   sendStepEmail,
@@ -20,6 +21,7 @@ import {
 import { PackageError } from '@/server/packages';
 import { PROSPECT_SEGMENTS, PROSPECT_STATUSES, type ProspectSegment, type ProspectStatus } from '@/db/schema';
 import { formText, type ActionResult } from '@/lib/form';
+import { OUTREACH_BASES, type OutreachBasis } from '@/server/consent';
 
 function readProspect(form: FormData): ProspectInput {
   const segment = String(form.get('segment') ?? 'other') as ProspectSegment;
@@ -35,6 +37,8 @@ function readProspect(form: FormData): ProspectInput {
     area: formText(form, 'area'),
     links: formText(form, 'links'),
     stockNote: formText(form, 'stockNote'),
+    diagnosis: formText(form, 'diagnosis'),
+    agreedNextStep: formText(form, 'agreedNextStep'),
     source: formText(form, 'source'),
     ownerUserId: formText(form, 'ownerUserId'),
   };
@@ -97,9 +101,9 @@ export async function recordTouch(_prev: ActionResult, form: FormData): Promise<
   return guarded(() => logTouch(id, { channel, outcome, note: formText(form, 'note') }, userId), [`/studio/prospects/${id}`, '/studio']);
 }
 
-export async function sendDueEmail(prospectId: string): Promise<ActionResult> {
+export async function sendDueEmail(prospectId: string, reviewedHash: string): Promise<ActionResult> {
   const { userId } = await requireStaff();
-  const r = await sendStepEmail(prospectId, userId);
+  const r = await sendStepEmail(prospectId, userId, new Date(), reviewedHash);
   revalidatePath(`/studio/prospects/${prospectId}`);
   revalidatePath('/studio');
   return r.status === 'sent' ? { ok: true } : { error: r.reason };
@@ -108,9 +112,16 @@ export async function sendDueEmail(prospectId: string): Promise<ActionResult> {
 /** The war room's one-click batch: every ticked due email, sent from this founder. */
 export async function sendDueBatch(_prev: ActionResult, form: FormData): Promise<ActionResult> {
   const { userId } = await requireStaff();
-  const ids = form.getAll('prospectId').map(String).filter(Boolean);
-  if (!ids.length) return { error: 'Tick at least one email to send' };
-  const { sent, problems } = await sendAllDue(ids, userId);
+  const reviewed = form
+    .getAll('reviewed')
+    .map(String)
+    .map((v) => {
+      const [id, hash] = v.split(':');
+      return { id, hash };
+    })
+    .filter((r) => r.id && r.hash);
+  if (!reviewed.length) return { error: 'Tick at least one email to send' };
+  const { sent, problems } = await sendAllDue(reviewed, userId);
   revalidatePath('/studio');
   revalidatePath('/studio/prospects');
   if (!sent && problems.length) return { error: problems.join(' · ') };
@@ -154,4 +165,15 @@ export async function convertProspect(_prev: ActionResult, form: FormData): Prom
   }, ['/studio/prospects', `/studio/prospects/${id}`]);
   if (result?.error) return result;
   redirect(`/studio/engagements/${engagementId}`);
+}
+
+/** Records how we may contact this prospect: without it, no email or WhatsApp goes out. */
+export async function recordBasis(_prev: ActionResult, form: FormData): Promise<ActionResult> {
+  const { userId } = await requireStaff();
+  const id = String(form.get('id'));
+  const basis = String(form.get('basis')) as OutreachBasis;
+  if (!OUTREACH_BASES.includes(basis)) return { error: 'Choose how they agreed to be contacted' };
+  const note = formText(form, 'note');
+  if (!note) return { error: 'Add a note: who introduced you, or what they said and when' };
+  return guarded(() => recordProspectBasis(id, basis, note, userId), [`/studio/prospects/${id}`, '/studio']);
 }

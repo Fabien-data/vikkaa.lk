@@ -34,14 +34,14 @@ export default async function BuyerPage({ params }: { params: Promise<{ id: stri
       <Link href="/studio/buyers" className="text-sm text-muted-foreground">
         Buyers
       </Link>
-      <h1 className="text-2xl font-semibold">{b.name ?? b.phone}</h1>
+      <h1 className="page-title">{b.name ?? b.phone}</h1>
       <p className="text-sm text-muted-foreground">
         {b.phone}
         {b.privacyAcceptedAt ? `. Accepted the privacy notice ${b.privacyAcceptedAt.toLocaleDateString('en-GB')}.` : '.'}
         {b.circleConsentAt && !b.circleWithdrawnAt ? ' Vikkaa Circle member.' : ''}
       </p>
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-4 font-semibold">Profile</h2>
         <ActionForm action={saveBuyer} submitLabel="Save profile">
           <input type="hidden" name="id" value={b.id} />
@@ -74,7 +74,7 @@ export default async function BuyerPage({ params }: { params: Promise<{ id: stri
         </ActionForm>
       </section>
 
-      <section className="grid gap-4 rounded-md border bg-background p-5">
+      <section className="grid gap-4 panel p-5">
         <h2 className="font-semibold">Contact record</h2>
         <EvidenceTable entries={entries} show="asset" />
         {active.length > 0 && <LogEvidenceForm buyerId={b.id} assetOptions={active} />}

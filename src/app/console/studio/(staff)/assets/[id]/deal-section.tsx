@@ -23,7 +23,7 @@ export async function DealSection({ assetId, preselectBuyer }: { assetId: string
   const open = history.find((h) => h.deal.status === 'agreed');
 
   return (
-    <section id="deal" className="grid gap-4 rounded-md border bg-background p-5">
+    <section id="deal" className="grid gap-4 panel p-5">
       <h2 className="font-semibold">Sale</h2>
       {history.length > 0 && (
         <ul className="grid gap-3 text-sm">

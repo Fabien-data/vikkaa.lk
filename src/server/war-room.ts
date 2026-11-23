@@ -15,8 +15,8 @@ export const PITCH_TARGET = 30;
 export type GateStatus = 'met' | 'open' | 'missed';
 export type Gate = { key: 'A' | 'B' | 'C'; date: string; daysLeft: number; status: GateStatus; detail: string };
 
-/** A pitch is a real conversation about working together: a visit, a meeting, or a call marked "pitched". */
-const isPitch = or(inArray(messages.channel, ['visit', 'meeting']), eq(messages.outcome, 'pitched'));
+/** A pitch is a touch a founder marked "pitched": need, scope, price and next step covered with a decision-maker. A visit alone is not one. */
+const isPitch = eq(messages.outcome, 'pitched');
 const outbound = and(eq(messages.subjectType, 'prospect'), eq(messages.direction, 'out'), inArray(messages.status, ['sent', 'logged']));
 
 async function count(where: ReturnType<typeof and>) {
@@ -49,14 +49,17 @@ export async function pitchProgress() {
   return { done: await count(and(outbound, isPitch, gte(messages.sentAt, sriLankaMidnight(PITCH_COUNT_FROM)))), target: PITCH_TARGET };
 }
 
-/** Engagements for dealers or developers with at least one paid invoice: the court's "one paying client". */
-async function payingBusinessClients(): Promise<number> {
+/**
+ * The paid-client gate: distinct customers with a signed scope and a fully paid service invoice.
+ * Ad deposits are not invoices, and two engagements for one customer count once.
+ */
+export async function payingCustomers(): Promise<number> {
   const [{ n }] = await db
-    .select({ n: countDistinct(engagements.id) })
+    .select({ n: countDistinct(clients.id) })
     .from(engagements)
     .innerJoin(clients, eq(engagements.clientId, clients.id))
     .innerJoin(documents, eq(documents.engagementId, engagements.id))
-    .where(and(inArray(clients.type, ['dealer', 'developer']), isNotNull(documents.paidAt), sql`${documents.type}::text like '%invoice'`, sql`${documents.voidedAt} is null`));
+    .where(and(isNotNull(engagements.signedAt), isNotNull(documents.paidAt), sql`${documents.type}::text like '%invoice'`, sql`${documents.voidedAt} is null`));
   return n;
 }
 
@@ -64,7 +67,7 @@ export async function gates(now: Date, extra: { lawyerApproved: boolean; mrrCent
   const s = await getSettings();
   const [{ paid }] = await db.select({ paid: sql<number>`count(*)::int` }).from(engagements).where(isNotNull(engagements.paidAt));
   const [{ warm }] = await db.select({ warm: sql<number>`count(*)::int` }).from(prospects).where(inArray(prospects.status, ['meeting', 'won']));
-  const paying = await payingBusinessClients();
+  const paying = await payingCustomers();
   const share = Math.round((s.runway.monthlyCostCents * s.runway.gateCShareBp) / 10_000);
 
   const gate = (key: Gate['key'], date: string, met: boolean, detail: string): Gate => {
@@ -78,7 +81,7 @@ export async function gates(now: Date, extra: { lawyerApproved: boolean; mrrCent
       extra.lawyerApproved && (paid >= 1 || warm >= 3),
       `Lawyer-approved agreement: ${extra.lawyerApproved ? 'yes' : 'no'} · paid clients: ${paid} · prospects at meeting or won: ${warm} (need 1 paid or 3 warm)`,
     ),
-    gate('B', s.gates.b, paying >= 1, `Dealers or developers with a paid invoice: ${paying} (need 1)`),
+    gate('B', s.gates.b, paying >= 1, `Customers with a signed scope and a cleared fee: ${paying} (need 1)`),
     gate(
       'C',
       s.gates.c,
@@ -119,7 +122,8 @@ export type WarRoomExtras = {
   dealsAgreed: number;
   collectedThisMonthCents: number;
   owedCents: number;
-  survival: { needed: number; active: number } | null;
+  /** Paying clients a month needed to cover both founders' costs; `needed` is null when the fee does not cover delivery. */
+  survival: { needed: number | null; active: number } | null;
   failedMessages: number;
   lastTick: Date | null;
 };
@@ -127,7 +131,19 @@ export type WarRoomExtras = {
 export async function warRoomExtras(now: Date): Promise<WarRoomExtras> {
   const monthStart = sriLankaMidnight(`${sriLankaDay(now).slice(0, 7)}-01`);
   const retainers = await activeRetainers(now);
-  const mrrCents = retainers.reduce((a, r) => a + r.monthlyFeeCents, 0);
+  // Recurring revenue counts a retainer only once it has paid at least once: a signature is not cash.
+  const paidIds = retainers.length
+    ? new Set(
+        (
+          await db
+            .selectDistinct({ id: documents.engagementId })
+            .from(documents)
+            .where(and(inArray(documents.engagementId, retainers.map((r) => r.id)), isNotNull(documents.paidAt), revenueDoc))
+        ).map((r) => r.id),
+      )
+    : new Set<string | null>();
+  const paying = retainers.filter((r) => paidIds.has(r.id));
+  const mrrCents = paying.reduce((a, r) => a + r.monthlyFeeCents, 0);
   const [{ collected }] = await db
     .select({ collected: sql<number>`coalesce(sum(${payments.amountCents}), 0)::bigint` })
     .from(payments)
@@ -143,9 +159,11 @@ export async function warRoomExtras(now: Date): Promise<WarRoomExtras> {
   const [cheapest] = await db
     .select({ price: packages.priceCents })
     .from(packages)
-    .where(and(eq(packages.kind, 'retainer'), eq(packages.active, true)))
+    .where(and(inArray(packages.kind, ['retainer', 'pilot']), eq(packages.active, true), sql`${packages.priceCents} > 0`))
     .orderBy(packages.priceCents)
     .limit(1);
+  // Each client covers costs with what is left after delivering for them, not with the whole fee.
+  const contribution = cheapest ? cheapest.price - r.directCostPerClientCents : 0;
   const [{ failed }] = await db
     .select({ failed: sql<number>`count(*)::int` })
     .from(messages)
@@ -163,7 +181,7 @@ export async function warRoomExtras(now: Date): Promise<WarRoomExtras> {
     dealsAgreed: await agreedDealsCount(),
     collectedThisMonthCents: Number(collected),
     owedCents: Number(owed),
-    survival: cheapest && r.monthlyCostCents > 0 ? { needed: Math.ceil(r.monthlyCostCents / cheapest.price), active: retainers.length } : null,
+    survival: cheapest && r.monthlyCostCents > 0 ? { needed: contribution > 0 ? Math.ceil(r.monthlyCostCents / contribution) : null, active: paying.length } : null,
     failedMessages: failed,
     lastTick: lastTick(),
   };

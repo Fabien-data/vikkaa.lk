@@ -30,12 +30,12 @@ export default async function BuyersPage({ searchParams }: { searchParams: Promi
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Buyers</h1>
+        <h1 className="page-title">Buyers</h1>
         <form>
           <input name="q" defaultValue={q} placeholder="Search name, phone or area" className={inputClass} />
         </form>
       </div>
-      <table className="w-full rounded-md border bg-background text-sm">
+      <table className="w-full panel text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
             <th scope="col" className="p-3">Buyer</th>

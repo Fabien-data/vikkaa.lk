@@ -11,7 +11,7 @@ export default async function TemplatesPage() {
   return (
     <div className="grid gap-6">
       <header className="grid gap-3">
-        <h1 className="text-2xl font-semibold">Message templates</h1>
+        <h1 className="page-title">Message templates</h1>
         <SettingsNav current="/studio/settings/templates" />
         <p className="max-w-3xl text-sm text-muted-foreground">
           The words used in outreach. Placeholders you can use: {TEMPLATE_VARS.map((v) => `{${v}}`).join(' ')}. Every email gets an unsubscribe
@@ -19,7 +19,7 @@ export default async function TemplatesPage() {
         </p>
       </header>
       {templates.map((t) => (
-        <section key={t.id} className={`rounded-md border bg-background p-5 ${t.active ? '' : 'opacity-60'}`}>
+        <section key={t.id} className={`panel p-5 ${t.active ? '' : 'opacity-60'}`}>
           <h2 className="mb-3 font-semibold">
             {t.label} <span className="text-sm font-normal text-muted-foreground">· {t.channel}</span>
           </h2>

@@ -31,11 +31,11 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
         <Link href="/studio/clients" className="text-sm text-muted-foreground">
           Clients
         </Link>
-        <h1 className="text-2xl font-semibold">{client.name}</h1>
+        <h1 className="page-title">{client.name}</h1>
         <ShareLinkButton getLink={portalLink.bind(null, client.id)} label="Get portal link" />
       </div>
 
-      <section className="max-w-2xl rounded-md border bg-background p-5">
+      <section className="max-w-2xl panel p-5">
         <ActionForm action={saveClient} submitLabel="Save client">
           <ClientFields client={client} />
         </ActionForm>
@@ -45,7 +45,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
         <h2 className="font-semibold">Engagements</h2>
         <ul className="grid gap-2">
           {client.engagements.map((e) => (
-            <li key={e.id} className="flex flex-wrap items-center gap-3 rounded-md border bg-background p-3 text-sm">
+            <li key={e.id} className="flex flex-wrap items-center gap-3 panel p-3 text-sm">
               <Link href={`/studio/engagements/${e.id}`} className="font-medium hover:underline">
                 {e.assets.map((a) => a.title).join(', ') || 'No assets yet'}
               </Link>

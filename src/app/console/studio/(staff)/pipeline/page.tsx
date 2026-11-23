@@ -15,9 +15,10 @@ const NEXT_ASSET: Partial<Record<AssetStatus, AssetStatus>> = { production: 'liv
 
 function Column({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
   return (
-    <section className="flex w-72 shrink-0 flex-col gap-2 rounded-md bg-muted p-2">
-      <h2 className="px-1 text-sm font-semibold">
-        {title} <span className="font-normal text-muted-foreground">{count}</span>
+    <section className="flex w-72 shrink-0 flex-col gap-2.5 rounded-[1.25rem] border border-brand/6 bg-mist/80 p-2.5">
+      <h2 className="flex items-center justify-between px-1.5 pt-1 text-sm font-semibold">
+        {title}
+        <span className="chip bg-white text-ink-soft tabular-nums shadow-sm">{count}</span>
       </h2>
       {children}
     </section>
@@ -40,7 +41,7 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="grid gap-4">
-      <h1 className="text-2xl font-semibold">Pipeline</h1>
+      <h1 className="page-title">Pipeline</h1>
       {error && (
         <p role="alert" className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           {error}
@@ -59,7 +60,7 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
                   if (next) await moveEngagement(e.id, next);
                 }
                 return (
-                  <article key={e.id} className="grid gap-2 rounded bg-background p-3 text-sm shadow-sm">
+                  <article key={e.id} className="grid gap-2 rounded-xl border border-brand/8 bg-white p-3 text-sm shadow-[0_6px_18px_-12px_rgb(11_40_30/0.35)] transition-transform duration-300 hover:-translate-y-0.5">
                     <Link href={`/studio/engagements/${e.id}`} className="font-medium hover:underline">
                       {e.client.name}
                     </Link>
@@ -84,7 +85,7 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
 
         <Column title="Signed, awaiting payment" count={awaitingPayment.length}>
           {awaitingPayment.map((e) => (
-            <article key={e.id} className="grid gap-1 rounded bg-background p-3 text-sm shadow-sm">
+            <article key={e.id} className="grid gap-1 rounded-xl border border-brand/8 bg-white p-3 text-sm shadow-[0_6px_18px_-12px_rgb(11_40_30/0.35)] transition-transform duration-300 hover:-translate-y-0.5">
               <Link href={`/studio/engagements/${e.id}`} className="font-medium hover:underline">
                 {e.client.name}
               </Link>
@@ -104,7 +105,7 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
                   if (next) await moveAsset(a.id, next);
                 }
                 return (
-                  <article key={a.id} className="grid gap-1 rounded bg-background p-3 text-sm shadow-sm">
+                  <article key={a.id} className="grid gap-1 rounded-xl border border-brand/8 bg-white p-3 text-sm shadow-[0_6px_18px_-12px_rgb(11_40_30/0.35)] transition-transform duration-300 hover:-translate-y-0.5">
                     <Link href={`/studio/assets/${a.id}`} className="font-medium hover:underline">
                       {a.title}
                     </Link>

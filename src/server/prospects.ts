@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { and, asc, desc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import {
@@ -16,7 +17,7 @@ import type { ClientType, EngagementType } from '@/lib/enums';
 import { normalisePhone } from '@/lib/phone';
 import { DEFAULT_ORG_ID } from '@/lib/rules';
 import { DAY_MS, sriLankaDay, sriLankaMidnight } from '@/lib/sl-time';
-import { contactKey, isDoNotContact, withdrawAll } from '@/server/consent';
+import { canSend, contactKey, isDoNotContact, recordOutreachBasis, withdrawAll, type OutreachBasis } from '@/server/consent';
 import { sendTrackedEmail, whatsappDraft, type SendResult } from '@/server/messaging';
 import { applyPackage } from '@/server/packages';
 import { getSettings } from '@/server/settings';
@@ -81,6 +82,8 @@ export type ProspectInput = {
   area?: string | null;
   links?: string | null;
   stockNote?: string | null;
+  diagnosis?: string | null;
+  agreedNextStep?: string | null;
   source?: string | null;
   utm?: Record<string, string> | null;
   ownerUserId?: string | null;
@@ -194,8 +197,30 @@ async function staffUser(userId: string) {
   return u;
 }
 
-/** Sends the prospect's due cadence email from this founder. The cadence moves on only if it was sent. */
-export async function sendStepEmail(prospectId: string, userId: string, now = new Date()): Promise<SendResult> {
+/** Fingerprint of the exact copy a founder reviewed; a send with a different fingerprint is refused. */
+export const copyHash = (subject: string, body: string) => createHash('sha256').update(`${subject}
+
+${body}`).digest('hex');
+
+/** Records how we may contact this prospect, against each address they gave. */
+export async function recordProspectBasis(prospectId: string, basis: OutreachBasis, note: string | null, userId: string, now = new Date()): Promise<void> {
+  const p = await getProspect(prospectId);
+  const contacts = [p.phone, p.email].filter((c) => contactKey(c));
+  if (!contacts.length) throw new ProspectError('Add a phone number or an email address first');
+  for (const c of contacts) await recordOutreachBasis(c!, basis, { note, recordedByUserId: userId, at: now });
+}
+
+/** True if any of the prospect's addresses has a contact basis that has not been withdrawn. */
+export async function hasContactBasis(p: Pick<Prospect, 'phone' | 'email'>): Promise<boolean> {
+  for (const c of [p.phone, p.email]) if (contactKey(c) && (await canSend(c!, 'outreach'))) return true;
+  return false;
+}
+
+/**
+ * Sends the prospect's due cadence email from this founder. The cadence moves on only if it was sent.
+ * With `reviewedHash`, the email goes only if its copy is exactly what the founder reviewed.
+ */
+export async function sendStepEmail(prospectId: string, userId: string, now = new Date(), reviewedHash?: string): Promise<SendResult> {
   const p = await getProspect(prospectId);
   const step = currentStep(p);
   if (!step || step.step.channel !== 'email' || !step.step.template) return { status: 'blocked', reason: 'No email is due for this prospect' };
@@ -203,10 +228,13 @@ export async function sendStepEmail(prospectId: string, userId: string, now = ne
   if (!t) return { status: 'blocked', reason: `Template ${step.step.template} is missing or switched off` };
   const sender = await staffUser(userId);
   const vars = templateVars(p, sender.name);
+  const subject = render(t.subject ?? '', vars);
+  const body = render(t.body, vars);
+  if (reviewedHash && reviewedHash !== copyHash(subject, body)) return { status: 'blocked', reason: 'The email changed since you reviewed it. Reload and check it again' };
   const result = await sendTrackedEmail({
     to: p.email!,
-    subject: render(t.subject ?? '', vars),
-    body: render(t.body, vars),
+    subject,
+    body,
     purpose: 'outreach',
     fromUser: sender,
     subjectRef: { type: 'prospect', id: p.id },
@@ -218,12 +246,15 @@ export async function sendStepEmail(prospectId: string, userId: string, now = ne
   return result;
 }
 
-/** The one-click batch: sends every chosen due email, stopping at the first limit so nothing is half-sent. */
-export async function sendAllDue(prospectIds: string[], userId: string, now = new Date()): Promise<{ sent: number; problems: string[] }> {
+/**
+ * The one-click batch: sends every chosen due email whose copy still matches what the founder reviewed,
+ * stopping at the first limit so nothing is half-sent. Consent is rechecked per email at send time.
+ */
+export async function sendAllDue(reviewed: { id: string; hash: string }[], userId: string, now = new Date()): Promise<{ sent: number; problems: string[] }> {
   let sent = 0;
   const problems: string[] = [];
-  for (const id of prospectIds) {
-    const r = await sendStepEmail(id, userId, now);
+  for (const { id, hash } of reviewed) {
+    const r = await sendStepEmail(id, userId, now, hash);
     if (r.status === 'sent') sent++;
     else {
       const [p] = await db.select({ name: prospects.name }).from(prospects).where(eq(prospects.id, id));
@@ -238,9 +269,11 @@ export type QueueItem = {
   prospect: Prospect;
   step: CadenceStep;
   index: number;
-  email?: { subject: string; body: string };
+  email?: { subject: string; body: string; hash: string };
   whatsapp?: { text: string; link: string | null };
   doNotContact: boolean;
+  /** False until a founder records how we may contact them (or they wrote to us). */
+  hasBasis: boolean;
 };
 
 const endOfToday = (now: Date) => new Date(sriLankaMidnight(sriLankaDay(now)).getTime() + DAY_MS);
@@ -260,10 +293,14 @@ export async function todayQueue(userId: string, now = new Date()): Promise<Queu
     if (!cur) continue;
     const doNotContact = (await isDoNotContact(p.phone)) || (await isDoNotContact(p.email));
     const vars = templateVars(p, sender.name);
-    const item: QueueItem = { prospect: p, step: cur.step, index: cur.index, doNotContact };
+    const item: QueueItem = { prospect: p, step: cur.step, index: cur.index, doNotContact, hasBasis: !doNotContact && (await hasContactBasis(p)) };
     if (cur.step.template) {
       const t = await getTemplate(cur.step.template, cur.step.channel === 'email' ? 'email' : 'whatsapp');
-      if (t && cur.step.channel === 'email') item.email = { subject: render(t.subject ?? '', vars), body: render(t.body, vars) };
+      if (t && cur.step.channel === 'email') {
+        const subject = render(t.subject ?? '', vars);
+        const body = render(t.body, vars);
+        item.email = { subject, body, hash: copyHash(subject, body) };
+      }
       if (t && cur.step.channel === 'whatsapp') {
         const text = render(t.body, vars);
         item.whatsapp = { text, link: await whatsappDraft(p.phone, text, 'outreach') };

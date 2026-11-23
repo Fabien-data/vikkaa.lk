@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { buyers, consents } from '@/db/schema';
-import { canSend, contactKey, isDoNotContact, recordConsent, withdrawAll } from '@/server/consent';
+import { canSend, contactKey, isDoNotContact, recordConsent, recordOutreachBasis, withdrawAll } from '@/server/consent';
 
 describe('consent ledger', () => {
   it('normalises contacts', () => {
@@ -11,9 +11,12 @@ describe('consent ledger', () => {
     expect(contactKey('')).toBeNull();
   });
 
-  it('transactional always goes; outreach goes until they ask to stop', async () => {
+  it('transactional always goes; outreach needs a recorded basis and stops when they ask', async () => {
     expect(await canSend('+94771234567', 'transactional')).toBe(true);
+    expect(await canSend('+94771234567', 'outreach')).toBe(false);
+    await recordOutreachBasis('077 123 4567', 'introduction', { note: 'Introduced by Sunil', at: new Date('2026-11-01') });
     expect(await canSend('+94771234567', 'outreach')).toBe(true);
+    expect(await canSend('+94771234567', 'marketing')).toBe(false);
     await withdrawAll('0771234567', 'test');
     expect(await canSend('+94771234567', 'outreach')).toBe(false);
     expect(await canSend('+94771234567', 'transactional')).toBe(true);

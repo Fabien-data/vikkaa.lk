@@ -24,7 +24,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     <div className="grid gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Visits and shoots</h1>
+          <h1 className="page-title">Visits and shoots</h1>
           <p className="text-sm text-muted-foreground">Grouped by area so one trip covers one area. Book from an engagement.</p>
         </div>
         <nav className="flex gap-4 text-sm">
@@ -41,7 +41,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       </div>
 
       {days.map((d) => (
-        <section key={d.day} className={`rounded-md border bg-background p-4 ${d.day === today ? 'border-foreground' : ''}`}>
+        <section key={d.day} className={`panel p-4 ${d.day === today ? 'border-foreground' : ''}`}>
           <h2 className="mb-2 font-semibold">
             {dayHeading(d.day)}
             {d.day === today && <span className="ml-2 text-xs font-normal text-muted-foreground">today</span>}

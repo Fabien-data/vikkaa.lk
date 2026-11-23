@@ -57,9 +57,9 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
         <Link href={`/studio/clients/${e.client.id}`} className="text-sm text-muted-foreground">
           {e.client.name}, {e.client.phone}
         </Link>
-        <h1 className="text-2xl font-semibold">{e.assets.map((a) => a.title).join(', ') || 'New engagement'}</h1>
+        <h1 className="page-title">{e.assets.map((a) => a.title).join(', ') || 'New engagement'}</h1>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="rounded bg-foreground px-2 py-0.5 text-background">{stageLabel(e.stage)}</span>
+          <span className="chip bg-brand text-mint">{stageLabel(e.stage)}</span>
           <span className="capitalize text-muted-foreground">{e.type}</span>
           <FitBadge score={e.fitScore} flags={e.fitFlags} showFlags />
           <form action={recalc}>
@@ -84,7 +84,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
       </header>
 
       {answers.length > 0 && (
-        <section className="rounded-md border bg-background p-5">
+        <section className="panel p-5">
           <h2 className="mb-3 font-semibold">Intake answers</h2>
           <dl className="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2">
             {answers.map(([k, v]) => (
@@ -97,7 +97,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
         </section>
       )}
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-1 font-semibold">Package</h2>
         <p className="mb-4 text-sm text-muted-foreground">
           {e.package ? (
@@ -130,7 +130,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
         )}
       </section>
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-4 font-semibold">Terms and plan</h2>
         <ActionForm action={saveEngagement} submitLabel="Save terms">
           <input type="hidden" name="id" value={e.id} />
@@ -193,7 +193,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
         </div>
         <ul className="grid gap-2">
           {e.assets.map((a) => (
-            <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-background p-3 text-sm">
+            <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 panel p-3 text-sm">
               <Link href={`/studio/assets/${a.id}`} className="font-medium hover:underline">
                 {a.title}
               </Link>
@@ -209,7 +209,7 @@ export default async function EngagementPage({ params }: { params: Promise<{ id:
 
       <BookingsSection engagementId={e.id} assets={e.assets} />
 
-      <section className="rounded-md border bg-background p-5">
+      <section className="panel p-5">
         <h2 className="mb-3 font-semibold">Comparables (for the market report)</h2>
         <table className="mb-4 w-full text-sm">
           <tbody>

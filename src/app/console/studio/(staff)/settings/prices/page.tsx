@@ -90,7 +90,7 @@ export default async function PricesPage() {
   return (
     <div className="grid gap-6">
       <header className="grid gap-3">
-        <h1 className="text-2xl font-semibold">Price book</h1>
+        <h1 className="page-title">Price book</h1>
         <SettingsNav current="/studio/settings/prices" />
         <p className="max-w-3xl text-sm text-muted-foreground">
           Set each offer once. Applying a package to an engagement copies its terms, so later price changes never alter a quote already sent.
@@ -98,14 +98,14 @@ export default async function PricesPage() {
       </header>
 
       {all.map((p) => (
-        <section key={p.id} className={`rounded-md border bg-background p-5 ${p.active ? '' : 'opacity-60'}`}>
+        <section key={p.id} className={`panel p-5 ${p.active ? '' : 'opacity-60'}`}>
           <h2 className="mb-4 flex flex-wrap items-center gap-3 font-semibold">
             {p.name}
             <span className="text-sm font-normal text-muted-foreground">
               {formatLkr(p.priceCents)}
               {p.kind === 'retainer' ? ' / month' : ''} · {p.segment}
             </span>
-            {p.founding && <span className="rounded bg-amber-100 px-2 py-0.5 text-xs">Founding</span>}
+            {p.founding && <span className="chip bg-amber-100 text-xs">Founding</span>}
           </h2>
           <ActionForm action={savePackageAction} submitLabel="Save package">
             <PackageFields p={p} />
@@ -113,7 +113,7 @@ export default async function PricesPage() {
         </section>
       ))}
 
-      <section className="rounded-md border border-dashed bg-background p-5">
+      <section className="panel border-dashed p-5">
         <h2 className="mb-4 font-semibold">Add a package</h2>
         <ActionForm action={savePackageAction} submitLabel="Add package">
           <PackageFields />

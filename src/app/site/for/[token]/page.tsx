@@ -22,7 +22,7 @@ const COPY: Record<'dealer' | 'developer' | 'other', { title: React.ReactNode[];
       'We film your cars at your yard: photos, a walkaround film and short reels.',
       'One campaign per car across every platform, paid for from your ad budget, never more than you agree.',
       'Every enquiry comes to us first. We answer within the day and pass you only real buyers, with the details logged.',
-      'You see every enquiry, test drive and rupee of ad spend live in your own portal.',
+      'A weekly report of enquiries, test drives and ad spend, and your own portal with every enquiry on your cars.',
     ],
   },
   developer: {
@@ -32,17 +32,17 @@ const COPY: Record<'dealer' | 'developer' | 'other', { title: React.ReactNode[];
       'A dedicated project page with every available unit or plot, kept up to date.',
       'Our own shoot: photos, drone footage, a walkthrough film and reels.',
       'Every enquiry qualified by us (budget, timeline, financing) before it reaches you.',
-      'A live portal: enquiries, viewings, offers and ad spend, as they happen.',
+      'A weekly report of enquiries, viewings and ad spend, and your own portal with every enquiry on your project.',
     ],
   },
   other: {
-    title: ['Your property,', <>properly <em>sold</em></>],
-    sub: 'We price it with real market data, film it ourselves, run it everywhere at once and handle every buyer until it sells.',
+    title: ['Your property,', <>properly <em>marketed</em></>],
+    sub: 'We check the price against real market data, film it ourselves, run the campaign and handle every buyer enquiry for the campaign period.',
     points: [
       'A market report with real comparable prices and a recommended asking price.',
       'Our own photo, drone and film shoot in one visit.',
       'Every buyer handled by us, with viewings run and every contact logged.',
-      'Your own live portal: every enquiry, viewing and offer as it happens.',
+      'A weekly report of enquiries and viewings, and your own portal with every enquiry.',
     ],
   },
 };
@@ -51,7 +51,7 @@ const copyFor = (s: ProspectSegment) => (s === 'dealer' ? COPY.dealer : s === 'd
 
 function priceLine(p: Package) {
   if (p.kind === 'retainer') return `${formatLkr(p.priceCents)} a month${p.unitsPerMonth ? `, up to ${p.unitsPerMonth} listings` : ''}`;
-  if (p.kind === 'pilot') return `${formatLkr(p.priceCents)}, one month, fixed price`;
+  if (p.kind === 'pilot') return `${formatLkr(p.priceCents)}, 30-day campaign, paid upfront`;
   return `${formatLkr(p.priceCents)} upfront`;
 }
 
@@ -75,6 +75,23 @@ export default async function PitchPage({ params, searchParams }: { params: Prom
           <MessageCircle className="size-4" aria-hidden="true" /> WhatsApp us
         </a>
       </PageHero>
+
+      {(p.diagnosis || p.agreedNextStep) && (
+        <section aria-labelledby="saw-h" className="mx-auto grid w-[min(1120px,100%-40px)] gap-6 pt-16 md:grid-cols-2 md:pt-24">
+          {p.diagnosis && (
+            <div className="rounded-[1.5rem] border border-brand/10 bg-white p-7">
+              <p id="saw-h" className="eyebrow text-brand-green">What we saw</p>
+              <p className="mt-4 whitespace-pre-line text-lg text-brand-ink">{p.diagnosis}</p>
+            </div>
+          )}
+          {p.agreedNextStep && (
+            <div className="rounded-[1.5rem] border border-brand/10 bg-white p-7">
+              <p className="eyebrow text-brand-green">What we agreed</p>
+              <p className="mt-4 text-lg text-brand-ink">{p.agreedNextStep}</p>
+            </div>
+          )}
+        </section>
+      )}
 
       <section aria-labelledby="what-h" className="mx-auto grid w-[min(1120px,100%-40px)] gap-10 py-16 md:grid-cols-2 md:py-24">
         <div>
@@ -118,7 +135,10 @@ export default async function PitchPage({ params, searchParams }: { params: Prom
                 </li>
               )}
             </ul>
-            <p className="mt-6 text-sm text-ink-soft">Your advertising budget is separate, spent only on your ads, and shown live in your portal.</p>
+            <p className="mt-6 text-sm text-ink-soft">
+              The fee buys the work in a written scope: filming, the campaign and buyer follow-up. No sale is guaranteed. Your advertising budget is separate, capped at what you agree,
+              spent only on your ads and shown in your weekly report.
+            </p>
           </div>
         </section>
       )}

@@ -13,6 +13,7 @@ import {
   markDoNotContact,
   markWhatsappSent,
   quickAdd,
+  recordProspectBasis,
   sendAllDue,
   sendStepEmail,
   setStatus,
@@ -22,7 +23,7 @@ import {
 import { savePackage } from '@/server/packages';
 import { saveSettings } from '@/server/settings';
 import { submitSellerIntake, sellerIntakeSchema } from '@/server/seller-intake';
-import { weekNumbers, gates } from '@/server/war-room';
+import { weekNumbers, gates, payingCustomers, warRoomExtras } from '@/server/war-room';
 
 const DAY = 86_400_000;
 const T0 = new Date('2026-11-23T05:00:00Z'); // Monday 10:30 Colombo
@@ -32,6 +33,7 @@ async function founder(name = 'Tiran') {
   return u.id;
 }
 const load = async (id: string) => (await db.select().from(prospects).where(eq(prospects.id, id)))[0];
+const allow = (prospectId: string, userId: string) => recordProspectBasis(prospectId, 'asked_in_person', 'Said yes at the yard', userId, T0);
 
 describe('prospects', () => {
   beforeEach(() => sendEmail.mockClear());
@@ -47,6 +49,8 @@ describe('prospects', () => {
   it('runs the four-step cadence: email, WhatsApp, call, email', async () => {
     const me = await founder();
     const p = await quickAdd({ name: 'Lanka Auto', segment: 'dealer', phone: '0771234567', email: 'owner@lankaauto.lk', ownerUserId: me }, T0);
+    expect(await sendStepEmail(p.id, me, T0)).toMatchObject({ status: 'blocked', reason: 'No contact basis recorded' });
+    await allow(p.id, me);
 
     expect(await sendStepEmail(p.id, me, T0)).toMatchObject({ status: 'sent' });
     let row = await load(p.id);
@@ -93,8 +97,8 @@ describe('prospects', () => {
   it("today's queue holds my due prospects and unassigned ones, with a filled WhatsApp link", async () => {
     const me = await founder();
     const other = await founder('Partner');
-    await quickAdd({ name: 'Mine', segment: 'dealer', phone: '0771111111', ownerUserId: me }, T0);
-    await quickAdd({ name: 'Unassigned', segment: 'dealer', email: 'x@y.lk' }, T0);
+    await allow((await quickAdd({ name: 'Mine', segment: 'dealer', phone: '0771111111', ownerUserId: me }, T0)).id, me);
+    await allow((await quickAdd({ name: 'Unassigned', segment: 'dealer', email: 'x@y.lk' }, T0)).id, me);
     await quickAdd({ name: 'Theirs', segment: 'dealer', phone: '0772222222', ownerUserId: other }, T0);
     await quickAdd({ name: 'Later', segment: 'dealer', phone: '0773333333', ownerUserId: me }, new Date(T0.getTime() + 5 * DAY));
     const q = await todayQueue(me, T0);
@@ -102,6 +106,7 @@ describe('prospects', () => {
     const mine = q.find((i) => i.prospect.name === 'Mine')!;
     expect(mine.step.channel).toBe('whatsapp');
     expect(mine.whatsapp?.link).toMatch(/wa\.me\/94771111111/);
+    expect(mine.hasBasis).toBe(true);
     expect(q.find((i) => i.prospect.name === 'Unassigned')?.email?.subject).toMatch(/Unassigned/);
   });
 
@@ -111,15 +116,31 @@ describe('prospects', () => {
     const a = await quickAdd({ name: 'A', segment: 'dealer', email: 'a@a.lk' }, T0);
     const b = await quickAdd({ name: 'B', segment: 'dealer', email: 'b@b.lk' }, T0);
     const c = await quickAdd({ name: 'C', segment: 'dealer', email: 'c@c.lk' }, T0);
-    const r = await sendAllDue([a.id, b.id, c.id], me, T0);
+    for (const p of [a, b, c]) await allow(p.id, me);
+    const reviewed = (await todayQueue(me, T0)).map((q) => ({ id: q.prospect.id, hash: q.email!.hash }));
+    const r = await sendAllDue(reviewed, me, T0);
     expect(r.sent).toBe(1);
     expect(r.problems).toHaveLength(1);
     expect((await load(b.id)).cadenceStep).toBe(0);
   });
 
-  it('do not contact withdraws every channel and closes the prospect', async () => {
+  it('send all due refuses an email whose copy changed after review, and lists prospects with no basis', async () => {
+    const me = await founder();
+    const a = await quickAdd({ name: 'A', segment: 'dealer', email: 'a@a.lk' }, T0);
+    await quickAdd({ name: 'Cold', segment: 'dealer', email: 'cold@c.lk' }, T0);
+    await allow(a.id, me);
+    const q = await todayQueue(me, T0);
+    expect(q.map((i) => [i.prospect.name, i.hasBasis]).sort()).toEqual([['A', true], ['Cold', false]]);
+    const r = await sendAllDue([{ id: a.id, hash: 'stale' }], me, T0);
+    expect(r.sent).toBe(0);
+    expect(r.problems[0]).toMatch(/changed since you reviewed it/);
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it('do not contact withdraws every channel and closes the prospect, overriding a recorded basis', async () => {
     const me = await founder();
     const p = await quickAdd({ name: 'Stop', segment: 'dealer', phone: '0774444444', email: 's@s.lk' }, T0);
+    await allow(p.id, me);
     await markDoNotContact(p.id, me, T0);
     const row = await load(p.id);
     expect([row.status, row.lostReason]).toEqual(['lost', 'Asked not to be contacted']);
@@ -155,6 +176,7 @@ describe('outreach safety', () => {
   it('two simultaneous sends of the same step send one email', async () => {
     const me = await founder();
     const p = await quickAdd({ name: 'Double Click Motors', segment: 'dealer', email: 'd@d.lk' }, T0);
+    await allow(p.id, me);
     sendEmail.mockClear();
     const results = await Promise.all([sendStepEmail(p.id, me, T0), sendStepEmail(p.id, me, T0)]);
     expect(sendEmail).toHaveBeenCalledTimes(1);
@@ -167,15 +189,41 @@ describe('war room', () => {
     const me = await founder();
     const p = await quickAdd({ name: 'Lanka Auto', segment: 'dealer', phone: '0771234567' }, T0);
     await logTouch(p.id, { channel: 'visit', outcome: 'pitched' }, me, T0);
+    await logTouch(p.id, { channel: 'visit', outcome: 'talked' }, me, T0);
     await logTouch(p.id, { channel: 'call', outcome: 'no_answer' }, me, T0);
     const w = await weekNumbers(new Date(T0.getTime() + DAY));
+    // Only the touch marked "pitched" is a pitch; a visit where they only talked is not.
     expect([w.contacted, w.pitches]).toEqual([1, 1]);
-    expect(await db.select().from(messages)).toHaveLength(2);
+    expect(await db.select().from(messages)).toHaveLength(3);
   });
 
-  it('gate B is met by a dealer with a paid invoice', async () => {
+  it('the paid-client gate counts distinct customers with a signed scope and a cleared fee', async () => {
+    const [c] = await db.insert(clients).values({ type: 'private', name: 'Nimal', phone: '+94771234567' }).returning();
+    const terms = { clientId: c.id, type: 'single' as const, commissionRateBp: 0, exclusiveDays: 30, followOnMonths: 0 };
+    const [unsigned] = await db.insert(engagements).values(terms).returning();
+    const paid = (engagementId: string) => db.insert(documents).values({ engagementId, type: 'invoice', storageKey: crypto.randomUUID(), sha256: 'x'.repeat(64), totalCents: 100, paidAt: T0 });
+    await paid(unsigned.id);
+    expect(await payingCustomers()).toBe(0);
+    for (let i = 0; i < 2; i++) await paid((await db.insert(engagements).values({ ...terms, signedAt: T0 }).returning())[0].id);
+    expect(await payingCustomers()).toBe(1);
+  });
+
+  it('survival divides costs by what a client leaves after delivery, and MRR needs a paid retainer', async () => {
+    await saveSettings('runway', { monthlyCostCents: 24_000_000, cashOnHandCents: 0, asOf: '', gateCShareBp: 5_000, directCostPerClientCents: 2_000_000 });
+    await savePackage({ name: '30-day campaign', segment: 'dealer', category: 'vehicle', kind: 'pilot', priceCents: 9_000_000 });
     const [c] = await db.insert(clients).values({ type: 'dealer', name: 'Lanka Auto', phone: '+94771234567' }).returning();
-    const [e] = await db.insert(engagements).values({ clientId: c.id, type: 'retainer', commissionRateBp: 150, exclusiveDays: 90, followOnMonths: 6 }).returning();
+    const [e] = await db.insert(engagements).values({ clientId: c.id, type: 'retainer', monthlyFeeCents: 15_000_000, signedAt: T0, commissionRateBp: 0, exclusiveDays: 30, followOnMonths: 0 }).returning();
+    let x = await warRoomExtras(T0);
+    expect(x.survival).toEqual({ needed: 4, active: 0 }); // 240,000 / (90,000 - 20,000) = 3.4
+    expect(x.mrrCents).toBe(0);
+    await db.insert(documents).values({ engagementId: e.id, type: 'retainer_invoice', storageKey: 'k', sha256: 'x'.repeat(64), totalCents: 100, paidAt: T0 });
+    x = await warRoomExtras(T0);
+    expect([x.mrrCents, x.survival?.active]).toEqual([15_000_000, 1]);
+  });
+
+  it('gate B is met by a signed dealer with a paid invoice', async () => {
+    const [c] = await db.insert(clients).values({ type: 'dealer', name: 'Lanka Auto', phone: '+94771234567' }).returning();
+    const [e] = await db.insert(engagements).values({ clientId: c.id, type: 'retainer', signedAt: T0, commissionRateBp: 150, exclusiveDays: 90, followOnMonths: 6 }).returning();
     const extra = { lawyerApproved: false, mrrCents: 0, dealsAgreed: 0 };
     expect((await gates(T0, extra)).find((g) => g.key === 'B')?.status).toBe('open');
     await db.insert(documents).values({ engagementId: e.id, type: 'invoice', storageKey: 'k', sha256: 'x'.repeat(64), totalCents: 100, paidAt: T0 });

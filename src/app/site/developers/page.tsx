@@ -32,7 +32,7 @@ export default async function DevelopersPage({ searchParams }: { searchParams: P
           'A project page listing every available unit or plot.',
           'Photos, drone footage, a walkthrough film and reels from our own crew.',
           'Every buyer qualified by budget, timeline and financing.',
-          'Enquiries, viewings and ad spend live in your portal, so the pilot speaks for itself.',
+          'A weekly report of enquiries, viewings and ad spend, so the pilot speaks for itself.',
         ]}
         photo={STOCK.villaAhangama}
         note="A fixed price for the pilot. Continue on a retainer only if it earns its place."

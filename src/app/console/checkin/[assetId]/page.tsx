@@ -13,9 +13,13 @@ export default async function CheckinPage({ params }: { params: Promise<{ assetI
   if (!asset) notFound();
 
   return (
-    <main className="mx-auto max-w-md px-5 py-10">
-      <p className="text-sm font-semibold">Vikkaa.lk</p>
-      <h1 className="mt-2 text-2xl font-semibold">Welcome to the {asset.category === 'vehicle' ? 'test drive' : 'viewing'}</h1>
+    <main className="mx-auto w-full max-w-md px-5 py-10 motion-safe:animate-rise">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/brand/logo.png" alt="Vikkaa" width={112} height={56} className="h-9 w-auto" />
+      <p className="eyebrow mt-10 text-brand-green">Welcome</p>
+      <h1 className="page-title mt-3">
+        Welcome to the <em className="text-brand-green">{asset.category === 'vehicle' ? 'test drive' : 'viewing'}</em>
+      </h1>
       <p className="mt-2 text-muted-foreground">{asset.title}</p>
       <CheckinForm assetId={asset.id} kind={asset.category} privacyUrl={`${config.publicUrl}/privacy`} />
     </main>

@@ -22,7 +22,7 @@ export function TaskRow({ task, assignee, showSubject }: { task: TaskLike; assig
       <form action={toggle}>
         <button
           aria-label={task.doneAt ? `Reopen: ${task.title}` : `Mark done: ${task.title}`}
-          className={`flex size-5 items-center justify-center rounded border ${task.doneAt ? 'bg-foreground text-background' : ''}`}
+          className={`flex size-5 items-center justify-center rounded border ${task.doneAt ? 'border-brand-green bg-brand-green text-white' : 'bg-white'}`}
         >
           {task.doneAt ? '✓' : ''}
         </button>
@@ -43,7 +43,7 @@ export async function TasksPanel({ subject }: { subject: Subject }) {
   const [rows, staff] = await Promise.all([tasksFor(subject), db.select({ id: user.id, name: user.name }).from(user).orderBy(asc(user.name))]);
 
   return (
-    <section className="rounded-md border bg-background p-5">
+    <section className="panel p-5">
       <h2 className="mb-3 font-semibold">Tasks</h2>
       <ul className="mb-4 grid gap-2 text-sm">
         {rows.map((t) => (

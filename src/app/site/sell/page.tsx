@@ -30,7 +30,7 @@ export default function SellPage() {
           'We call you within one working day to talk it through.',
           'One of us visits, checks the documents and prepares a market report with real comparable prices.',
           'You see the content plan, the quote and the agreement.',
-          'We film it, launch it everywhere and handle every buyer until it sells.',
+          'We film it, run the campaign and handle every buyer enquiry for 30 days.',
         ]}
         photo={STOCK.openAirLiving}
         note="Nothing is paid until you agree to the plan."

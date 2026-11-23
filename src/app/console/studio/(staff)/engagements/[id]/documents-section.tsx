@@ -34,7 +34,7 @@ export async function DocumentsSection({ engagementId }: { engagementId: string 
   const opText: Record<string, string> = { proposal: 'Generate proposal', agreement: 'Generate agreement draft', invoice: 'Issue fee invoice', retainer: "Issue this month's retainer invoice" };
 
   return (
-    <section className="grid gap-4 rounded-md border bg-background p-5">
+    <section className="grid gap-4 panel p-5">
       <h2 className="font-semibold">Documents and payments</h2>
       <div className="flex flex-wrap gap-2">
         {ops.map((op) => (

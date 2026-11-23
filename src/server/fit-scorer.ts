@@ -26,7 +26,6 @@ export const RED_FLAGS: readonly FitFlag[] = [
   'overpriced',
   'document_issue',
   'owners_disagree',
-  'no_exclusivity',
 ];
 
 /** Advisory score (0–100) for a seller intake; a founder makes the final call. */
@@ -53,8 +52,9 @@ export function scoreFit(answers: IntakeAnswers, askingCents: number | null, ran
   if (answers.ownersAgree) score += w.ownersAgree;
   else flags.push('owners_disagree');
 
-  if (answers.exclusiveOk) score += w.exclusive;
-  else flags.push('no_exclusivity');
+  // The prepaid campaign needs no exclusivity: declining it is noted for the commission option, never penalised.
+  score += w.exclusive;
+  if (!answers.exclusiveOk) flags.push('no_exclusivity');
 
   if (answers.inWesternProvince) score += w.westernProvince;
   else flags.push('outside_wp');

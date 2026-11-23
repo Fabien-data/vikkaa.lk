@@ -13,7 +13,7 @@ export async function SignatoriesSection({ engagementId, signed }: { engagementI
   const rows = await db.select().from(signatories).where(eq(signatories.engagementId, engagementId)).orderBy(asc(signatories.createdAt));
 
   return (
-    <section className="grid gap-4 rounded-md border bg-background p-5">
+    <section className="grid gap-4 panel p-5">
       <h2 className="font-semibold">Signatories</h2>
       <p className="text-sm text-muted-foreground">
         Generate the agreement draft first. Each signatory gets their own link and signs with a code sent to their phone (or email
@@ -31,7 +31,7 @@ export async function SignatoriesSection({ engagementId, signed }: { engagementI
               <span className="text-muted-foreground">{ROLE_TEXT[s.role]}</span>
               <span>{s.phone}</span>
               {s.signedAt ? (
-                <span className="rounded bg-emerald-100 px-2 py-0.5 text-emerald-900">Signed {s.signedAt.toLocaleDateString('en-GB')}</span>
+                <span className="chip bg-emerald-100 text-emerald-900">Signed {s.signedAt.toLocaleDateString('en-GB')}</span>
               ) : (
                 <>
                   <ShareLinkButton getLink={signingLink.bind(null, s.id)} label="Get signing link" />

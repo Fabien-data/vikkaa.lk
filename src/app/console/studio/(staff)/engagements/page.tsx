@@ -19,22 +19,22 @@ export default async function EngagementsPage({ searchParams }: { searchParams: 
 
   return (
     <div className="grid gap-6">
-      <h1 className="text-2xl font-semibold">Engagements</h1>
+      <h1 className="page-title">Engagements</h1>
       <nav className="flex flex-wrap gap-2 text-sm" aria-label="Filter by stage">
-        <Link href="/studio/engagements" className={`rounded px-3 py-1 ${!filter ? 'bg-foreground text-background' : 'bg-background border'}`}>
+        <Link href="/studio/engagements" className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${!filter ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}>
           All
         </Link>
         {ENGAGEMENT_STAGES.map((s) => (
           <Link
             key={s}
             href={`/studio/engagements?stage=${s}`}
-            className={`rounded px-3 py-1 ${filter === s ? 'bg-foreground text-background' : 'bg-background border'}`}
+            className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${filter === s ? 'bg-brand text-white shadow-sm' : 'border bg-white hover:border-brand/30'}`}
           >
             {stageLabel(s)}
           </Link>
         ))}
       </nav>
-      <table className="w-full rounded-md border bg-background text-sm">
+      <table className="w-full panel text-sm">
         <thead className="text-left text-muted-foreground">
           <tr>
             <th scope="col" className="p-3">Client</th>

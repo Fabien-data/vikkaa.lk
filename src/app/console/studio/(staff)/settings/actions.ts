@@ -29,6 +29,7 @@ const PARSE: Record<SettingsSection, (f: FormData) => Record<string, unknown>> =
     cashOnHandCents: formCents(f, 'cashOnHandRupees', 'Cash on hand'),
     asOf: t(f, 'asOf'),
     gateCShareBp: percentBp(f, 'gateCSharePercent', 'Gate C share', 5_000),
+    directCostPerClientCents: formCents(f, 'directCostPerClientRupees', 'Delivery cost per client'),
   }),
   gates: (f) => ({ a: t(f, 'a'), b: t(f, 'b'), c: t(f, 'c') }),
   messaging: (f) => ({

@@ -34,6 +34,10 @@ export const prospects = pgTable(
     area: text(),
     links: text(),
     stockNote: text(),
+    /** What we saw in their stock or process, shown on their pitch page. */
+    diagnosis: text(),
+    /** The follow-up they agreed to in conversation, shown on their pitch page. */
+    agreedNextStep: text(),
     source: text(),
     utm: jsonb().$type<Record<string, string>>(),
     status: prospectStatus().notNull().default('new'),
@@ -107,7 +111,8 @@ export const messages = pgTable(
   (t) => [index('messages_status_scheduled_idx').on(t.status, t.scheduledAt), index('messages_subject_idx').on(t.subjectType, t.subjectId)],
 );
 
-export const CONSENT_PURPOSES = ['circle', 'marketing', 'all'] as const;
+/** `outreach` grants record the basis for one-to-one business contact (introduction, their request…); without one, nothing is sent. */
+export const CONSENT_PURPOSES = ['circle', 'marketing', 'all', 'outreach'] as const;
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
 export const consentPurpose = pgEnum('consent_purpose', CONSENT_PURPOSES);
 

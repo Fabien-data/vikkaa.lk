@@ -22,7 +22,7 @@ export default function SecurityPage() {
 
   return (
     <div className="max-w-md space-y-6">
-      <h1 className="text-2xl font-semibold">Two-factor sign-in</h1>
+      <h1 className="page-title">Two-factor sign-in</h1>
       {!secret ? (
         <form action={enable} className="space-y-3">
           <Label htmlFor="password">Confirm your password</Label>

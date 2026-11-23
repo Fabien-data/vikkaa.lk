@@ -15,7 +15,7 @@ export async function BookingsSection({ engagementId, assets }: { engagementId: 
   const titleOf = (id: string | null) => assets.find((a) => a.id === id)?.title;
 
   return (
-    <section className="rounded-md border bg-background p-5">
+    <section className="panel p-5">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-semibold">Visits and shoots</h2>
         <Link href="/studio/calendar" className="text-sm underline">

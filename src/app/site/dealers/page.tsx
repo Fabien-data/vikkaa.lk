@@ -32,7 +32,7 @@ export default async function DealersPage({ searchParams }: { searchParams: Prom
           'Photos, a walkaround film and reels for each car, shot at your yard.',
           'One campaign per car on every platform, from an ad budget you set.',
           'Every enquiry answered by us within the day. You get real buyers, not tyre-kickers.',
-          'A live portal with every enquiry, test drive and rupee of ad spend.',
+          'A weekly report of enquiries, test drives and ad spend, and a portal with every enquiry.',
         ]}
         photo={STOCK.carShowroom}
         note="A fixed monthly retainer covers a set number of cars a month."

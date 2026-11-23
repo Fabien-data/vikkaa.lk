@@ -5,7 +5,7 @@ import { config } from '@/lib/config';
 import { signPath } from '@/lib/signed-url';
 import { whatsappLink } from '@/lib/whatsapp';
 import { sriLankaDay, sriLankaHour, sriLankaMidnight } from '@/lib/sl-time';
-import { canSend, contactKey } from '@/server/consent';
+import { canSend, contactKey, isDoNotContact } from '@/server/consent';
 import { sendEmail } from '@/server/email';
 import { getSettings } from '@/server/settings';
 
@@ -89,6 +89,8 @@ export async function sendTrackedEmail(input: TrackedEmail): Promise<SendResult>
   };
 
   if (!(await canSend(to, input.purpose))) {
+    // No row for a missing grant: it holds the dedupe key, which would stop the real send once a basis is recorded.
+    if (!(await isDoNotContact(to))) return { status: 'blocked', reason: input.purpose === 'outreach' ? 'No contact basis recorded' : 'No consent recorded' };
     const [row] = await db.insert(messages).values({ ...base, status: 'blocked', blockedReason: 'Asked not to be contacted' }).onConflictDoNothing().returning();
     return { status: 'blocked', reason: 'This contact asked not to be contacted', messageId: row?.id };
   }
@@ -126,7 +128,7 @@ export async function sendTrackedEmail(input: TrackedEmail): Promise<SendResult>
 
 /**
  * A wa.me link with the message filled in, for a founder to send from their own phone.
- * Null when the contact asked not to be contacted. Outreach and marketing carry a STOP line.
+ * Null when there is no consent or contact basis, or they asked not to be contacted. Outreach and marketing carry a STOP line.
  */
 export async function whatsappDraft(phone: string | null, text: string, purpose: MessagePurpose): Promise<string | null> {
   const to = contactKey(phone);

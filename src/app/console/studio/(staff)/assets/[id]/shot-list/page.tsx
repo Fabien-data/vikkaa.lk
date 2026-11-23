@@ -21,7 +21,7 @@ export default async function ShotListPage({ params }: { params: Promise<{ id: s
         <p className="text-sm capitalize text-muted-foreground">
           Shot list · {asset.kind} · {asset.area}, {asset.district}
         </p>
-        <h1 className="text-2xl font-semibold">{asset.title}</h1>
+        <h1 className="page-title">{asset.title}</h1>
       </header>
       {asset.engagement.contentPlan && (
         <section>

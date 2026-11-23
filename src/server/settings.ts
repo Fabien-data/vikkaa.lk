@@ -19,6 +19,8 @@ const sections = {
     asOf: text,
     /** Gate C: recurring revenue must cover this share of monthly cost (basis points). */
     gateCShareBp: z.number().int().min(0).max(10_000).default(5_000),
+    /** Cash spent delivering for one client in a month (travel, contractors, tools). Rs 20,000 until real costs replace it. */
+    directCostPerClientCents: z.number().int().nonnegative().default(2_000_000),
   }),
   gates: z.object({ a: z.string().default('2026-12-20'), b: z.string().default('2027-01-31'), c: z.string().default('2027-02-28') }),
   messaging: z.object({

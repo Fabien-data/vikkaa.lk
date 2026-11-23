@@ -7,6 +7,7 @@ vi.mock('@/server/email', () => ({ sendEmail: vi.fn(async () => ({})) }));
 
 import { getPitch, recordPitchView, requestCall, recordInbound } from '@/server/pitch';
 import { quickAdd } from '@/server/prospects';
+import { canSend } from '@/server/consent';
 import { savePackage } from '@/server/packages';
 import { addBooking, weekView } from '@/server/bookings';
 
@@ -39,7 +40,9 @@ describe('pitch pages', () => {
     expect(row.pitchFirstViewedAt?.getTime()).toBe(T0.getTime());
     const t = await db.select().from(tasks).where(eq(tasks.subjectId, p.id));
     expect(t).toHaveLength(1);
-    expect(t[0].title).toMatch(/opened their pitch page/);
+    expect(t[0].title).toMatch(/opened their pitch page: follow up as agreed/);
+    // A view is interest, not permission to message them.
+    expect(await canSend('+94771234567', 'outreach')).toBe(false);
   });
 
   it('a call request marks the prospect replied, stops the cadence and creates a task', async () => {
@@ -50,6 +53,7 @@ describe('pitch pages', () => {
     const [m] = await db.select().from(messages).where(eq(messages.subjectId, p.id));
     expect([m.direction, m.outcome, m.body]).toEqual(['in', 'call_requested', 'After 4pm']);
     expect(await db.select().from(tasks).where(eq(tasks.subjectId, p.id))).toHaveLength(1);
+    expect(await canSend('+94775555555', 'outreach')).toBe(true);
   });
 });
 
@@ -61,7 +65,9 @@ describe('inbound website leads', () => {
     const again = await recordInbound({ segment: 'dealer', name: 'Galle Road Motors (again)', phone: '+94776666666' }, T0);
     expect(again.id).toBe(p.id);
     expect(await db.select().from(prospects)).toHaveLength(1);
-    expect((await db.select().from(consents)).map((c) => [c.purpose, c.granted])).toEqual([['marketing', true]]);
+    const rows = await db.select().from(consents);
+    expect(rows.filter((c) => c.purpose === 'marketing').map((c) => [c.contact, c.granted])).toEqual([['+94776666666', true]]);
+    expect(rows.filter((c) => c.purpose === 'outreach').every((c) => c.source === 'inbound_request' && c.contact === '+94776666666')).toBe(true);
   });
 });
 

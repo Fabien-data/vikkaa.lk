@@ -173,10 +173,10 @@ export function SellForm() {
             <option value="no">Not yet</option>
           </select>
         </Field>
-        <Field label="Happy to sell only through Vikkaa for the agreement period?" name="exclusiveOk" errors={errors}>
-          <select name="exclusiveOk" className={input} defaultValue="yes">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+        <Field label="Open to an exclusive agreement instead of a prepaid campaign? (optional)" name="exclusiveOk" errors={errors}>
+          <select name="exclusiveOk" className={input} defaultValue="no">
+            <option value="no">No, a prepaid campaign suits me</option>
+            <option value="yes">Yes, tell me about the commission option</option>
           </select>
         </Field>
         <div className="sm:col-span-2">
